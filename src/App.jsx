@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
+import supabase from './supabase.js'
 
 const AMBER = '#e8e8e8'
 const AMBER_DIM = '#1a1a1a'
@@ -24,10 +25,10 @@ const MODEL_META = [
 ]
 
 const FEATURE_DETAILS = [
-  { label: 'Multi-model', desc: '4 models answer in parallel', detail: 'Your prompt is sent simultaneously to GPT-4o, Claude, DeepSeek, and Grok — four of the most capable AI models, from four different labs. Each answers independently before synthesis begins.' },
-  { label: 'Consensus', desc: 'Agreement and conflict mapped visually', detail: 'A synthesis pass analyzes where the models agreed, partially overlapped, or genuinely conflicted. Color-coded: green for consensus, yellow for partial, red for conflict.' },
-  { label: 'Debate (Premium)', desc: '4 models debate and vote blindly on the best answer', detail: 'In Premium mode, the four models go through 2 rounds of debate where each critiques the others and updates its own answer. Then they vote blindly — they don\'t know which answer is whose — on the best final response. Majority wins, ties broken by Claude.' },
-  { label: 'Transparency', desc: 'See every response and every vote', detail: 'Every answer includes a "view source responses" button showing each model\'s individual output. In Premium, you also see the full debate history and how each model voted.' },
+  { label: 'Multi-model', desc: '4 models answer in parallel', detail: 'Your prompt is sent simultaneously to GPT-4o, Claude, DeepSeek, and Grok. Each answers independently before synthesis begins.' },
+  { label: 'Consensus', desc: 'Agreement and conflict mapped visually', detail: 'A synthesis pass analyzes where models agreed, partially overlapped, or conflicted. Color-coded: green for consensus, yellow for partial, red for conflict.' },
+  { label: 'Debate (Premium)', desc: '4 models debate and vote blindly', detail: 'In Premium mode, models go through 2 rounds of debate, then vote blindly on the best answer. Majority wins, ties broken by Claude.' },
+  { label: 'Transparency', desc: 'See every response and vote', detail: 'Every answer shows each model\'s individual output. Premium also shows the full debate history and how each model voted.' },
 ]
 
 function getGreeting() {
@@ -39,19 +40,14 @@ function getGreeting() {
 
 function FormattedText({ text }) {
   if (!text) return null
-
   let cleaned = text
     .replace(/\\times/g, '×').replace(/\\cdot/g, '·').replace(/\\div/g, '÷')
     .replace(/\\pm/g, '±').replace(/\\neq/g, '≠').replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
     .replace(/\\sqrt/g, '√').replace(/\\leq/g, '≤').replace(/\\geq/g, '≥')
     .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
-    .replace(/\$([^$]+)\$/g, (match, inner) => {
-      return '$' + inner.replace(/\\times/g, '×').replace(/\\sqrt/g, '√') + '$'
-    })
-
+    .replace(/\$([^$]+)\$/g, (match, inner) => '$' + inner.replace(/\\times/g, '×').replace(/\\sqrt/g, '√') + '$')
   cleaned = cleaned.replace(/(?<![a-zA-Z0-9])\$(?!\$)(?![^$]*\$)/g, '')
   const parts = cleaned.split(/(```[\s\S]*?```|\$\$[\s\S]*?\$\$|\$[^$\n]+\$)/g)
-
   return (
     <div style={{ fontSize: 15, lineHeight: 1.85, color: '#e8e6e0' }}>
       {parts.map((part, i) => {
@@ -67,19 +63,13 @@ function FormattedText({ text }) {
         if ((part.startsWith('$$') && part.endsWith('$$')) || (part.startsWith('$') && part.endsWith('$'))) {
           const math = part.replace(/^\$+|\$+$/g, '')
           const isBlock = part.startsWith('$$')
-          if (isBlock) {
-            return (
-              <div key={i} style={{ background: '#141414', border: '1px solid #252525', borderRadius: 8, padding: '14px 20px', margin: '14px 0', fontFamily: 'monospace', fontSize: 15, color: '#e8e8e8', textAlign: 'center', borderLeft: '2px solid #e8e8e830' }}>
-                <div style={{ fontSize: 9, fontFamily: 'monospace', color: '#444', letterSpacing: '0.1em', marginBottom: 8 }}>FORMULA</div>
-                {math}
-              </div>
-            )
-          }
-          const superscript = math
-            .replace(/\^2/g, '²').replace(/\^3/g, '³').replace(/\^4/g, '⁴')
-            .replace(/\^5/g, '⁵').replace(/\^6/g, '⁶').replace(/\^7/g, '⁷')
-            .replace(/\^8/g, '⁸').replace(/\^9/g, '⁹').replace(/\^0/g, '⁰')
-            .replace(/\^1/g, '¹').replace(/\^n/g, 'ⁿ').replace(/\^x/g, 'ˣ')
+          if (isBlock) return (
+            <div key={i} style={{ background: '#141414', border: '1px solid #252525', borderRadius: 8, padding: '14px 20px', margin: '14px 0', fontFamily: 'monospace', fontSize: 15, color: '#e8e8e8', textAlign: 'center', borderLeft: '2px solid #e8e8e830' }}>
+              <div style={{ fontSize: 9, fontFamily: 'monospace', color: '#444', letterSpacing: '0.1em', marginBottom: 8 }}>FORMULA</div>
+              {math}
+            </div>
+          )
+          const superscript = math.replace(/\^2/g,'²').replace(/\^3/g,'³').replace(/\^n/g,'ⁿ')
           return <span key={i} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 5, padding: '2px 8px', fontFamily: 'monospace', fontSize: 14, color: '#e8e8e8', display: 'inline', margin: '0 2px' }}>{superscript}</span>
         }
         return (
@@ -125,8 +115,7 @@ function ConfidenceBar({ color, points, label }) {
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false)
   return (
-    <button
-      onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+    <button onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
       style={{ background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: copied ? GREEN : MUTED, fontSize: 10, fontFamily: 'monospace', padding: '4px 10px', cursor: 'pointer', letterSpacing: '0.05em', transition: 'color 0.2s' }}>
       {copied ? 'COPIED' : 'COPY'}
     </button>
@@ -161,16 +150,14 @@ function IndividualAnswers({ individual }) {
 
 function VoteTally({ votes, counts, resolution }) {
   if (!votes || !counts) return null
-
   const badgeMeta = {
-    consensus: { label: 'CONSENSUS', color: GREEN, desc: '3+ models voted for the same answer' },
-    majority:  { label: 'MAJORITY',  color: YELLOW, desc: 'Most models agreed — split vote' },
-    tie:       { label: 'TIEBREAKER', color: RED, desc: 'Vote was split — Claude resolved' },
+    consensus: { label: 'CONSENSUS', color: GREEN },
+    majority: { label: 'MAJORITY', color: YELLOW },
+    tie: { label: 'TIEBREAKER', color: RED },
   }
   const badge = badgeMeta[resolution?.type] || badgeMeta.majority
   const winnerIdx = 'ABCD'.indexOf(resolution?.winner)
   const winnerModel = winnerIdx >= 0 ? MODEL_META[winnerIdx] : null
-
   return (
     <div style={{ marginBottom: 16, padding: '20px 24px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -180,35 +167,24 @@ function VoteTally({ votes, counts, resolution }) {
           <span style={{ fontSize: 10, fontFamily: 'monospace', color: badge.color, letterSpacing: '0.12em', fontWeight: 600 }}>{badge.label}</span>
         </div>
       </div>
-
-      {winnerModel && resolution?.type !== 'tie' && (
-        <div style={{ marginBottom: 16, fontSize: 12, color: '#aaa' }}>
-          Winner: <span style={{ color: winnerModel.color, fontWeight: 600 }}>{winnerModel.label}</span>
-          <span style={{ color: MUTED2, marginLeft: 8, fontSize: 11 }}>— {badge.desc}</span>
-        </div>
-      )}
-
+      {winnerModel && <div style={{ marginBottom: 16, fontSize: 12, color: '#aaa' }}>
+        Winner: <span style={{ color: winnerModel.color, fontWeight: 600 }}>{winnerModel.label}</span>
+      </div>}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>
         {MODEL_META.map((m, i) => {
           const letter = 'ABCD'[i]
           const count = counts[letter] || 0
           const isWinner = resolution?.winner === letter
           return (
-            <div key={m.key} style={{
-              background: isWinner ? `${m.color}15` : SURFACE,
-              border: `1px solid ${isWinner ? m.color + '60' : BORDER2}`,
-              borderRadius: 7, padding: '10px 12px', textAlign: 'center'
-            }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: m.color, letterSpacing: '0.08em', marginBottom: 4 }}>{m.label.toUpperCase()}</div>
+            <div key={m.key} style={{ background: isWinner ? `${m.color}15` : SURFACE, border: `1px solid ${isWinner ? m.color + '60' : BORDER2}`, borderRadius: 7, padding: '10px 12px', textAlign: 'center' }}>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: m.color, marginBottom: 4 }}>{m.label.toUpperCase()}</div>
               <div style={{ fontSize: 22, fontWeight: 700, color: isWinner ? m.color : '#888' }}>{count}</div>
-              <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.08em' }}>{count === 1 ? 'VOTE' : 'VOTES'}</div>
+              <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>{count === 1 ? 'VOTE' : 'VOTES'}</div>
             </div>
           )
         })}
       </div>
-
       <div style={{ paddingTop: 12, borderTop: `1px solid ${BORDER2}` }}>
-        <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.1em', marginBottom: 8 }}>INDIVIDUAL VOTES</div>
         {votes.map((votedLetter, voterIdx) => {
           const voter = MODEL_META[voterIdx]
           const votedIdx = 'ABCD'.indexOf(votedLetter)
@@ -217,9 +193,8 @@ function VoteTally({ votes, counts, resolution }) {
             <div key={voterIdx} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, marginBottom: 4, color: '#999' }}>
               <span style={{ color: voter.color, fontFamily: 'monospace', fontSize: 11, minWidth: 72 }}>{voter.label}</span>
               <span style={{ color: MUTED2 }}>→</span>
-              {votedFor
-                ? <span style={{ color: votedFor.color, fontFamily: 'monospace', fontSize: 11 }}>{votedFor.label}</span>
-                : <span style={{ color: MUTED2, fontFamily: 'monospace', fontSize: 11 }}>(no vote parsed)</span>}
+              {votedFor ? <span style={{ color: votedFor.color, fontFamily: 'monospace', fontSize: 11 }}>{votedFor.label}</span>
+                : <span style={{ color: MUTED2, fontFamily: 'monospace', fontSize: 11 }}>(no vote)</span>}
             </div>
           )
         })}
@@ -231,8 +206,6 @@ function VoteTally({ votes, counts, resolution }) {
 function DebateHistory({ rounds }) {
   const [open, setOpen] = useState(false)
   if (!rounds) return null
-  const roundKeys = Object.keys(rounds).sort()
-
   return (
     <div style={{ marginTop: 12 }}>
       <button onClick={() => setOpen(!open)}
@@ -241,10 +214,10 @@ function DebateHistory({ rounds }) {
       </button>
       {open && (
         <div style={{ marginTop: 12 }}>
-          {roundKeys.map(rk => (
+          {Object.keys(rounds).sort().map(rk => (
             <div key={rk} style={{ marginBottom: 24 }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 12 }}>
-                ROUND {rk}{rk === '0' ? ' — INITIAL ANSWERS' : rk === '2' ? ' — FINAL ANSWERS' : ' — DEBATE'}
+                ROUND {rk}{rk === '0' ? ' — INITIAL' : rk === '2' ? ' — FINAL' : ' — DEBATE'}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 {MODEL_META.map((m, i) => (
@@ -284,29 +257,30 @@ function ChatItem({ chat, active, onSelect, onRename }) {
   const [editing, setEditing] = useState(false)
   const [val, setVal] = useState(chat.title)
   function save() { if (val.trim()) onRename(val.trim()); setEditing(false) }
-  if (editing) {
-    return (
-      <div style={{ padding: '4px 6px', marginBottom: 2 }}>
-        <input autoFocus value={val} onChange={e => setVal(e.target.value)} onBlur={save}
-          onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false) }}
-          style={{ width: '100%', background: '#1a1a1a', border: '1px solid #333', borderRadius: 5, color: '#e8e6e0', fontSize: 12, padding: '5px 8px', outline: 'none', boxSizing: 'border-box' }} />
-      </div>
-    )
-  }
+  if (editing) return (
+    <div style={{ padding: '4px 6px', marginBottom: 2 }}>
+      <input autoFocus value={val} onChange={e => setVal(e.target.value)} onBlur={save}
+        onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false) }}
+        style={{ width: '100%', background: '#1a1a1a', border: '1px solid #333', borderRadius: 5, color: '#e8e6e0', fontSize: 12, padding: '5px 8px', outline: 'none', boxSizing: 'border-box' }} />
+    </div>
+  )
   return (
     <div onDoubleClick={() => { setVal(chat.title); setEditing(true) }} onClick={onSelect}
       style={{ padding: '8px 10px', borderRadius: 7, cursor: 'pointer', marginBottom: 2, background: active ? '#1a1a1a' : 'none', color: active ? TEXT : MUTED, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', borderLeft: active ? `2px solid ${AMBER}` : '2px solid transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{chat.title}{chat.isPremium && <span style={{ color: PURPLE, marginLeft: 6, fontSize: 10 }}>◆</span>}</span>
+      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {chat.mode === 'premium' && <span style={{ color: PURPLE, marginRight: 4 }}>◆</span>}
+        {chat.title}
+      </span>
       {active && <button onClick={e => { e.stopPropagation(); setVal(chat.title); setEditing(true) }} style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', fontSize: 11, padding: '0 2px', flexShrink: 0 }}>✎</button>}
     </div>
   )
 }
 
-function ModelRow({ label, color, active }) {
+function ModelRow({ label, color }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
-      <div style={{ width: 6, height: 6, borderRadius: '50%', background: active ? color : MUTED2, flexShrink: 0 }}/>
-      <span style={{ fontSize: 12, color: active ? '#888' : MUTED2, fontFamily: 'monospace' }}>{label}</span>
+      <div style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0 }}/>
+      <span style={{ fontSize: 12, color: '#888', fontFamily: 'monospace' }}>{label}</span>
     </div>
   )
 }
@@ -315,20 +289,13 @@ function ModeToggle({ mode, setMode, disabled }) {
   return (
     <div style={{ display: 'inline-flex', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, padding: 2, fontSize: 11, fontFamily: 'monospace' }}>
       <button onClick={() => !disabled && setMode('standard')} disabled={disabled}
-        style={{
-          padding: '5px 12px', borderRadius: 5, border: 'none',
-          background: mode === 'standard' ? AMBER : 'transparent',
-          color: mode === 'standard' ? '#000' : MUTED,
-          cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'all 0.15s',
-        }}>STANDARD</button>
+        style={{ padding: '5px 12px', borderRadius: 5, border: 'none', background: mode === 'standard' ? AMBER : 'transparent', color: mode === 'standard' ? '#000' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'all 0.15s' }}>
+        STANDARD
+      </button>
       <button onClick={() => !disabled && setMode('premium')} disabled={disabled}
-        style={{
-          padding: '5px 12px', borderRadius: 5, border: 'none',
-          background: mode === 'premium' ? PURPLE : 'transparent',
-          color: mode === 'premium' ? '#fff' : MUTED,
-          cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'all 0.15s',
-          display: 'flex', alignItems: 'center', gap: 5,
-        }}>◆ PREMIUM</button>
+        style={{ padding: '5px 12px', borderRadius: 5, border: 'none', background: mode === 'premium' ? PURPLE : 'transparent', color: mode === 'premium' ? '#fff' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 5 }}>
+        ◆ PREMIUM
+      </button>
     </div>
   )
 }
@@ -338,22 +305,18 @@ function PremiumProgress({ currentStatus, rounds }) {
     { key: 'round-0', label: 'Initial answers' },
     { key: 'round-1', label: 'Round 1 of 2' },
     { key: 'round-2', label: 'Round 2 of 2' },
-    { key: 'voting',  label: 'Blind vote' },
+    { key: 'voting', label: 'Blind vote' },
     { key: 'resolve', label: 'Resolving' },
   ]
-  // Figure out current stage from status text heuristically
   const status = (currentStatus || '').toLowerCase()
   let active = 0
   if (status.includes('round 0') || status.includes('initial')) active = 0
   else if (status.includes('round 1')) active = 1
   else if (status.includes('round 2')) active = 2
   else if (status.includes('voting') || status.includes('blind')) active = 3
-  else if (status.includes('tiebreak') || status.includes('resolving')) active = 4
-
-  // Also use rounds count as evidence
+  else if (status.includes('tiebreak')) active = 4
   const roundsReceived = rounds ? Object.keys(rounds).length : 0
   if (roundsReceived > active) active = Math.min(roundsReceived, 3)
-
   return (
     <div style={{ padding: '20px 24px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, marginBottom: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
@@ -366,35 +329,193 @@ function PremiumProgress({ currentStatus, rounds }) {
           const isDone = i < active
           const isActive = i === active
           return (
-            <div key={s.key} style={{
-              flex: 1,
-              padding: '8px 6px',
-              borderRadius: 6,
-              background: isDone ? `${PURPLE}20` : isActive ? `${PURPLE}10` : '#0a0a0a',
-              border: `1px solid ${isDone ? PURPLE + '60' : isActive ? PURPLE : BORDER2}`,
-              textAlign: 'center',
-              transition: 'all 0.3s',
-            }}>
-              <div style={{ fontSize: 9, fontFamily: 'monospace', color: isDone || isActive ? PURPLE : MUTED2, letterSpacing: '0.06em', marginBottom: 2 }}>
-                {isDone ? '✓' : isActive ? '●' : '○'}
-              </div>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: isDone || isActive ? '#ccc' : MUTED2 }}>
-                {s.label}
-              </div>
+            <div key={s.key} style={{ flex: 1, padding: '8px 6px', borderRadius: 6, background: isDone ? `${PURPLE}20` : isActive ? `${PURPLE}10` : '#0a0a0a', border: `1px solid ${isDone ? PURPLE + '60' : isActive ? PURPLE : BORDER2}`, textAlign: 'center', transition: 'all 0.3s' }}>
+              <div style={{ fontSize: 9, fontFamily: 'monospace', color: isDone || isActive ? PURPLE : MUTED2, marginBottom: 2 }}>{isDone ? '✓' : isActive ? '●' : '○'}</div>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: isDone || isActive ? '#ccc' : MUTED2 }}>{s.label}</div>
             </div>
           )
         })}
       </div>
-      {currentStatus && (
-        <div style={{ marginTop: 14, fontSize: 11, fontFamily: 'monospace', color: '#888', letterSpacing: '0.05em' }}>
-          {currentStatus}
-        </div>
-      )}
+      {currentStatus && <div style={{ marginTop: 14, fontSize: 11, fontFamily: 'monospace', color: '#888' }}>{currentStatus}</div>}
     </div>
   )
 }
 
-function App() {
+function BuyCreditsModal({ onClose, user, onPurchase }) {
+  const [loading, setLoading] = useState(null)
+  const [promoCode, setPromoCode] = useState('')
+  const [promoStatus, setPromoStatus] = useState(null)
+  const [promoMessage, setPromoMessage] = useState('')
+
+  async function handleBuy(packType) {
+    setLoading(packType)
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      const res = await fetch('http://localhost:3000/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ packType })
+      })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+    } catch (err) {
+      console.error('Checkout error:', err)
+    }
+    setLoading(null)
+  }
+
+  async function handlePromo() {
+    if (!promoCode.trim()) return
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      const res = await fetch('http://localhost:3000/api/promo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ code: promoCode.trim() })
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setPromoStatus('success')
+        setPromoMessage(data.message)
+        setTimeout(() => { onPurchase && onPurchase(); onClose() }, 1500)
+      } else {
+        setPromoStatus('error')
+        setPromoMessage(data.error || 'Invalid promo code')
+      }
+    } catch (err) {
+      setPromoStatus('error')
+      setPromoMessage('Something went wrong')
+    }
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 16, padding: 36, width: 480, borderTop: `2px solid ${AMBER}` }}>
+        <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 12 }}>BUY CREDITS</div>
+        <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 6, color: TEXT }}>Get more queries</h3>
+        <p style={{ color: MUTED, fontSize: 13, marginBottom: 28, lineHeight: 1.6 }}>Credits never expire. Use them whenever you need.</p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 20 }}>
+            <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.1em', marginBottom: 8 }}>STANDARD</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: TEXT, marginBottom: 4 }}>$1.99</div>
+            <div style={{ fontSize: 12, color: MUTED, marginBottom: 16 }}>10 queries</div>
+            <div style={{ fontSize: 11, color: '#888', marginBottom: 16, lineHeight: 1.6 }}>4 AI models answer simultaneously. Claude synthesizes the result.</div>
+            <button onClick={() => handleBuy('standard')} disabled={!!loading}
+              style={{ width: '100%', padding: '10px', borderRadius: 8, background: AMBER, border: 'none', color: '#000', fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading === 'premium' ? 0.5 : 1 }}>
+              {loading === 'standard' ? 'Loading...' : 'Buy Standard'}
+            </button>
+          </div>
+
+          <div style={{ background: `${PURPLE}10`, border: `1px solid ${PURPLE}40`, borderRadius: 12, padding: 20 }}>
+            <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.1em', marginBottom: 8 }}>◆ PREMIUM</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: TEXT, marginBottom: 4 }}>$4.99</div>
+            <div style={{ fontSize: 12, color: MUTED, marginBottom: 16 }}>10 queries</div>
+            <div style={{ fontSize: 11, color: '#888', marginBottom: 16, lineHeight: 1.6 }}>4 models debate in 2 rounds, vote blindly on the best answer.</div>
+            <button onClick={() => handleBuy('premium')} disabled={!!loading}
+              style={{ width: '100%', padding: '10px', borderRadius: 8, background: PURPLE, border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading === 'standard' ? 0.5 : 1 }}>
+              {loading === 'premium' ? 'Loading...' : 'Buy Premium'}
+            </button>
+          </div>
+        </div>
+
+        {/* Promo code */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 8 }}>PROMO CODE</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              placeholder="Enter code..."
+              value={promoCode}
+              onChange={e => { setPromoCode(e.target.value); setPromoStatus(null) }}
+              onKeyDown={e => e.key === 'Enter' && handlePromo()}
+              style={{ flex: 1, padding: '9px 14px', borderRadius: 8, border: `1px solid ${promoStatus === 'error' ? RED : promoStatus === 'success' ? GREEN : BORDER}`, background: '#0a0a0a', color: TEXT, fontSize: 13, outline: 'none', fontFamily: 'monospace' }}
+            />
+            <button onClick={handlePromo}
+              style={{ padding: '9px 16px', borderRadius: 8, background: CARD, border: `1px solid ${BORDER}`, color: MUTED, fontSize: 12, cursor: 'pointer', fontFamily: 'monospace' }}>
+              APPLY
+            </button>
+          </div>
+          {promoStatus && (
+            <div style={{ marginTop: 6, fontSize: 11, fontFamily: 'monospace', color: promoStatus === 'success' ? GREEN : RED }}>
+              {promoStatus === 'success' ? '✓ ' : '✕ '}{promoMessage}
+            </div>
+          )}
+        </div>
+
+        <button onClick={onClose}
+          style={{ width: '100%', padding: '10px', borderRadius: 8, background: 'none', border: `1px solid ${BORDER}`, color: MUTED, fontSize: 13, cursor: 'pointer' }}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+    
+
+function LoginPage() {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  async function handleGoogleLogin() {
+    setLoading(true)
+    setError(null)
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin }
+    })
+    if (error) { setError(error.message); setLoading(false) }
+  }
+
+  return (
+    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
+      <div style={{ width: 400, padding: 48, background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 20, borderTop: `2px solid ${AMBER}` }}>
+        <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>CONSENSUSAI</div>
+        <h1 style={{ fontSize: 28, fontWeight: 700, color: TEXT, marginBottom: 8, letterSpacing: '-0.02em' }}>The honest AI.</h1>
+        <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.7, marginBottom: 40 }}>
+          4 AI models answer your question simultaneously. See where they agree, disagree, and why.
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 32 }}>
+          {[
+            { icon: '⚡', text: '4 models in parallel' },
+            { icon: '🗳️', text: 'Blind debate voting' },
+            { icon: '🔍', text: 'Full transparency' },
+            { icon: '📊', text: 'Conflict mapping' },
+          ].map(f => (
+            <div key={f.text} style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 8, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 14 }}>{f.icon}</span>
+              <span style={{ fontSize: 11, color: '#888', fontFamily: 'monospace' }}>{f.text}</span>
+            </div>
+          ))}
+        </div>
+
+        {error && <div style={{ background: '#1a0a0a', border: '1px solid #3a1a1a', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: RED, marginBottom: 16 }}>{error}</div>}
+
+        <button onClick={handleGoogleLogin} disabled={loading}
+          style={{ width: '100%', padding: '14px', borderRadius: 10, background: loading ? MUTED2 : '#fff', border: 'none', color: '#000', fontSize: 15, fontWeight: 600, cursor: loading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'background 0.2s' }}>
+          <svg width="20" height="20" viewBox="0 0 48 48">
+            <path fill="#4285F4" d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.2 7.3-10.5 7.3-17.3z"/>
+            <path fill="#34A853" d="M24 48c6.6 0 12.2-2.2 16.2-5.9l-7.9-6c-2.2 1.5-5 2.3-8.3 2.3-6.4 0-11.8-4.3-13.7-10.1H2.1v6.2C6.1 42.6 14.5 48 24 48z"/>
+            <path fill="#FBBC05" d="M10.3 28.3c-.5-1.5-.8-3-.8-4.6s.3-3.2.8-4.6v-6.2H2.1C.8 15.9 0 19.9 0 24s.8 8.1 2.1 11.1l8.2-6.8z"/>
+            <path fill="#EA4335" d="M24 9.5c3.6 0 6.8 1.2 9.3 3.6l7-7C36.2 2.2 30.6 0 24 0 14.5 0 6.1 5.4 2.1 13.3l8.2 6.2C12.2 13.8 17.6 9.5 24 9.5z"/>
+          </svg>
+          {loading ? 'Signing in...' : 'Continue with Google'}
+        </button>
+
+        <p style={{ textAlign: 'center', fontSize: 11, color: MUTED2, marginTop: 20, lineHeight: 1.6 }}>
+          5 free queries on signup. No credit card required.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+export default function App() {
+  const [user, setUser] = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
+  const [credits, setCredits] = useState({ standard_credits: 0, premium_credits: 0 })
   const [prompt, setPrompt] = useState('')
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
@@ -402,15 +523,77 @@ function App() {
   const [statusText, setStatusText] = useState('')
   const [liveRounds, setLiveRounds] = useState(null)
   const [mode, setMode] = useState('standard')
-
-  const [name, setName] = useState(() => localStorage.getItem('consensusai_name') || '')
-  const [showKeyModal, setShowKeyModal] = useState(false)
+  const [showBuyModal, setShowBuyModal] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+  const [name, setName] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [attachment, setAttachment] = useState(null)
-  const [chats, setChats] = useState([{ id: 1, title: 'New chat', messages: [] }])
-  const [activeChatId, setActiveChatId] = useState(1)
+  const [chats, setChats] = useState([])
+  const [activeChatId, setActiveChatId] = useState(null)
   const [keyHovered, setKeyHovered] = useState(false)
+  const [noCreditsError, setNoCreditsError] = useState(false)
   const messagesEndRef = useRef(null)
+
+  // Auth listener
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setAuthLoading(false)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      if (session?.user) {
+        setName(session.user.user_metadata?.full_name?.split(' ')[0] || '')
+        loadUserData(session.user)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  // Check for payment success in URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('payment') === 'success') {
+      window.history.replaceState({}, '', '/')
+      setTimeout(() => loadUserData(user), 2000) // wait for webhook
+    }
+  }, [user])
+
+  async function loadUserData(currentUser) {
+    if (!currentUser) return
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      const res = await fetch('http://localhost:3000/api/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      const data = await res.json()
+      if (data.credits) setCredits(data.credits)
+      if (data.chats) {
+        const formatted = data.chats.map(chat => ({
+          id: chat.id,
+          title: chat.title,
+          mode: chat.mode,
+          messages: (chat.messages || []).map(m => ({
+            role: m.role,
+            content: m.role === 'user' ? m.content.text : m.content,
+            individual: m.individual,
+            rounds: m.rounds,
+            votes: m.votes,
+            resolution: m.resolution,
+            isPremium: chat.mode === 'premium',
+          }))
+        }))
+        setChats(formatted)
+        if (formatted.length > 0 && !activeChatId) {
+          setActiveChatId(formatted[0].id)
+          setMessages(formatted[0].messages)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load user data:', err)
+    }
+  }
 
   function handleFile(file) {
     if (!file) return
@@ -419,26 +602,59 @@ function App() {
     reader.readAsDataURL(file)
   }
 
+  async function getAuthHeader() {
+    const session = await supabase.auth.getSession()
+    return `Bearer ${session.data.session?.access_token}`
+  }
+
   async function handleSubmit() {
     if (!prompt.trim() || loading) return
-    const userMessage = prompt
     const isPremium = mode === 'premium'
+
+    // Check credits locally first
+    const availableCredits = isPremium ? credits.premium_credits : credits.standard_credits
+    if (availableCredits <= 0) {
+      setShowBuyModal(true)
+      return
+    }
+
+    const userMessage = prompt
     setPrompt('')
-    const newMessages = [...messages, { role: 'user', content: userMessage, isPremium, attachment: attachment ? { name: attachment.name, type: attachment.type } : null }]
+    const newMessages = [...messages, {
+      role: 'user', content: userMessage, isPremium,
+      attachment: attachment ? { name: attachment.name, type: attachment.type } : null
+    }]
     setMessages(newMessages)
     setLoading(true)
     setStreamingText('')
     setStatusText('Connecting...')
     setLiveRounds(null)
+    setNoCreditsError(false)
     setAttachment(null)
 
+    const token = await getAuthHeader()
     const endpoint = isPremium ? '/api/query/premium' : '/api/query'
 
     const res = await fetch(`http://localhost:3000${endpoint}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': token },
       body: JSON.stringify({ prompt: userMessage, attachment })
     })
+
+    // Handle insufficient credits (402)
+    if (res.status === 402) {
+      setLoading(false)
+      setMessages(messages) // revert
+      setShowBuyModal(true)
+      return
+    }
+
+    // Deduct from local state optimistically
+    setCredits(prev => ({
+      ...prev,
+      [isPremium ? 'premium_credits' : 'standard_credits']:
+        prev[isPremium ? 'premium_credits' : 'standard_credits'] - 1
+    }))
 
     const reader = res.body.getReader()
     const decoder = new TextDecoder()
@@ -465,22 +681,24 @@ function App() {
           }
           if (parsed.type === 'done') {
             const assistantMsg = {
-              role: 'assistant',
-              isPremium,
+              role: 'assistant', isPremium,
               content: parsed.answer,
               individual: parsed.individual,
               rounds: parsed.rounds,
               votes: parsed.votes,
-              voteResponses: parsed.voteResponses,
               resolution: parsed.resolution,
             }
             const finalMessages = [...newMessages, assistantMsg]
             setMessages(finalMessages)
-            setChats(prev => prev.map(c =>
-              c.id === activeChatId
-                ? { ...c, title: userMessage.slice(0, 28) + (userMessage.length > 28 ? '...' : ''), isPremium, messages: finalMessages }
-                : c
-            ))
+            // Add new chat to sidebar
+            const newChat = {
+              id: Date.now(),
+              title: userMessage.slice(0, 28) + (userMessage.length > 28 ? '...' : ''),
+              mode: isPremium ? 'premium' : 'standard',
+              messages: finalMessages,
+            }
+            setChats(prev => [newChat, ...prev])
+            setActiveChatId(newChat.id)
             setStreamingText('')
             setStatusText('')
             setLiveRounds(null)
@@ -494,21 +712,8 @@ function App() {
     }
   }
 
-  function exportPDF(msg, question) {
-    const content = `ConsensusAI Export\n${'='.repeat(50)}\n\nMode: ${msg.isPremium ? 'Premium (Debate)' : 'Standard'}\n\nQuestion: ${question}\n\nCombined Answer:\n${msg.content.summary}\n\nConfidence: ${msg.content.confidence}\n\n${msg.resolution ? `Vote result: ${msg.resolution.type.toUpperCase()} — winner: ${msg.resolution.winner}\n\n` : ''}GPT-4o:\n${msg.individual?.openai || ''}\n\nClaude:\n${msg.individual?.claude || ''}\n\nDeepSeek:\n${msg.individual?.deepseek || ''}\n\nGrok:\n${msg.individual?.grok || ''}`
-    const blob = new Blob([content], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `consensusai-${Date.now()}.txt`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
   function newChat() {
-    const id = Date.now()
-    setChats(prev => [...prev, { id, title: 'New chat', messages: [] }])
-    setActiveChatId(id)
+    setActiveChatId(null)
     setMessages([])
   }
 
@@ -521,33 +726,63 @@ function App() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit() }
   }
 
+  function exportPDF(msg, question) {
+    const content = `ConsensusAI Export\n${'='.repeat(50)}\n\nMode: ${msg.isPremium ? 'Premium' : 'Standard'}\nQuestion: ${question}\n\nAnswer:\n${msg.content.summary}\n\nGPT-4o:\n${msg.individual?.openai || ''}\n\nClaude:\n${msg.individual?.claude || ''}\n\nDeepSeek:\n${msg.individual?.deepseek || ''}\n\nGrok:\n${msg.individual?.grok || ''}`
+    const blob = new Blob([content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = `consensusai-${Date.now()}.txt`; a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const now = new Date()
   const timeStr = now.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })
+
+  if (authLoading) return (
+    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG }}>
+      <div style={{ fontSize: 11, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em' }}>LOADING...</div>
+    </div>
+  )
+
+  if (!user) return <LoginPage />
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: BG, color: TEXT, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
 
       <input type="file" accept="image/*,.pdf,.txt,.md" style={{ display: 'none' }} id="file-input" onChange={e => handleFile(e.target.files[0])} />
 
-      {showKeyModal && (
+      {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} user={user} />}
+
+      {showSettings && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 16, padding: 36, width: 440, borderTop: `2px solid ${AMBER}` }}>
             <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 12 }}>SETTINGS</div>
-            <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 6, color: TEXT }}>Your profile</h3>
-            <p style={{ color: MUTED, fontSize: 13, marginBottom: 28, lineHeight: 1.6 }}>Personalize your experience.</p>
-            <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 6 }}>YOUR NAME</div>
-              <input placeholder="Constantin" value={name} onChange={e => setName(e.target.value)}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: `1px solid ${BORDER}`, background: '#0a0a0a', color: TEXT, fontSize: 14, boxSizing: 'border-box' }} />
+            <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 24, color: TEXT }}>Account</h3>
+            <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, padding: 16, marginBottom: 20 }}>
+              <div style={{ fontSize: 11, color: MUTED, marginBottom: 4 }}>Signed in as</div>
+              <div style={{ fontSize: 14, color: TEXT }}>{user.email}</div>
+            </div>
+            <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, padding: 16, marginBottom: 24 }}>
+              <div style={{ fontSize: 11, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 12 }}>CREDITS</div>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: AMBER }}>{credits.standard_credits}</div>
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2 }}>STANDARD</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: PURPLE }}>{credits.premium_credits}</div>
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2 }}>PREMIUM</div>
+                </div>
+              </div>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => { localStorage.setItem('consensusai_name', name); setShowKeyModal(false) }}
+              <button onClick={() => { setShowSettings(false); setShowBuyModal(true) }}
                 style={{ flex: 1, padding: '11px', borderRadius: 8, background: AMBER, border: 'none', color: '#000', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-                Save
+                Buy Credits
               </button>
-              <button onClick={() => setShowKeyModal(false)}
+              <button onClick={async () => { await supabase.auth.signOut(); setShowSettings(false) }}
                 style={{ padding: '11px 18px', borderRadius: 8, background: 'none', border: `1px solid ${BORDER}`, color: MUTED, fontSize: 14, cursor: 'pointer' }}>
-                Cancel
+                Sign out
               </button>
             </div>
           </div>
@@ -571,7 +806,7 @@ function App() {
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '12px 8px' }}>
             <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.12em', padding: '0 8px', marginBottom: 6 }}>SESSIONS</div>
-            {chats.slice().reverse().map(chat => (
+            {chats.map(chat => (
               <ChatItem key={chat.id} chat={chat} active={chat.id === activeChatId}
                 onSelect={() => switchChat(chat)}
                 onRename={newTitle => setChats(prev => prev.map(c => c.id === chat.id ? { ...c, title: newTitle } : c))} />
@@ -580,25 +815,33 @@ function App() {
 
           <div style={{ padding: '12px 16px', borderTop: `1px solid ${BORDER2}` }}>
             <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.12em', marginBottom: 10 }}>MODELS ONLINE</div>
-            {MODEL_META.map(m => <ModelRow key={m.key} label={m.label} color={GREEN} active={true} />)}
-            <ModelRow label="Synthesis (Claude)" color={GREEN} active={true} />
+            {MODEL_META.map(m => <ModelRow key={m.key} label={m.label} color={GREEN} />)}
+            <ModelRow label="Synthesis (Claude)" color={GREEN} />
 
-            <button
-              onClick={() => setShowKeyModal(true)}
-              onMouseEnter={() => setKeyHovered(true)}
-              onMouseLeave={() => setKeyHovered(false)}
-              style={{
-                marginTop: 10, width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 8px', borderRadius: 7,
-                background: keyHovered ? '#0f2a0f' : '#0a1a0a',
-                border: `1px solid ${keyHovered ? '#2a5a2a' : '#1a3a1a'}`,
-                color: GREEN, fontSize: 12, fontFamily: 'monospace', cursor: 'pointer', transition: 'all 0.15s',
-                transform: keyHovered ? 'scale(1.02)' : 'scale(1)',
-              }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: GREEN, flexShrink: 0, boxShadow: keyHovered ? `0 0 8px ${GREEN}` : 'none', transition: 'box-shadow 0.15s' }}/>
-              {name ? name.toUpperCase() : 'SETTINGS'}
+            {/* Credits display */}
+            <div style={{ marginTop: 12, marginBottom: 8, display: 'flex', gap: 8 }}>
+              <div style={{ flex: 1, background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: AMBER }}>{credits.standard_credits}</div>
+                <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>STD</div>
+              </div>
+              <div style={{ flex: 1, background: `${PURPLE}10`, border: `1px solid ${PURPLE}30`, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: PURPLE }}>{credits.premium_credits}</div>
+                <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>PRO</div>
+              </div>
+              <button onClick={() => setShowBuyModal(true)}
+                style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 6, padding: '6px 10px', color: MUTED, fontSize: 12, cursor: 'pointer' }}>
+                +
+              </button>
+            </div>
+
+            <button onClick={() => setShowSettings(true)}
+              onMouseEnter={() => setKeyHovered(true)} onMouseLeave={() => setKeyHovered(false)}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 8px', borderRadius: 7, background: keyHovered ? '#0f2a0f' : '#0a1a0a', border: `1px solid ${keyHovered ? '#2a5a2a' : '#1a3a1a'}`, color: GREEN, fontSize: 12, fontFamily: 'monospace', cursor: 'pointer', transition: 'all 0.15s' }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: GREEN, flexShrink: 0 }}/>
+              {name ? name.toUpperCase() : user.email?.split('@')[0].toUpperCase()}
             </button>
 
-            <div style={{ marginTop: 16, fontSize: 10, color: MUTED2, fontFamily: 'monospace', lineHeight: 1.8 }}>
+            <div style={{ marginTop: 12, fontSize: 10, color: MUTED2, fontFamily: 'monospace', lineHeight: 1.8 }}>
               by Constantin Riegler
             </div>
           </div>
@@ -613,10 +856,7 @@ function App() {
           <div style={{ flex: 1 }}/>
           <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.08em' }}>{timeStr}</div>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <div style={{ width: 5, height: 5, borderRadius: '50%', background: GREEN }}/>
-            <div style={{ width: 5, height: 5, borderRadius: '50%', background: GREEN }}/>
-            <div style={{ width: 5, height: 5, borderRadius: '50%', background: GREEN }}/>
-            <div style={{ width: 5, height: 5, borderRadius: '50%', background: GREEN }}/>
+            {[GREEN, GREEN, GREEN, GREEN].map((c, i) => <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: c }}/>)}
           </div>
         </div>
 
@@ -628,7 +868,9 @@ function App() {
                 {getGreeting()}{name ? `, ${name}` : ''}.
               </div>
               <div style={{ fontSize: 15, color: MUTED, marginBottom: 48, lineHeight: 1.7 }}>
-                Ask anything. Your question goes to multiple AI models simultaneously. In Premium, they debate and vote on the best answer.
+                Ask anything. Your question goes to 4 AI models simultaneously.
+                {credits.standard_credits > 0 && <span style={{ color: GREEN }}> {credits.standard_credits} standard {credits.standard_credits === 1 ? 'query' : 'queries'} remaining.</span>}
+                {credits.premium_credits > 0 && <span style={{ color: PURPLE }}> {credits.premium_credits} premium {credits.premium_credits === 1 ? 'query' : 'queries'} remaining.</span>}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
                 {FEATURE_DETAILS.map((f, i) => <FeatureCard key={i} feature={f} />)}
@@ -648,7 +890,6 @@ function App() {
                   <div style={{ fontSize: 22, fontWeight: 700, color: TEXT, lineHeight: 1.3, borderLeft: `3px solid ${msg.isPremium ? PURPLE : AMBER}`, paddingLeft: 16 }}>
                     {msg.content}
                   </div>
-                  {msg.attachment && <div style={{ marginTop: 8, paddingLeft: 19, fontSize: 11, fontFamily: 'monospace', color: MUTED }}>+ {msg.attachment.name}</div>}
                 </div>
               ) : (
                 <div>
@@ -672,9 +913,7 @@ function App() {
                     <FormattedText text={msg.content.summary} />
                   </div>
 
-                  {msg.isPremium && msg.votes && (
-                    <VoteTally votes={msg.votes} counts={msg.resolution?.counts} resolution={msg.resolution} />
-                  )}
+                  {msg.isPremium && msg.votes && <VoteTally votes={msg.votes} counts={msg.resolution?.counts} resolution={msg.resolution} />}
 
                   {!msg.isPremium && (
                     <div style={{ marginBottom: 16, padding: '20px 24px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10 }}>
@@ -682,14 +921,6 @@ function App() {
                       <ConfidenceBar color={GREEN} points={msg.content.agreed} label="Consensus" />
                       <ConfidenceBar color={YELLOW} points={msg.content.partial} label="Partial agreement" />
                       <ConfidenceBar color={RED} points={msg.content.conflicted} label="Conflicting signals" />
-                      <div style={{ display: 'flex', gap: 16, marginTop: 8, paddingTop: 12, borderTop: `1px solid ${BORDER2}` }}>
-                        {[[GREEN, 'Consensus'], [YELLOW, 'Partial'], [RED, 'Conflict']].map(([c, l]) => (
-                          <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <div style={{ width: 5, height: 5, borderRadius: '50%', background: c }}/>
-                            <span style={{ fontSize: 10, color: MUTED2, fontFamily: 'monospace' }}>{l}</span>
-                          </div>
-                        ))}
-                      </div>
                     </div>
                   )}
 
@@ -716,7 +947,7 @@ function App() {
                 </div>
               ) : mode === 'standard' && (
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                  {['GPT-4o', 'Claude', 'DeepSeek', 'Grok', 'Synthesis (Claude)'].map(m => (
+                  {['GPT-4o', 'Claude', 'DeepSeek', 'Grok', 'Synthesis'].map(m => (
                     <div key={m} style={{ fontSize: 11, fontFamily: 'monospace', color: MUTED, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 5, padding: '4px 10px' }}>{m} ···</div>
                   ))}
                 </div>
@@ -735,17 +966,22 @@ function App() {
           <div style={{ maxWidth: 720, margin: '0 auto' }}>
             <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <ModeToggle mode={mode} setMode={setMode} disabled={loading} />
-              {mode === 'premium' && (
-                <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.08em' }}>
-                  4 MODELS · 2 DEBATE ROUNDS · BLIND VOTE · ~30s
-                </div>
-              )}
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2 }}>
+                {mode === 'standard'
+                  ? `${credits.standard_credits} standard ${credits.standard_credits === 1 ? 'query' : 'queries'} left`
+                  : `${credits.premium_credits} premium ${credits.premium_credits === 1 ? 'query' : 'queries'} left`}
+                {(mode === 'standard' ? credits.standard_credits : credits.premium_credits) === 0 && (
+                  <button onClick={() => setShowBuyModal(true)} style={{ marginLeft: 8, background: 'none', border: 'none', color: AMBER, fontSize: 10, fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}>
+                    buy more
+                  </button>
+                )}
+              </div>
             </div>
             {attachment && (
               <div style={{ marginBottom: 8, padding: '6px 12px', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 11, fontFamily: 'monospace', color: AMBER }}>+</span>
                 <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#aaa', flex: 1 }}>{attachment.name}</span>
-                <button onClick={() => setAttachment(null)} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 14, padding: 0, lineHeight: 1 }}>✕</button>
+                <button onClick={() => setAttachment(null)} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 14, padding: 0 }}>✕</button>
               </div>
             )}
             <div style={{ position: 'relative' }}>
@@ -774,5 +1010,3 @@ function App() {
     </div>
   )
 }
-
-export default App
