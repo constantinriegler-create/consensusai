@@ -352,7 +352,7 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
     try {
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
-      const res = await fetch('http://localhost:3000/api/checkout', {
+      const res = await fetch('https://consensusai-production-0e01.up.railway.app', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ packType })
@@ -370,7 +370,7 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
     try {
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
-      const res = await fetch('http://localhost:3000/api/promo', {
+      const res = await fetch('https://consensusai-production-0e01.up.railway.app', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ code: promoCode.trim() })
@@ -564,7 +564,7 @@ export default function App() {
     try {
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
-      const res = await fetch('http://localhost:3000/api/me', {
+      const res = await fetch('https://consensusai-production-0e01.up.railway.app', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       const data = await res.json()
@@ -635,7 +635,7 @@ export default function App() {
     const token = await getAuthHeader()
     const endpoint = isPremium ? '/api/query/premium' : '/api/query'
 
-    const res = await fetch(`http://localhost:3000${endpoint}`, {
+    const res = await fetch(`https://consensusai-production-0e01.up.railway.app${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': token },
       body: JSON.stringify({ prompt: userMessage, attachment })
