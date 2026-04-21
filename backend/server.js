@@ -67,7 +67,13 @@ app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), async
   res.json({ received: true })
 })
 
-app.use(cors())
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://consensusai-three.vercel.app'
+  ]
+}))
 app.use(express.json({ limit: '100mb' }))
 
 // Promo code redemption
@@ -132,8 +138,8 @@ app.post('/api/checkout', requireAuth, async (req, res) => {
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: 'http://localhost:5173?payment=success',
-      cancel_url: 'http://localhost:5173?payment=cancelled',
+     success_url: 'https://consensusai-three.vercel.app?payment=success',
+cancel_url: 'https://consensusai-three.vercel.app?payment=cancelled',
       metadata: {
         userId: req.user.id,
         packType,
