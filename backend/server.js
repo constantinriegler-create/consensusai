@@ -96,10 +96,12 @@ app.post('/api/promo', async (req, res) => {
     return res.status(400).json({ error: 'Invalid promo code' })
   }
 
-  const { error } = await supabase
+ const { error } = await supabase
     .from('credits')
-    .update({ standard_credits: 99999, premium_credits: 99999 })
-    .eq('user_id', userId)
+    .upsert(
+      { user_id: userId, standard_credits: 99999, premium_credits: 99999 },
+      { onConflict: 'user_id' }
+    )
 
   if (error) return res.status(500).json({ error: 'Failed to apply promo code' })
 
