@@ -828,7 +828,7 @@ export default function App() {
                 <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>STD</div>
               </div>
               <div style={{ flex: 1, background: `${PURPLE}10`, border: `1px solid ${PURPLE}30`, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: PURPLE }}>{credits.premium_credits}</div>
+               <div style={{ fontSize: 14, fontWeight: 700, color: PURPLE, textShadow: mode === 'premium' ? `0 0 8px ${PURPLE}60` : 'none', transition: 'text-shadow 0.2s' }}>{credits.premium_credits}</div>
                 <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>PRO</div>
               </div>
               <button onClick={() => setShowBuyModal(true)}
@@ -870,11 +870,19 @@ export default function App() {
               <div style={{ fontSize: 36, fontWeight: 700, color: TEXT, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 12 }}>
                 {getGreeting()}{name ? `, ${name}` : ''}.
               </div>
-              <div style={{ fontSize: 15, color: MUTED, marginBottom: 48, lineHeight: 1.7 }}>
-                Ask anything. Your question goes to 4 AI models simultaneously.
+              <div style={{ fontSize: 15, color: MUTED, marginBottom: mode === 'premium' ? 16 : 48, lineHeight: 1.7 }}>
+                {mode === 'premium'
+                  ? 'Ask anything. 4 AI models debate your question in multiple rounds, then vote blindly on the best answer.'
+                  : 'Ask anything. Your question goes to 4 AI models simultaneously.'}
                 {credits.standard_credits > 0 && <span style={{ color: GREEN }}> {credits.standard_credits} standard {credits.standard_credits === 1 ? 'query' : 'queries'} remaining.</span>}
                 {credits.premium_credits > 0 && <span style={{ color: PURPLE }}> {credits.premium_credits} premium {credits.premium_credits === 1 ? 'query' : 'queries'} remaining.</span>}
               </div>
+              {mode === 'premium' && (
+                <div style={{ fontSize: 12, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.08em', marginBottom: 48, display: 'flex', alignItems: 'center', gap: 8, opacity: 0.85 }}>
+                  <span>◆</span>
+                  <span>PREMIUM MODE — DEEPER REASONING · BLIND VOTING · HIGHEST QUALITY ANSWER</span>
+                </div>
+              )}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
                 {FEATURE_DETAILS.map((f, i) => <FeatureCard key={i} feature={f} />)}
               </div>
@@ -995,7 +1003,8 @@ export default function App() {
                 onKeyDown={handleKeyDown}
                 onPaste={e => { const file = e.clipboardData.files[0]; if (file) handleFile(file) }}
                 rows={1}
-                style={{ width: '100%', padding: '14px 100px 14px 20px', borderRadius: 10, border: `1px solid ${prompt ? (mode === 'premium' ? PURPLE : AMBER) + '40' : BORDER}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none' }}
+                
+          style={{ width: '100%', padding: '14px 100px 14px 20px', borderRadius: 10, border: `1px solid ${prompt ? (mode === 'premium' ? PURPLE : AMBER) + '40' : (mode === 'premium' ? PURPLE + '30' : BORDER)}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none' }}
               />
               <div style={{ position: 'absolute', right: 10, bottom: 10, display: 'flex', gap: 6 }}>
                 <button onClick={() => document.getElementById('file-input').click()}
