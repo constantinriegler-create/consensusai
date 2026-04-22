@@ -352,7 +352,7 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
     try {
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
-      const res = await fetch('https://consensusai-production-0e01.up.railway.app', {
+      const res = await fetch('https://consensusai-production-0e01.up.railway.app/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ packType })
@@ -567,7 +567,7 @@ export default function App() {
     try {
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
-      const res = await fetch('https://consensusai-production-0e01.up.railway.app', {
+      const res = await fetch('https://consensusai-production-0e01.up.railway.app/api/me', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       const data = await res.json()
