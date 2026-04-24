@@ -819,7 +819,7 @@ export default function App() {
           <div style={{ padding: '12px 16px', borderTop: `1px solid ${BORDER2}` }}>
             <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.12em', marginBottom: 10 }}>MODELS ONLINE</div>
             {MODEL_META.map(m => <ModelRow key={m.key} label={m.label} color={GREEN} />)}
-            <ModelRow label="Synthesis (Claude)" color={GREEN} />
+            <ModelRow label="Synthesis" color={GREEN} />
 
             {/* Credits display */}
             <div style={{ marginTop: 12, marginBottom: 8, display: 'flex', gap: 8 }}>
