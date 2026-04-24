@@ -757,8 +757,14 @@ export default function App() {
       {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} user={user} />}
 
       {showSettings && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 16, padding: 36, width: 440, borderTop: `2px solid ${AMBER}` }}>
+        <div onClick={() => setShowSettings(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ position: 'relative', background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 16, padding: 36, width: 440, borderTop: `2px solid ${AMBER}` }}>
+            <button onClick={() => setShowSettings(false)}
+              onMouseEnter={(e) => { e.currentTarget.style.color = TEXT; e.currentTarget.style.background = BORDER }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = MUTED; e.currentTarget.style.background = 'transparent' }}
+              style={{ position: 'absolute', top: 14, right: 14, width: 28, height: 28, borderRadius: 6, background: 'transparent', border: 'none', color: MUTED, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s', padding: 0 }}>
+              ✕
+            </button>
             <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 12 }}>SETTINGS</div>
             <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 24, color: TEXT }}>Account</h3>
             <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, padding: 16, marginBottom: 20 }}>
