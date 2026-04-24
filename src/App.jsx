@@ -458,11 +458,14 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
     
 
 function LoginPage() {
+  const [authMode, setAuthMode] = useState('signin') // 'signin' | 'signup'
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
   async function handleGoogleLogin() {
-    setLoading(true)
+    setLoading('google')
     setError(null)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -471,44 +474,103 @@ function LoginPage() {
     if (error) { setError(error.message); setLoading(false) }
   }
 
+  async function handleEmailSubmit(e) {
+    e.preventDefault()
+    if (!email.trim() || !password.trim()) {
+      setError('Email and password are required')
+      return
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters')
+      return
+    }
+    setLoading('email')
+    setError(null)
+
+    const { error } = authMode === 'signup'
+      ? await supabase.auth.signUp({ email: email.trim(), password })
+      : await supabase.auth.signInWithPassword({ email: email.trim(), password })
+
+    if (error) {
+      // Friendlier error messages
+      const msg = error.message.toLowerCase()
+      if (msg.includes('invalid login')) setError('Incorrect email or password')
+      else if (msg.includes('already registered') || msg.includes('already exists')) setError('An account with this email already exists. Try signing in instead.')
+      else if (msg.includes('invalid email')) setError('Please enter a valid email address')
+      else setError(error.message)
+      setLoading(false)
+    }
+    // On success, onAuthStateChange handles the redirect automatically
+  }
+
   return (
-    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
+    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', padding: 20 }}>
       <div style={{ width: 400, padding: 48, background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 20, borderTop: `2px solid ${AMBER}` }}>
         <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>CONSENSUSAI</div>
-        <h1 style={{ fontSize: 28, fontWeight: 700, color: TEXT, marginBottom: 8, letterSpacing: '-0.02em' }}>The honest AI.</h1>
-        <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.7, marginBottom: 40 }}>
-          4 AI models answer your question simultaneously. See where they agree, disagree, and why.
+        <h1 style={{ fontSize: 28, fontWeight: 700, color: TEXT, marginBottom: 8, letterSpacing: '-0.02em' }}>
+          {authMode === 'signup' ? 'Create your account.' : 'The honest AI.'}
+        </h1>
+        <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.7, marginBottom: 32 }}>
+          {authMode === 'signup'
+            ? 'Get 3 free standard queries to start. No credit card required.'
+            : '4 AI models answer your question simultaneously. See where they agree, disagree, and why.'}
         </p>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 32 }}>
-          {[
-            { icon: '⚡', text: '4 models in parallel' },
-            { icon: '🗳️', text: 'Blind debate voting' },
-            { icon: '🔍', text: 'Full transparency' },
-            { icon: '📊', text: 'Conflict mapping' },
-          ].map(f => (
-            <div key={f.text} style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 8, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 14 }}>{f.icon}</span>
-              <span style={{ fontSize: 11, color: '#888', fontFamily: 'monospace' }}>{f.text}</span>
-            </div>
-          ))}
-        </div>
 
         {error && <div style={{ background: '#1a0a0a', border: '1px solid #3a1a1a', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: RED, marginBottom: 16 }}>{error}</div>}
 
-        <button onClick={handleGoogleLogin} disabled={loading}
-          style={{ width: '100%', padding: '14px', borderRadius: 10, background: loading ? MUTED2 : '#fff', border: 'none', color: '#000', fontSize: 15, fontWeight: 600, cursor: loading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'background 0.2s' }}>
-          <svg width="20" height="20" viewBox="0 0 48 48">
+        <form onSubmit={handleEmailSubmit} style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 6 }}>EMAIL</div>
+          <input
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            autoComplete="email"
+            disabled={!!loading}
+            style={{ width: '100%', padding: '12px 14px', borderRadius: 8, border: `1px solid ${BORDER}`, background: CARD, color: TEXT, fontSize: 14, marginBottom: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'monospace' }}
+          />
+          <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 6 }}>PASSWORD</div>
+          <input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder={authMode === 'signup' ? 'At least 6 characters' : 'Your password'}
+            autoComplete={authMode === 'signup' ? 'new-password' : 'current-password'}
+            disabled={!!loading}
+            style={{ width: '100%', padding: '12px 14px', borderRadius: 8, border: `1px solid ${BORDER}`, background: CARD, color: TEXT, fontSize: 14, marginBottom: 16, outline: 'none', boxSizing: 'border-box', fontFamily: 'monospace' }}
+          />
+          <button
+            type="submit"
+            disabled={!!loading}
+            style={{ width: '100%', padding: '13px', borderRadius: 10, background: loading ? MUTED2 : AMBER, border: 'none', color: '#000', fontSize: 14, fontWeight: 600, cursor: loading ? 'default' : 'pointer', transition: 'background 0.2s' }}>
+            {loading === 'email' ? (authMode === 'signup' ? 'Creating account...' : 'Signing in...') : (authMode === 'signup' ? 'Create account' : 'Sign in')}
+          </button>
+        </form>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <div style={{ flex: 1, height: 1, background: BORDER }} />
+          <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.15em' }}>OR</div>
+          <div style={{ flex: 1, height: 1, background: BORDER }} />
+        </div>
+
+        <button onClick={handleGoogleLogin} disabled={!!loading}
+          style={{ width: '100%', padding: '13px', borderRadius: 10, background: loading ? MUTED2 : '#fff', border: 'none', color: '#000', fontSize: 14, fontWeight: 600, cursor: loading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'background 0.2s' }}>
+          <svg width="18" height="18" viewBox="0 0 48 48">
             <path fill="#4285F4" d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.2 7.3-10.5 7.3-17.3z"/>
             <path fill="#34A853" d="M24 48c6.6 0 12.2-2.2 16.2-5.9l-7.9-6c-2.2 1.5-5 2.3-8.3 2.3-6.4 0-11.8-4.3-13.7-10.1H2.1v6.2C6.1 42.6 14.5 48 24 48z"/>
             <path fill="#FBBC05" d="M10.3 28.3c-.5-1.5-.8-3-.8-4.6s.3-3.2.8-4.6v-6.2H2.1C.8 15.9 0 19.9 0 24s.8 8.1 2.1 11.1l8.2-6.8z"/>
             <path fill="#EA4335" d="M24 9.5c3.6 0 6.8 1.2 9.3 3.6l7-7C36.2 2.2 30.6 0 24 0 14.5 0 6.1 5.4 2.1 13.3l8.2 6.2C12.2 13.8 17.6 9.5 24 9.5z"/>
           </svg>
-          {loading ? 'Signing in...' : 'Continue with Google'}
+          {loading === 'google' ? 'Redirecting...' : 'Continue with Google'}
         </button>
 
-        <p style={{ textAlign: 'center', fontSize: 11, color: MUTED2, marginTop: 20, lineHeight: 1.6 }}>
-          5 free queries on signup. No credit card required.
+        <p style={{ textAlign: 'center', fontSize: 12, color: MUTED, marginTop: 24, lineHeight: 1.6 }}>
+          {authMode === 'signup' ? 'Already have an account? ' : "Don't have an account? "}
+          <button
+            onClick={() => { setAuthMode(authMode === 'signup' ? 'signin' : 'signup'); setError(null) }}
+            style={{ background: 'none', border: 'none', color: AMBER, cursor: 'pointer', padding: 0, fontSize: 12, fontWeight: 600, textDecoration: 'underline' }}>
+            {authMode === 'signup' ? 'Sign in' : 'Sign up'}
+          </button>
         </p>
       </div>
     </div>
