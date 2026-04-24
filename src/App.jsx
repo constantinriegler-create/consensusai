@@ -829,7 +829,7 @@ export default function App() {
               </div>
               <div style={{ flex: 1, background: `${PURPLE}10`, border: `1px solid ${PURPLE}30`, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
                <div style={{ fontSize: 14, fontWeight: 700, color: PURPLE, textShadow: mode === 'premium' ? `0 0 8px ${PURPLE}60` : 'none', transition: 'text-shadow 0.2s' }}>{credits.premium_credits}</div>
-                <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>PRO</div>
+                <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>PREMIUM</div>
               </div>
               <button onClick={() => setShowBuyModal(true)}
                 style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 6, padding: '6px 10px', color: MUTED, fontSize: 12, cursor: 'pointer' }}>
