@@ -150,13 +150,14 @@ cancel_url: 'https://consensusai-three.vercel.app?payment=cancelled',
     res.json({ url: session.url })
   } catch (err) {
     console.error('Stripe checkout error:', err)
+    
     res.status(500).json({ error: err.message })
   }
 })
 
 // Standard query
 app.post('/api/query', requireAuth, async (req, res) => {
-  const { prompt, attachment } = req.body
+ const { prompt, attachment, useWebSearch } = req.body
 
   try {
     await deductCredit(req.user.id, 'standard')
@@ -173,9 +174,9 @@ app.post('/api/query', requireAuth, async (req, res) => {
     res.setHeader('Connection', 'keep-alive')
     res.write(`data: ${JSON.stringify({ type: 'status', message: 'Asking GPT-4o, Claude, DeepSeek, and Grok simultaneously...' })}\n\n`)
 
-    const result = await router(prompt, attachment, (chunk) => {
-      res.write(`data: ${JSON.stringify({ type: 'chunk', text: chunk })}\n\n`)
-    })
+   const result = await router(prompt, attachment, (chunk) => {
+  res.write(`data: ${JSON.stringify({ type: 'chunk', text: chunk })}\n\n`)
+}, useWebSearch)
 
     // Save to DB in background
     saveChat(req.user.id, prompt.slice(0, 40), 'standard')
