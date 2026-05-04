@@ -598,6 +598,7 @@ export default function App() {
   const [keyHovered, setKeyHovered] = useState(false)
   const [noCreditsError, setNoCreditsError] = useState(false)
   const messagesEndRef = useRef(null)
+  const [useWebSearch, setUseWebSearch] = useState(false)
 
   // Auth listener
   useEffect(() => {
@@ -703,7 +704,7 @@ export default function App() {
     const res = await fetch(`https://consensusai-production-0e01.up.railway.app${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': token },
-      body: JSON.stringify({ prompt: userMessage, attachment })
+     body: JSON.stringify({ prompt: userMessage, attachment, useWebSearch })
     })
 
     // Handle insufficient credits (402)
@@ -1072,18 +1073,37 @@ export default function App() {
                 onPaste={e => { const file = e.clipboardData.files[0]; if (file) handleFile(file) }}
                 rows={1}
                 
-          style={{ width: '100%', padding: '14px 100px 14px 20px', borderRadius: 10, border: `1px solid ${prompt ? (mode === 'premium' ? PURPLE : AMBER) + '40' : (mode === 'premium' ? PURPLE + '30' : BORDER)}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none' }}
+ style={{ width: '100%', padding: '14px 100px 14px 20px', borderRadius: 10, border: `1px solid ${prompt ? (mode === 'premium' ? PURPLE : AMBER) + '40' : (mode === 'premium' ? PURPLE + '30' : BORDER)}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none' }}
               />
               <div style={{ position: 'absolute', right: 10, bottom: 10, display: 'flex', gap: 6 }}>
                 <button onClick={() => document.getElementById('file-input').click()}
                   style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, width: 36, height: 36, cursor: 'pointer', color: MUTED, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⊕</button>
+                <button onClick={() => setUseWebSearch(!useWebSearch)}
+                  title={useWebSearch ? 'Web search ON' : 'Web search OFF'}
+                  style={{
+                    background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : `${AMBER}20`) : CARD,
+                    border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`,
+                    borderRadius: 7,
+                    height: 36,
+                    padding: '0 10px',
+                    cursor: 'pointer',
+                    color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED,
+                    fontSize: 10,
+                    fontFamily: 'monospace',
+                    fontWeight: 600,
+                    letterSpacing: '0.08em',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.15s',
+                  }}>WEB</button>
                 <button onClick={handleSubmit} disabled={loading}
                   style={{ background: prompt && !loading ? (mode === 'premium' ? PURPLE : AMBER) : MUTED2, border: 'none', borderRadius: 7, width: 36, height: 36, cursor: !loading && prompt ? 'pointer' : 'default', color: prompt ? '#fff' : '#555', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', fontWeight: 700 }}>↑</button>
               </div>
             </div>
           </div>
           <div style={{ textAlign: 'center', fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 8, letterSpacing: '0.05em' }}>
-            ENTER TO SEND · PASTE OR CLICK ⊕ TO ATTACH
+            ENTER TO SEND · PASTE OR CLICK ⊕ TO ATTACH · WEB FOR LIVE SEARCH
           </div>
         </div>
       </div>
