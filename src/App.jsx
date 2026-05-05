@@ -598,7 +598,13 @@ export default function App() {
   const [keyHovered, setKeyHovered] = useState(false)
   const [noCreditsError, setNoCreditsError] = useState(false)
   const messagesEndRef = useRef(null)
-  const [useWebSearch, setUseWebSearch] = useState(false)
+  const [useWebSearch, setUseWebSearch] = useState(() => {
+  return localStorage.getItem('useWebSearch') === 'true'
+})
+
+useEffect(() => {
+  localStorage.setItem('useWebSearch', useWebSearch)
+}, [useWebSearch])
 
   // Auth listener
   useEffect(() => {
