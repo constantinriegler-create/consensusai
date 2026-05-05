@@ -4,6 +4,7 @@ import { callDeepSeek } from '../providers/deepseek.js'
 import { callGrok } from '../providers/grok.js'
 import { synthesize } from '../synthesizer/synthesize.js'
 import { makeDebatePrompt, makeVotePrompt, MODEL_NAMES } from '../providers/debate.js'
+import { searchWeb, formatSearchContext } from '../tavily.js'
 
 const CALLERS = [callOpenAI, callAnthropic, callDeepSeek, callGrok]
 
@@ -67,16 +68,25 @@ function resolveWinner(counts) {
   return { type: 'tie', counts }
 }
 
-export async function premiumRouter(prompt, attachment, onEvent) {
+export async function premiumRouter(prompt, attachment, onEvent, useWebSearch = false) {
+  // Optional: fetch web context first, inject into all debate rounds
+  let augmentedPrompt = prompt
+  if (useWebSearch) {
+    onEvent({ type: 'status', message: 'Searching the web...' })
+    const searchData = await searchWeb(prompt)
+    const webContext = formatSearchContext(searchData)
+    augmentedPrompt = webContext ? `${prompt}${webContext}` : prompt
+  }
+
   // Round 0: initial answers
   onEvent({ type: 'status', message: 'Round 0: Getting initial answers from all 4 models...' })
-  const round0 = await callAll(Array(4).fill(prompt), attachment)
+  const round0 = await callAll(Array(4).fill(augmentedPrompt), attachment)
   onEvent({ type: 'round', round: 0, answers: round0 })
 
   // Round 1: debate
   onEvent({ type: 'status', message: 'Round 1: Models debating and refining answers...' })
   const round1Prompts = round0.map((myAnswer, i) =>
-    makeDebatePrompt(prompt, myAnswer, otherAnswers(round0, i), MODEL_NAMES[i], 1)
+    makeDebatePrompt(augmentedPrompt, myAnswer, otherAnswers(round0, i), MODEL_NAMES[i], 1)
   )
   const round1 = await callAll(round1Prompts, null)
   onEvent({ type: 'round', round: 1, answers: round1 })
@@ -84,7 +94,7 @@ export async function premiumRouter(prompt, attachment, onEvent) {
   // Round 2: final debate
   onEvent({ type: 'status', message: 'Round 2: Models locking in final answers...' })
   const round2Prompts = round1.map((myAnswer, i) =>
-    makeDebatePrompt(prompt, myAnswer, otherAnswers(round1, i), MODEL_NAMES[i], 2)
+    makeDebatePrompt(augmentedPrompt, myAnswer, otherAnswers(round1, i), MODEL_NAMES[i], 2)
   )
   const finalAnswers = await callAll(round2Prompts, null)
   onEvent({ type: 'round', round: 2, answers: finalAnswers })
@@ -102,6 +112,8 @@ export async function premiumRouter(prompt, attachment, onEvent) {
     const perm = permutations[voterIdx]
     // Show the voter the answers in their private order, without any model names
     const shuffledAnswers = perm.map(realIdx => anonymizedAnswers[realIdx])
+    // Voting uses the ORIGINAL prompt, not the web-augmented one — voters judge
+    // answers on the user's actual question, not the bloated context.
     return makeBlindVotePrompt(prompt, shuffledAnswers)
   })
 
@@ -133,6 +145,7 @@ export async function premiumRouter(prompt, attachment, onEvent) {
   let finalSynthesis
   if (resolution.type === 'tie') {
     onEvent({ type: 'status', message: 'Split vote — Claude is resolving the tiebreaker...' })
+    // Synthesizer reads the original question; final answers already incorporate web facts.
     finalSynthesis = await synthesize(prompt, finalAnswers, (chunk) => {
       onEvent({ type: 'chunk', text: chunk })
     })

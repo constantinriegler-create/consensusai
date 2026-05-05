@@ -194,7 +194,7 @@ app.post('/api/query', requireAuth, async (req, res) => {
 
 // Premium query
 app.post('/api/query/premium', requireAuth, async (req, res) => {
-  const { prompt, attachment } = req.body
+  const { prompt, attachment, useWebSearch } = req.body
 
   try {
     await deductCredit(req.user.id, 'premium')
@@ -211,8 +211,8 @@ app.post('/api/query/premium', requireAuth, async (req, res) => {
     res.setHeader('Connection', 'keep-alive')
 
     const result = await premiumRouter(prompt, attachment, (event) => {
-      res.write(`data: ${JSON.stringify(event)}\n\n`)
-    })
+  res.write(`data: ${JSON.stringify(event)}\n\n`)
+}, useWebSearch)
 
     // Save to DB in background
     saveChat(req.user.id, prompt.slice(0, 40), 'premium')
