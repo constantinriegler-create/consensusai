@@ -657,10 +657,7 @@ useEffect(() => {
           }))
         }))
         setChats(formatted)
-        if (formatted.length > 0 && !activeChatId) {
-          setActiveChatId(formatted[0].id)
-          setMessages(formatted[0].messages)
-        }
+        
       }
     } catch (err) {
       console.error('Failed to load user data:', err)
@@ -785,9 +782,13 @@ useEffect(() => {
   }
 
   function newChat() {
-    setActiveChatId(null)
-    setMessages([])
-  }
+  setActiveChatId(null)
+  setMessages([])
+  setPrompt('')
+  setStreamingText('')
+  setStatusText('')
+  setLiveRounds(null)
+}
 
   function switchChat(chat) {
     setActiveChatId(chat.id)
