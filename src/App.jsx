@@ -255,7 +255,7 @@ function FeatureCard({ feature }) {
   )
 }
 
-function ChatItem({ chat, active, onSelect, onRename }) {
+function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
   const [editing, setEditing] = useState(false)
   const [val, setVal] = useState(chat.title)
   function save() { if (val.trim()) onRename(val.trim()); setEditing(false) }
@@ -273,7 +273,12 @@ function ChatItem({ chat, active, onSelect, onRename }) {
         {chat.mode === 'premium' && <span style={{ color: PURPLE, marginRight: 4 }}>◆</span>}
         {chat.title}
       </span>
-      {active && <button onClick={e => { e.stopPropagation(); setVal(chat.title); setEditing(true) }} style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', fontSize: 11, padding: '0 2px', flexShrink: 0 }}>✎</button>}
+      {active && (
+        <span style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
+          <button onClick={e => { e.stopPropagation(); setVal(chat.title); setEditing(true) }} style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', fontSize: 11, padding: '0 2px' }}>✎</button>
+          <button onClick={e => { e.stopPropagation(); if (window.confirm('Delete this chat? This cannot be undone.')) onDelete() }} style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', fontSize: 11, padding: '0 2px' }}>🗑</button>
+        </span>
+      )}
     </div>
   )
 }
@@ -797,6 +802,20 @@ useEffect(() => {
     setMessages(chat.messages)
   }
 
+  async function handleDeleteChat(chatId) {
+    const session = await supabase.auth.getSession()
+    const token = session.data.session?.access_token
+    await fetch(`https://consensusai-production-0e01.up.railway.app/api/chats/${chatId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+    setChats(prev => prev.filter(c => c.id !== chatId))
+    if (activeChatId === chatId) {
+      setActiveChatId(null)
+      setMessages([])
+    }
+  }
+
   function handleKeyDown(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit() }
   }
@@ -890,7 +909,8 @@ useEffect(() => {
             {chats.map(chat => (
               <ChatItem key={chat.id} chat={chat} active={chat.id === activeChatId}
                 onSelect={() => switchChat(chat)}
-                onRename={newTitle => setChats(prev => prev.map(c => c.id === chat.id ? { ...c, title: newTitle } : c))} />
+                onRename={newTitle => setChats(prev => prev.map(c => c.id === chat.id ? { ...c, title: newTitle } : c))}
+                onDelete={() => handleDeleteChat(chat.id)} />
             ))}
           </div>
 

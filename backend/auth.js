@@ -77,6 +77,32 @@ export async function saveMessages(chatId, userPrompt, assistantResult, mode) {
   if (error) throw new Error('Could not save messages')
 }
 
+export async function deleteChat(userId, chatId) {
+  // Verify ownership before deleting
+  const { data, error: fetchError } = await supabase
+    .from('chats')
+    .select('id')
+    .eq('id', chatId)
+    .eq('user_id', userId)
+    .single()
+
+  if (fetchError || !data) throw new Error('Chat not found or access denied')
+
+  const { error: msgError } = await supabase
+    .from('messages')
+    .delete()
+    .eq('chat_id', chatId)
+
+  if (msgError) throw new Error('Could not delete messages')
+
+  const { error: chatError } = await supabase
+    .from('chats')
+    .delete()
+    .eq('id', chatId)
+
+  if (chatError) throw new Error('Could not delete chat')
+}
+
 export async function getUserChats(userId) {
   const { data, error } = await supabase
     .from('chats')

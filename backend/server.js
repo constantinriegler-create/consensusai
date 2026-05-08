@@ -3,7 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import { router } from './orchestrator/router.js'
 import { premiumRouter } from './orchestrator/premium.js'
-import { requireAuth, getCredits, deductCredit, saveChat, saveMessages, getUserChats } from './auth.js'
+import { requireAuth, getCredits, deductCredit, saveChat, saveMessages, getUserChats, deleteChat } from './auth.js'
 import { stripe, PACKS } from './stripe.js'
 import supabase from './supabase.js'
 
@@ -119,6 +119,16 @@ app.get('/api/me', requireAuth, async (req, res) => {
     res.json({ credits, chats })
   } catch (err) {
     res.status(500).json({ error: err.message })
+  }
+})
+
+// Delete a chat
+app.delete('/api/chats/:id', requireAuth, async (req, res) => {
+  try {
+    await deleteChat(req.user.id, req.params.id)
+    res.json({ ok: true })
+  } catch (err) {
+    res.status(err.message === 'Chat not found or access denied' ? 403 : 500).json({ error: err.message })
   }
 })
 
