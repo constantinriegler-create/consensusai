@@ -584,6 +584,20 @@ function LoginPage() {
   )
 }
 
+function Lightbox({ src, onClose }) {
+  useEffect(() => {
+    function onKey(e) { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', width: 32, height: 32, color: '#fff', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+      <img onClick={e => e.stopPropagation()} src={src} style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 10, objectFit: 'contain' }} />
+    </div>
+  )
+}
+
 function HoldToDelete({ onConfirm }) {
   const HOLD_MS = 5000
   const [holding, setHolding] = useState(false)
@@ -654,6 +668,7 @@ export default function App() {
   const [showBuyModal, setShowBuyModal] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [deleteAllError, setDeleteAllError] = useState('')
+  const [lightboxImage, setLightboxImage] = useState(null)
   const [name, setName] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [attachment, setAttachment] = useState(null)
@@ -755,7 +770,7 @@ useEffect(() => {
     setPrompt('')
     const newMessages = [...messages, {
       role: 'user', content: userMessage, isPremium,
-      attachment: attachment ? { name: attachment.name, type: attachment.type } : null
+      attachment: attachment ? { name: attachment.name, type: attachment.type, data: attachment.type?.startsWith('image/') ? attachment.data : null } : null
     }]
     setMessages(newMessages)
     setLoading(true)
@@ -922,6 +937,8 @@ useEffect(() => {
 
       {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} user={user} />}
 
+      {lightboxImage && <Lightbox src={lightboxImage} onClose={() => setLightboxImage(null)} />}
+
       {showSettings && (
         <div onClick={() => setShowSettings(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div onClick={(e) => e.stopPropagation()} style={{ position: 'relative', background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 16, padding: 36, width: 440, borderTop: `2px solid ${AMBER}` }}>
@@ -1079,6 +1096,15 @@ useEffect(() => {
                   <div style={{ fontSize: 22, fontWeight: 700, color: TEXT, lineHeight: 1.3, borderLeft: `3px solid ${msg.isPremium ? PURPLE : AMBER}`, paddingLeft: 16 }}>
                     {msg.content}
                   </div>
+                  {msg.attachment?.type?.startsWith('image/') && msg.attachment.data && (
+                    <div style={{ paddingLeft: 19, marginTop: 10 }}>
+                      <img
+                        src={`data:${msg.attachment.type};base64,${msg.attachment.data}`}
+                        onClick={() => setLightboxImage(`data:${msg.attachment.type};base64,${msg.attachment.data}`)}
+                        style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, border: `1px solid ${BORDER}`, cursor: 'pointer', display: 'block' }}
+                      />
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div>
@@ -1167,11 +1193,25 @@ useEffect(() => {
               </div>
             </div>
             {attachment && (
-              <div style={{ marginBottom: 8, padding: '6px 12px', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 11, fontFamily: 'monospace', color: AMBER }}>+</span>
-                <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#aaa', flex: 1 }}>{attachment.name}</span>
-                <button onClick={() => setAttachment(null)} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 14, padding: 0 }}>✕</button>
-              </div>
+              attachment.type?.startsWith('image/') ? (
+                <div style={{ marginBottom: 8, display: 'inline-flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+                  <div style={{ position: 'relative', display: 'inline-block' }}>
+                    <img
+                      src={`data:${attachment.type};base64,${attachment.data}`}
+                      onClick={() => setLightboxImage(`data:${attachment.type};base64,${attachment.data}`)}
+                      style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, border: `1px solid ${BORDER}`, cursor: 'pointer', display: 'block' }}
+                    />
+                    <button onClick={() => setAttachment(null)} style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: 'rgba(0,0,0,0.75)', border: 'none', color: '#fff', fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, lineHeight: 1 }}>✕</button>
+                  </div>
+                  <span style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, marginTop: 4, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{attachment.name}</span>
+                </div>
+              ) : (
+                <div style={{ marginBottom: 8, padding: '6px 12px', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: AMBER }}>+</span>
+                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#aaa', flex: 1 }}>{attachment.name}</span>
+                  <button onClick={() => setAttachment(null)} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 14, padding: 0 }}>✕</button>
+                </div>
+              )
             )}
 <div style={{ position: 'relative' }}>
               <textarea
