@@ -995,11 +995,11 @@ useEffect(() => {
         </div>
       )}
 
-      {sidebarOpen && isMobile && (
-        <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 49 }} />
+      {isMobile && (
+        <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 49, opacity: sidebarOpen ? 1 : 0, pointerEvents: sidebarOpen ? 'auto' : 'none', transition: 'opacity 250ms ease-out' }} />
       )}
-      {sidebarOpen && (
-        <div style={isMobile ? { position: 'fixed', top: 0, left: 0, height: '100vh', width: '85vw', maxWidth: 320, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', zIndex: 50, overflowY: 'auto' } : { width: 240, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+      {(sidebarOpen || isMobile) && (
+        <div style={isMobile ? { position: 'fixed', top: 0, left: 0, height: '100vh', width: '85vw', maxWidth: 320, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', zIndex: 50, overflowY: 'auto', transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)', transition: 'transform 320ms cubic-bezier(0.4, 0, 0.2, 1)' } : { width: 240, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
           <div style={{ padding: '20px 16px 16px', borderBottom: `1px solid ${BORDER2}` }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
@@ -1098,7 +1098,7 @@ useEffect(() => {
           )}
 
           {messages.map((msg, i) => (
-            <div key={i} style={{ maxWidth: 720, margin: '0 auto 48px', padding: isMobile ? '0 16px' : '0 32px' }}>
+            <div key={i} className="chat-message" style={{ maxWidth: 720, margin: '0 auto 48px', padding: isMobile ? '0 16px' : '0 32px' }}>
               {msg.role === 'user' ? (
                 <div style={{ marginBottom: 8 }}>
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.1em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1208,12 +1208,16 @@ useEffect(() => {
 
         <style>{`
           @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+          @keyframes msgSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
           textarea::placeholder { color: #2a2a2a !important; }
+          .chat-message { animation: msgSlideIn 250ms ease-out both; }
           @media (max-width: 768px) {
             .source-link { word-break: break-all !important; }
             .mode-toggle-wrap { padding: 1px !important; }
-            .mode-btn { height: 30px !important; padding: 0 10px !important; font-size: 10px !important; border-radius: 4px !important; box-sizing: border-box !important; }
+            .mode-btn { height: 30px !important; padding: 0 10px !important; font-size: 10px !important; border-radius: 4px !important; box-sizing: border-box !important; transition: all 150ms ease-out !important; }
             .premium-diamond { display: none !important; }
+            button { transition: opacity 150ms ease-out, transform 150ms ease-out, background 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out !important; }
+            button:active { opacity: 0.72 !important; transform: scale(0.95) !important; }
           }
         `}</style>
 
