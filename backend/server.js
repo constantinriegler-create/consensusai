@@ -3,7 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import { router } from './orchestrator/router.js'
 import { premiumRouter } from './orchestrator/premium.js'
-import { requireAuth, getCredits, deductCredit, saveChat, saveMessages, getUserChats, deleteChat } from './auth.js'
+import { requireAuth, getCredits, deductCredit, saveChat, saveMessages, getUserChats, deleteChat, deleteAllChats } from './auth.js'
 import { stripe, PACKS } from './stripe.js'
 import supabase from './supabase.js'
 
@@ -117,6 +117,16 @@ app.get('/api/me', requireAuth, async (req, res) => {
       getUserChats(req.user.id),
     ])
     res.json({ credits, chats })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// Delete all chats for authenticated user
+app.delete('/api/chats/all', requireAuth, async (req, res) => {
+  try {
+    await deleteAllChats(req.user.id)
+    res.json({ ok: true })
   } catch (err) {
     res.status(500).json({ error: err.message })
   }

@@ -584,6 +584,62 @@ function LoginPage() {
   )
 }
 
+function HoldToDelete({ onConfirm }) {
+  const HOLD_MS = 5000
+  const [holding, setHolding] = useState(false)
+  const [fill, setFill] = useState(0)
+  const [countdown, setCountdown] = useState(5)
+  const timerRef = useRef(null)
+  const intervalRef = useRef(null)
+  const startRef = useRef(null)
+
+  function start() {
+    setHolding(true)
+    startRef.current = Date.now()
+    setFill(0)
+    setCountdown(5)
+
+    intervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - startRef.current
+      const pct = Math.min((elapsed / HOLD_MS) * 100, 100)
+      setFill(pct)
+      setCountdown(Math.max(1, Math.ceil((HOLD_MS - elapsed) / 1000)))
+    }, 50)
+
+    timerRef.current = setTimeout(() => {
+      cleanup()
+      onConfirm()
+    }, HOLD_MS)
+  }
+
+  function cancel() {
+    cleanup()
+    setHolding(false)
+    setFill(0)
+    setCountdown(5)
+  }
+
+  function cleanup() {
+    clearTimeout(timerRef.current)
+    clearInterval(intervalRef.current)
+  }
+
+  useEffect(() => () => cleanup(), [])
+
+  const label = holding ? (countdown <= 4 ? `Keep holding... ${countdown}s` : 'Keep holding...') : 'Hold to delete all chats'
+
+  return (
+    <button
+      onPointerDown={start}
+      onPointerUp={cancel}
+      onPointerLeave={cancel}
+      style={{ position: 'relative', overflow: 'hidden', width: '100%', padding: '11px', borderRadius: 8, background: 'transparent', border: `1px solid ${RED}`, color: RED, fontSize: 13, cursor: 'pointer', fontFamily: 'monospace', letterSpacing: '0.04em', textAlign: 'center', userSelect: 'none' }}>
+      <div style={{ position: 'absolute', inset: 0, background: RED, width: `${fill}%`, transition: holding ? 'none' : 'width 0.15s', zIndex: 0 }} />
+      <span style={{ position: 'relative', zIndex: 1, color: fill > 50 ? '#000' : RED, transition: 'color 0.1s' }}>{label}</span>
+    </button>
+  )
+}
+
 export default function App() {
   const [user, setUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
@@ -597,6 +653,7 @@ export default function App() {
   const [mode, setMode] = useState('standard')
   const [showBuyModal, setShowBuyModal] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [deleteAllError, setDeleteAllError] = useState('')
   const [name, setName] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [attachment, setAttachment] = useState(null)
@@ -802,6 +859,24 @@ useEffect(() => {
     setMessages(chat.messages)
   }
 
+  async function handleDeleteAllChats() {
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      const res = await fetch('https://consensusai-production-0e01.up.railway.app/api/chats/all', {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+      if (!res.ok) throw new Error((await res.json()).error || 'Delete failed')
+      setChats([])
+      setMessages([])
+      setActiveChatId(null)
+      setShowSettings(false)
+    } catch (err) {
+      setDeleteAllError(err.message)
+    }
+  }
+
   async function handleDeleteChat(chatId) {
     const session = await supabase.auth.getSession()
     const token = session.data.session?.access_token
@@ -875,7 +950,7 @@ useEffect(() => {
                 </div>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 10 }}>
+            <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
               <button onClick={() => { setShowSettings(false); setShowBuyModal(true) }}
                 style={{ flex: 1, padding: '11px', borderRadius: 8, background: AMBER, border: 'none', color: '#000', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
                 Buy Credits
@@ -884,6 +959,11 @@ useEffect(() => {
                 style={{ padding: '11px 18px', borderRadius: 8, background: 'none', border: `1px solid ${BORDER}`, color: MUTED, fontSize: 14, cursor: 'pointer' }}>
                 Sign out
               </button>
+            </div>
+            <div style={{ borderTop: `1px solid #2a1a1a`, paddingTop: 20 }}>
+              <div style={{ fontSize: 9, fontFamily: 'monospace', color: RED, letterSpacing: '0.15em', marginBottom: 12 }}>DANGER ZONE</div>
+              <HoldToDelete onConfirm={handleDeleteAllChats} />
+              {deleteAllError && <div style={{ marginTop: 8, fontSize: 11, color: RED, fontFamily: 'monospace' }}>{deleteAllError}</div>}
             </div>
           </div>
         </div>
@@ -935,7 +1015,7 @@ useEffect(() => {
               </button>
             </div>
 
-            <button onClick={() => setShowSettings(true)}
+            <button onClick={() => { setShowSettings(true); setDeleteAllError('') }}
               onMouseEnter={() => setKeyHovered(true)} onMouseLeave={() => setKeyHovered(false)}
               style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 8px', borderRadius: 7, background: keyHovered ? '#0f2a0f' : '#0a1a0a', border: `1px solid ${keyHovered ? '#2a5a2a' : '#1a3a1a'}`, color: GREEN, fontSize: 12, fontFamily: 'monospace', cursor: 'pointer', transition: 'all 0.15s' }}>
               <div style={{ width: 6, height: 6, borderRadius: '50%', background: GREEN, flexShrink: 0 }}/>

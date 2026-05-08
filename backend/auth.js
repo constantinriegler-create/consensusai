@@ -103,6 +103,32 @@ export async function deleteChat(userId, chatId) {
   if (chatError) throw new Error('Could not delete chat')
 }
 
+export async function deleteAllChats(userId) {
+  const { data: chats, error: fetchError } = await supabase
+    .from('chats')
+    .select('id')
+    .eq('user_id', userId)
+
+  if (fetchError) throw new Error('Could not fetch chats')
+
+  const chatIds = (chats || []).map(c => c.id)
+  if (chatIds.length === 0) return
+
+  const { error: msgError } = await supabase
+    .from('messages')
+    .delete()
+    .in('chat_id', chatIds)
+
+  if (msgError) throw new Error('Could not delete messages')
+
+  const { error: chatError } = await supabase
+    .from('chats')
+    .delete()
+    .eq('user_id', userId)
+
+  if (chatError) throw new Error('Could not delete chats')
+}
+
 export async function getUserChats(userId) {
   const { data, error } = await supabase
     .from('chats')
