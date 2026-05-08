@@ -8,9 +8,11 @@ import { searchWeb, formatSearchContext } from '../tavily.js'
 export async function router(prompt, attachment, onChunk, useWebSearch = false) {
   // Step 1: optionally fetch web context first
   let augmentedPrompt = prompt
+  let sources = []
   if (useWebSearch) {
     onChunk('Searching the web...')
     const searchData = await searchWeb(prompt)
+    sources = (searchData?.results || []).map(r => ({ title: r.title, url: r.url }))
     const webContext = formatSearchContext(searchData)
     augmentedPrompt = webContext ? `${prompt}${webContext}` : prompt
   }
@@ -27,6 +29,7 @@ export async function router(prompt, attachment, onChunk, useWebSearch = false) 
   onChunk('All models responded. Synthesizing...')
 
   const combined = await synthesize(prompt, results, onChunk)
+  if (sources.length) combined.sources = sources
   return {
     synthesis: combined,
     individual: {
@@ -34,6 +37,7 @@ export async function router(prompt, attachment, onChunk, useWebSearch = false) 
       claude: results[1],
       deepseek: results[2],
       grok: results[3],
-    }
+    },
+    sources,
   }
 }

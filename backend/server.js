@@ -203,7 +203,7 @@ app.post('/api/query', requireAuth, async (req, res) => {
       .then(chatId => saveMessages(chatId, prompt, result, 'standard'))
       .catch(e => console.error('Save error:', e))
 
-    res.write(`data: ${JSON.stringify({ type: 'done', answer: result.synthesis, individual: result.individual })}\n\n`)
+    res.write(`data: ${JSON.stringify({ type: 'done', answer: result.synthesis, individual: result.individual, sources: result.sources || [] })}\n\n`)
     res.end()
   } catch (err) {
     console.error('FULL ERROR:', err)
@@ -247,6 +247,7 @@ app.post('/api/query/premium', requireAuth, async (req, res) => {
       votes: result.votes,
       voteResponses: result.voteResponses,
       resolution: result.resolution,
+      sources: result.sources || [],
     })}\n\n`)
     res.end()
   } catch (err) {

@@ -71,9 +71,11 @@ function resolveWinner(counts) {
 export async function premiumRouter(prompt, attachment, onEvent, useWebSearch = false) {
   // Optional: fetch web context first, inject into all debate rounds
   let augmentedPrompt = prompt
+  let sources = []
   if (useWebSearch) {
     onEvent({ type: 'status', message: 'Searching the web...' })
     const searchData = await searchWeb(prompt)
+    sources = (searchData?.results || []).map(r => ({ title: r.title, url: r.url }))
     const webContext = formatSearchContext(searchData)
     augmentedPrompt = webContext ? `${prompt}${webContext}` : prompt
   }
@@ -166,6 +168,7 @@ export async function premiumRouter(prompt, attachment, onEvent, useWebSearch = 
     }
   }
 
+  if (sources.length) finalSynthesis.sources = sources
   return {
     synthesis: finalSynthesis,
     resolution,
@@ -178,6 +181,7 @@ export async function premiumRouter(prompt, attachment, onEvent, useWebSearch = 
       deepseek: finalAnswers[2],
       grok: finalAnswers[3],
     },
+    sources,
   }
 }
 

@@ -732,6 +732,7 @@ useEffect(() => {
             rounds: m.rounds,
             votes: m.votes,
             resolution: m.resolution,
+            sources: m.content?.sources || [],
             isPremium: chat.mode === 'premium',
           }))
         }))
@@ -835,6 +836,7 @@ useEffect(() => {
               rounds: parsed.rounds,
               votes: parsed.votes,
               resolution: parsed.resolution,
+              sources: parsed.sources || [],
             }
             const finalMessages = [...newMessages, assistantMsg]
             setMessages(finalMessages)
@@ -1136,6 +1138,28 @@ useEffect(() => {
                       <ConfidenceBar color={GREEN} points={msg.content.agreed} label="Consensus" />
                       <ConfidenceBar color={YELLOW} points={msg.content.partial} label="Partial agreement" />
                       <ConfidenceBar color={RED} points={msg.content.conflicted} label="Conflicting signals" />
+                    </div>
+                  )}
+
+                  {msg.sources?.length > 0 && (
+                    <div style={{ marginBottom: 16, padding: '16px 20px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10 }}>
+                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.12em', marginBottom: 12 }}>SOURCES</div>
+                      {msg.sources.map((src, idx) => (
+                        <div key={idx} style={{ display: 'flex', gap: 10, marginBottom: 10, alignItems: 'flex-start' }}>
+                          <span style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, flexShrink: 0, marginTop: 1 }}>[{idx + 1}]</span>
+                          <div>
+                            <a href={src.url} target="_blank" rel="noopener noreferrer"
+                              style={{ fontSize: 12, color: TEXT, textDecoration: 'none', display: 'block', lineHeight: 1.4 }}
+                              onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                              onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                              {src.title}
+                            </a>
+                            <span style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, display: 'block', marginTop: 2 }}>
+                              {(() => { try { return new URL(src.url).hostname.replace('www.', '') } catch { return src.url } })()}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
 
