@@ -1221,7 +1221,7 @@ useEffect(() => {
                 onKeyDown={handleKeyDown}
                 onPaste={e => { const file = e.clipboardData.files[0]; if (file) handleFile(file) }}
                 rows={1}
-                style={{ width: '100%', padding: '14px 90px 14px 80px', borderRadius: 10, border: `1px solid ${prompt ? (mode === 'premium' ? PURPLE : AMBER) + '40' : (mode === 'premium' ? PURPLE + '30' : BORDER)}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none' }}
+                style={{ width: '100%', padding: '14px 90px 14px 80px', borderRadius: 10, border: `1px solid ${prompt ? (mode === 'premium' ? PURPLE : AMBER) + '40' : (mode === 'premium' ? PURPLE + '30' : BORDER)}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none', caretColor: mode === 'premium' ? PURPLE : AMBER }}
               />
               <button onClick={() => setUseWebSearch(!useWebSearch)}
                 title={useWebSearch ? 'Web search ON' : 'Web search OFF'}
