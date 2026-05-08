@@ -353,6 +353,7 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
   const [promoCode, setPromoCode] = useState('')
   const [promoStatus, setPromoStatus] = useState(null)
   const [promoMessage, setPromoMessage] = useState('')
+  const isMobile = window.innerWidth <= 768
 
   async function handleBuy(packType) {
     setLoading(packType)
@@ -402,12 +403,12 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 16, padding: 36, width: 480, borderTop: `2px solid ${AMBER}` }}>
+      <div style={{ background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? 20 : 36, width: isMobile ? 'calc(100vw - 32px)' : 480, borderTop: `2px solid ${AMBER}`, maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 12 }}>BUY CREDITS</div>
-        <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 6, color: TEXT }}>Get more queries</h3>
-        <p style={{ color: MUTED, fontSize: 13, marginBottom: 28, lineHeight: 1.6 }}>Credits never expire. Use them whenever you need.</p>
+        <h3 style={{ fontSize: isMobile ? 17 : 20, fontWeight: 600, marginBottom: 6, color: TEXT }}>Get more queries</h3>
+        <p style={{ color: MUTED, fontSize: 13, marginBottom: isMobile ? 16 : 28, lineHeight: 1.6 }}>Credits never expire. Use them whenever you need.</p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12, marginBottom: 24 }}>
           <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 20 }}>
             <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.1em', marginBottom: 8 }}>STANDARD</div>
             <div style={{ fontSize: 28, fontWeight: 700, color: TEXT, marginBottom: 4 }}>$1.99</div>
@@ -666,6 +667,7 @@ export default function App() {
   const [liveRounds, setLiveRounds] = useState(null)
   const [mode, setMode] = useState('standard')
   const [showBuyModal, setShowBuyModal] = useState(false)
+  const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [deleteAllError, setDeleteAllError] = useState('')
   const [lightboxImage, setLightboxImage] = useState(null)
@@ -713,7 +715,9 @@ useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('payment') === 'success') {
       window.history.replaceState({}, '', '/')
-      setTimeout(() => loadUserData(user), 2000) // wait for webhook
+      setPaymentSuccess(true)
+      setTimeout(() => setPaymentSuccess(false), 5000)
+      setTimeout(() => loadUserData(user), 2000) // wait for webhook to process
     }
   }, [user])
 
@@ -944,7 +948,15 @@ useEffect(() => {
 
       <input type="file" accept="image/*,.pdf,.txt,.md" style={{ display: 'none' }} id="file-input" onChange={e => handleFile(e.target.files[0])} />
 
-      {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} user={user} />}
+      {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} user={user} onPurchase={() => loadUserData(user)} />}
+
+      {paymentSuccess && (
+        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 200, background: '#0f0f0f', border: `1px solid ${GREEN}`, borderRadius: 10, padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: `0 0 24px ${GREEN}20`, animation: 'msgSlideIn 300ms ease-out both' }}>
+          <span style={{ color: GREEN, fontSize: 16 }}>✓</span>
+          <span style={{ fontSize: 13, fontFamily: 'monospace', color: TEXT }}>Credits added to your account!</span>
+          <button onClick={() => setPaymentSuccess(false)} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 14, padding: 0, marginLeft: 4 }}>✕</button>
+        </div>
+      )}
 
       {lightboxImage && <Lightbox src={lightboxImage} onClose={() => setLightboxImage(null)} />}
 

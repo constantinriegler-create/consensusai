@@ -28,6 +28,20 @@ export async function getCredits(userId) {
   return data
 }
 
+export async function addCredits(userId, type, amount) {
+  const col = type === 'premium' ? 'premium_credits' : 'standard_credits'
+  const credits = await getCredits(userId)
+  const current = credits[col] || 0
+
+  const { error } = await supabase
+    .from('credits')
+    .update({ [col]: current + amount, updated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+
+  if (error) throw new Error('Could not add credits')
+  return current + amount
+}
+
 export async function deductCredit(userId, type) {
   const col = type === 'premium' ? 'premium_credits' : 'standard_credits'
   const credits = await getCredits(userId)

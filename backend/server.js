@@ -3,7 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import { router } from './orchestrator/router.js'
 import { premiumRouter } from './orchestrator/premium.js'
-import { requireAuth, getCredits, deductCredit, saveChat, saveMessages, getUserChats, deleteChat, deleteAllChats } from './auth.js'
+import { requireAuth, getCredits, addCredits, deductCredit, saveChat, saveMessages, getUserChats, deleteChat, deleteAllChats } from './auth.js'
 import { stripe, PACKS } from './stripe.js'
 import supabase from './supabase.js'
 
@@ -39,17 +39,7 @@ app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), async
       return res.status(400).json({ error: 'Invalid metadata' })
     }
 
-    const col = packType === 'premium' ? 'premium_credits' : 'standard_credits'
-    const { data: credits } = await supabase
-      .from('credits')
-      .select(col)
-      .eq('user_id', userId)
-      .single()
-
-    await supabase
-      .from('credits')
-      .update({ [col]: (credits?.[col] || 0) + pack.credits })
-      .eq('user_id', userId)
+    await addCredits(userId, packType, pack.credits)
 
     await supabase
       .from('payments')
