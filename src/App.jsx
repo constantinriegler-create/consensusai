@@ -1580,83 +1580,87 @@ export default function App() {
                   caretColor: mode === 'premium' ? PURPLE : AMBER,
                 }}
               />
+<button
+  onClick={() => setUseWebSearch(!useWebSearch)}
+  title={useWebSearch ? 'Web search ON' : 'Web search OFF'}
+  style={{
+    position: 'absolute',
+    left: 10,
+    bottom: isMobile ? 14 : 10,
+    width: 48,
+    height: 36,
+    padding: 0,
+    background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : `${AMBER}20`) : CARD,
+    border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`,
+    borderRadius: 7,
+    cursor: 'pointer',
+    color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED,
+    fontSize: 10,
+    fontFamily: 'monospace',
+    fontWeight: 600,
+    letterSpacing: '0.04em',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+    lineHeight: 1,
+    boxSizing: 'border-box',
+    transition: 'all 0.15s',
+  }}
+>
+  WEB
+</button>
 
-              <button
-                onClick={() => setUseWebSearch(!useWebSearch)}
-                title={useWebSearch ? 'Web search ON' : 'Web search OFF'}
-                style={{
-                  position: 'absolute',
-                  left: 10,
-                  bottom: isMobile ? 14 : 10,
-                  background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : `${AMBER}20`) : CARD,
-                  border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`,
-                  borderRadius: 7,
-                  height: 36,
-                  padding: isMobile ? '0 10px' : '0 12px',
-                  cursor: 'pointer',
-                  color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED,
-                  fontSize: 10,
-                  fontFamily: 'monospace',
-                  fontWeight: 600,
-                  letterSpacing: '0.08em',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.15s',
-                }}
-              >
-                WEB
-              </button>
+<div style={{ position: 'absolute', right: 10, bottom: isMobile ? 14 : 10, display: 'flex', gap: 6 }}>
+  <button
+    onClick={() => document.getElementById('file-input').click()}
+    style={{
+      background: CARD,
+      border: `1px solid ${BORDER}`,
+      borderRadius: 7,
+      width: 48,
+      height: 36,
+      cursor: 'pointer',
+      color: MUTED,
+      fontSize: 16,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+  >
+    ⊕
+  </button>
 
-              <div style={{ position: 'absolute', right: 10, bottom: isMobile ? 14 : 10, display: 'flex', gap: 6 }}>
-                <button
-                  onClick={() => document.getElementById('file-input').click()}
-                  style={{
-                    background: CARD,
-                    border: `1px solid ${BORDER}`,
-                    borderRadius: 7,
-                    width: 36,
-                    height: 36,
-                    cursor: 'pointer',
-                    color: MUTED,
-                    fontSize: 16,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  ⊕
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={loading}
-                  style={{
-                    background: prompt && !loading ? (mode === 'premium' ? PURPLE : AMBER) : MUTED2,
-                    border: 'none',
-                    borderRadius: 7,
-                    width: 36,
-                    height: 36,
-                    cursor: !loading && prompt ? 'pointer' : 'default',
-                    color: prompt ? '#fff' : '#555',
-                    fontSize: 16,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'background 0.2s',
-                    fontWeight: 700,
-                  }}
-                >
-                  ↑
-                </button>
-              </div>
-            </div>
-          </div>
+  <button
+    onClick={handleSubmit}
+    disabled={loading}
+    style={{
+      background: prompt && !loading ? (mode === 'premium' ? PURPLE : AMBER) : MUTED2,
+      border: 'none',
+      borderRadius: 7,
+      width: 36,
+      height: 36,
+      cursor: !loading && prompt ? 'pointer' : 'default',
+      color: prompt ? '#fff' : '#555',
+      fontSize: 16,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transition: 'background 0.2s',
+      fontWeight: 700,
+    }}
+  >
+    ↑
+  </button>
+</div>
+</div>
+</div>
 
-          <div style={{ textAlign: 'center', fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 8, letterSpacing: '0.05em' }}>
-            {isMobile ? 'TAP ↑ TO SEND · WEB FOR LIVE SEARCH' : 'ENTER TO SEND · PASTE OR CLICK ⊕ TO ATTACH · WEB FOR LIVE SEARCH'}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+<div style={{ textAlign: 'center', fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 8, letterSpacing: '0.05em' }}>
+  {isMobile ? 'TAP ↑ TO SEND · WEB FOR LIVE SEARCH' : 'ENTER TO SEND · PASTE OR CLICK ⊕ TO ATTACH · WEB FOR LIVE SEARCH'}
+</div>
+</div>
+</div>
+</div>
+)
 }
