@@ -295,13 +295,13 @@ function ModelRow({ label, color }) {
 function ModeToggle({ mode, setMode, disabled }) {
   return (
     <div style={{ display: 'inline-flex', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, padding: 2, fontSize: 11, fontFamily: 'monospace' }}>
-      <button onClick={() => !disabled && setMode('standard')} disabled={disabled}
+      <button onClick={() => !disabled && setMode('standard')} disabled={disabled} className="mode-btn"
         style={{ padding: '5px 12px', borderRadius: 5, border: 'none', background: mode === 'standard' ? AMBER : 'transparent', color: mode === 'standard' ? '#000' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'all 0.15s' }}>
         STANDARD
       </button>
-      <button onClick={() => !disabled && setMode('premium')} disabled={disabled}
+      <button onClick={() => !disabled && setMode('premium')} disabled={disabled} className="mode-btn"
         style={{ padding: '5px 12px', borderRadius: 5, border: 'none', background: mode === 'premium' ? PURPLE : 'transparent', color: mode === 'premium' ? '#fff' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 5 }}>
-        ◆ PREMIUM
+        <span className="premium-diamond">◆ </span>PREMIUM
       </button>
     </div>
   )
@@ -1211,6 +1211,8 @@ useEffect(() => {
           textarea::placeholder { color: #2a2a2a !important; }
           @media (max-width: 768px) {
             .source-link { word-break: break-all !important; }
+            .mode-btn { padding: 4px 10px !important; font-size: 10px !important; }
+            .premium-diamond { display: none !important; }
           }
         `}</style>
 
