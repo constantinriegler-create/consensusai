@@ -635,7 +635,7 @@ function HoldToDelete({ onConfirm }) {
       onPointerLeave={cancel}
       style={{ position: 'relative', overflow: 'hidden', width: '100%', padding: '11px', borderRadius: 8, background: 'transparent', border: `1px solid ${RED}`, color: RED, fontSize: 13, cursor: 'pointer', fontFamily: 'monospace', letterSpacing: '0.04em', textAlign: 'center', userSelect: 'none' }}>
       <div style={{ position: 'absolute', inset: 0, background: RED, width: `${fill}%`, transition: holding ? 'none' : 'width 0.15s', zIndex: 0 }} />
-      <span style={{ position: 'relative', zIndex: 1, color: fill > 50 ? '#000' : RED, transition: 'color 0.1s' }}>{label}</span>
+      <span style={{ position: 'relative', zIndex: 1, color: fill > 50 ? '#fff' : RED, transition: 'color 0.1s' }}>{label}</span>
     </button>
   )
 }
