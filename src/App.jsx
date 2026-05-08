@@ -45,6 +45,7 @@ function FormattedText({ text }) {
     .replace(/\\pm/g, '±').replace(/\\neq/g, '≠').replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
     .replace(/\\sqrt/g, '√').replace(/\\leq/g, '≤').replace(/\\geq/g, '≥')
     .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
+    .replace(/\{,\}/g, ',')
     .replace(/\$([^$]+)\$/g, (match, inner) => '$' + inner.replace(/\\times/g, '×').replace(/\\sqrt/g, '√') + '$')
   cleaned = cleaned.replace(/(?<![a-zA-Z0-9])\$(?!\$)(?![^$]*\$)/g, '')
   const parts = cleaned.split(/(```[\s\S]*?```|\$\$[\s\S]*?\$\$|\$[^$\n]+\$)/g)
