@@ -1179,6 +1179,27 @@ useEffect(() => {
 
         <div style={{ padding: '16px 32px 20px', borderTop: `1px solid ${BORDER2}`, background: BG }}>
           <div style={{ maxWidth: 720, margin: '0 auto' }}>
+            {attachment && (
+              attachment.type?.startsWith('image/') ? (
+                <div style={{ marginBottom: 10, display: 'inline-flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+                  <div style={{ position: 'relative', display: 'inline-block' }}>
+                    <img
+                      src={`data:${attachment.type};base64,${attachment.data}`}
+                      onClick={() => setLightboxImage(`data:${attachment.type};base64,${attachment.data}`)}
+                      style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, border: `1px solid ${BORDER}`, cursor: 'pointer', display: 'block' }}
+                    />
+                    <button onClick={() => setAttachment(null)} style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: 'rgba(0,0,0,0.75)', border: 'none', color: '#fff', fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, lineHeight: 1 }}>✕</button>
+                  </div>
+                  <span style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, marginTop: 4, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{attachment.name}</span>
+                </div>
+              ) : (
+                <div style={{ marginBottom: 10, padding: '6px 12px', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: AMBER }}>+</span>
+                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#aaa', flex: 1 }}>{attachment.name}</span>
+                  <button onClick={() => setAttachment(null)} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 14, padding: 0 }}>✕</button>
+                </div>
+              )
+            )}
             <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <ModeToggle mode={mode} setMode={setMode} disabled={loading} />
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2 }}>
@@ -1192,27 +1213,6 @@ useEffect(() => {
                 )}
               </div>
             </div>
-            {attachment && (
-              attachment.type?.startsWith('image/') ? (
-                <div style={{ marginBottom: 8, display: 'inline-flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
-                  <div style={{ position: 'relative', display: 'inline-block' }}>
-                    <img
-                      src={`data:${attachment.type};base64,${attachment.data}`}
-                      onClick={() => setLightboxImage(`data:${attachment.type};base64,${attachment.data}`)}
-                      style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, border: `1px solid ${BORDER}`, cursor: 'pointer', display: 'block' }}
-                    />
-                    <button onClick={() => setAttachment(null)} style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: 'rgba(0,0,0,0.75)', border: 'none', color: '#fff', fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, lineHeight: 1 }}>✕</button>
-                  </div>
-                  <span style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, marginTop: 4, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{attachment.name}</span>
-                </div>
-              ) : (
-                <div style={{ marginBottom: 8, padding: '6px 12px', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: AMBER }}>+</span>
-                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#aaa', flex: 1 }}>{attachment.name}</span>
-                  <button onClick={() => setAttachment(null)} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 14, padding: 0 }}>✕</button>
-                </div>
-              )
-            )}
 <div style={{ position: 'relative' }}>
               <textarea
                 placeholder={mode === 'premium' ? 'Ask anything — models will debate it...' : 'Ask anything...'}
