@@ -1264,7 +1264,7 @@ useEffect(() => {
             </div>
             <div style={{ position: 'relative' }}>
               <textarea
-                placeholder={mode === 'premium' ? 'Ask anything — models will debate it...' : 'Ask anything...'}
+                placeholder={mode === 'premium' ? 'Ask anything — models will debate' : 'Ask anything...'}
                 value={prompt}
                 onChange={e => setPrompt(e.target.value)}
                 onKeyDown={handleKeyDown}
