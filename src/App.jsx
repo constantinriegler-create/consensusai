@@ -1008,7 +1008,7 @@ useEffect(() => {
               </div>
               <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 16, padding: 4, lineHeight: 1 }}>✕</button>
             </div>
-            <button onClick={newChat} style={{ width: '100%', padding: '8px 12px', borderRadius: 7, background: AMBER_DIM, border: `1px solid ${AMBER}30`, color: AMBER, fontSize: 12, cursor: 'pointer', textAlign: 'left', fontWeight: 500 }}>
+            <button onClick={() => { newChat(); if (isMobile) setSidebarOpen(false) }} style={{ width: '100%', padding: '8px 12px', borderRadius: 7, background: AMBER_DIM, border: `1px solid ${AMBER}30`, color: AMBER, fontSize: 12, cursor: 'pointer', textAlign: 'left', fontWeight: 500 }}>
               + New chat
             </button>
           </div>
