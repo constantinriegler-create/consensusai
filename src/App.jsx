@@ -669,6 +669,13 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false)
   const [deleteAllError, setDeleteAllError] = useState('')
   const [lightboxImage, setLightboxImage] = useState(null)
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    const handler = e => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
   const [name, setName] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [attachment, setAttachment] = useState(null)
@@ -943,7 +950,7 @@ useEffect(() => {
 
       {showSettings && (
         <div onClick={() => setShowSettings(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ position: 'relative', background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 16, padding: 36, width: 440, borderTop: `2px solid ${AMBER}` }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ position: 'relative', background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? 20 : 36, width: isMobile ? 'calc(100vw - 32px)' : 440, borderTop: `2px solid ${AMBER}` }}>
             <button onClick={() => setShowSettings(false)}
               onMouseEnter={(e) => { e.currentTarget.style.color = TEXT; e.currentTarget.style.background = BORDER }}
               onMouseLeave={(e) => { e.currentTarget.style.color = MUTED; e.currentTarget.style.background = 'transparent' }}
@@ -988,8 +995,11 @@ useEffect(() => {
         </div>
       )}
 
+      {sidebarOpen && isMobile && (
+        <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 49 }} />
+      )}
       {sidebarOpen && (
-        <div style={{ width: 240, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+        <div style={isMobile ? { position: 'fixed', top: 0, left: 0, height: '100vh', width: '85vw', maxWidth: 320, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', zIndex: 50, overflowY: 'auto' } : { width: 240, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
           <div style={{ padding: '20px 16px 16px', borderBottom: `1px solid ${BORDER2}` }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
@@ -1007,7 +1017,7 @@ useEffect(() => {
             <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.12em', padding: '0 8px', marginBottom: 6 }}>SESSIONS</div>
             {chats.map(chat => (
               <ChatItem key={chat.id} chat={chat} active={chat.id === activeChatId}
-                onSelect={() => switchChat(chat)}
+                onSelect={() => { switchChat(chat); if (isMobile) setSidebarOpen(false) }}
                 onRename={newTitle => setChats(prev => prev.map(c => c.id === chat.id ? { ...c, title: newTitle } : c))}
                 onDelete={() => handleDeleteChat(chat.id)} />
             ))}
@@ -1062,9 +1072,9 @@ useEffect(() => {
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '48px 0' }}>
           {messages.length === 0 && !loading && (
-            <div style={{ maxWidth: 600, margin: '0 auto', padding: '0 32px' }}>
+            <div style={{ maxWidth: 600, margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px' }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>CONSENSUSAI / TERMINAL</div>
-              <div style={{ fontSize: 36, fontWeight: 700, color: TEXT, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 12 }}>
+              <div style={{ fontSize: isMobile ? 26 : 36, fontWeight: 700, color: TEXT, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 12 }}>
                 {getGreeting()}{name ? `, ${name}` : ''}.
               </div>
               <div style={{ fontSize: 15, color: MUTED, marginBottom: mode === 'premium' ? 16 : 48, lineHeight: 1.7 }}>
@@ -1080,7 +1090,7 @@ useEffect(() => {
                   <span>PREMIUM MODE — DEEPER REASONING · BLIND VOTING · HIGHEST QUALITY ANSWER</span>
                 </div>
               )}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10, marginBottom: 24 }}>
                 {FEATURE_DETAILS.map((f, i) => <FeatureCard key={i} feature={f} />)}
               </div>
               <div style={{ fontSize: 11, color: MUTED2, fontFamily: 'monospace', marginBottom: 32, letterSpacing: '0.06em' }}>CREATED BY CONSTANTIN RIEGLER</div>
@@ -1088,7 +1098,7 @@ useEffect(() => {
           )}
 
           {messages.map((msg, i) => (
-            <div key={i} style={{ maxWidth: 720, margin: '0 auto 48px', padding: '0 32px' }}>
+            <div key={i} style={{ maxWidth: 720, margin: '0 auto 48px', padding: isMobile ? '0 16px' : '0 32px' }}>
               {msg.role === 'user' ? (
                 <div style={{ marginBottom: 8 }}>
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.1em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1133,7 +1143,7 @@ useEffect(() => {
                   {msg.isPremium && msg.votes && <VoteTally votes={msg.votes} counts={msg.resolution?.counts} resolution={msg.resolution} />}
 
                   {!msg.isPremium && (
-                    <div style={{ marginBottom: 16, padding: '20px 24px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10 }}>
+                    <div style={{ marginBottom: 16, padding: isMobile ? '14px 16px' : '20px 24px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10 }}>
                       <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.12em', marginBottom: 18 }}>SIGNAL ANALYSIS</div>
                       <ConfidenceBar color={GREEN} points={msg.content.agreed} label="Consensus" />
                       <ConfidenceBar color={YELLOW} points={msg.content.partial} label="Partial agreement" />
@@ -1142,13 +1152,13 @@ useEffect(() => {
                   )}
 
                   {msg.sources?.length > 0 && (
-                    <div style={{ marginBottom: 16, padding: '16px 20px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10 }}>
+                    <div style={{ marginBottom: 16, padding: isMobile ? '14px 16px' : '16px 20px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10 }}>
                       <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.12em', marginBottom: 12 }}>SOURCES</div>
                       {msg.sources.map((src, idx) => (
                         <div key={idx} style={{ display: 'flex', gap: 10, marginBottom: 10, alignItems: 'flex-start' }}>
                           <span style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, flexShrink: 0, marginTop: 1 }}>[{idx + 1}]</span>
                           <div>
-                            <a href={src.url} target="_blank" rel="noopener noreferrer"
+                            <a href={src.url} target="_blank" rel="noopener noreferrer" className="source-link"
                               style={{ fontSize: 12, color: TEXT, textDecoration: 'none', display: 'block', lineHeight: 1.4 }}
                               onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
                               onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
@@ -1171,7 +1181,7 @@ useEffect(() => {
           ))}
 
           {loading && (
-            <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 32px' }}>
+            <div style={{ maxWidth: 720, margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px' }}>
               {mode === 'premium' && <PremiumProgress currentStatus={statusText} rounds={liveRounds} />}
               {mode === 'standard' && statusText && !streamingText && (
                 <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 16 }}>{statusText.toUpperCase()}</div>
@@ -1199,9 +1209,12 @@ useEffect(() => {
         <style>{`
           @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
           textarea::placeholder { color: #2a2a2a !important; }
+          @media (max-width: 768px) {
+            .source-link { word-break: break-all !important; }
+          }
         `}</style>
 
-        <div style={{ padding: '16px 32px 20px', borderTop: `1px solid ${BORDER2}`, background: BG }}>
+        <div style={{ padding: isMobile ? '12px 16px 16px' : '16px 32px 20px', borderTop: `1px solid ${BORDER2}`, background: BG }}>
           <div style={{ maxWidth: 720, margin: '0 auto' }}>
             {attachment && (
               attachment.type?.startsWith('image/') ? (
@@ -1224,7 +1237,7 @@ useEffect(() => {
                 </div>
               )
             )}
-            <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ marginBottom: 10, display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: isMobile ? 6 : 0 }}>
               <ModeToggle mode={mode} setMode={setMode} disabled={loading} />
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2 }}>
                 {mode === 'standard'
@@ -1237,7 +1250,14 @@ useEffect(() => {
                 )}
               </div>
             </div>
-<div style={{ position: 'relative' }}>
+{isMobile && (
+              <div style={{ marginBottom: 6 }}>
+                <button onClick={() => setUseWebSearch(!useWebSearch)}
+                  title={useWebSearch ? 'Web search ON' : 'Web search OFF'}
+                  style={{ background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : `${AMBER}20`) : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 34, padding: '0 12px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'inline-flex', alignItems: 'center', transition: 'all 0.15s' }}>WEB</button>
+              </div>
+            )}
+            <div style={{ position: 'relative' }}>
               <textarea
                 placeholder={mode === 'premium' ? 'Ask anything — models will debate it...' : 'Ask anything...'}
                 value={prompt}
@@ -1245,35 +1265,18 @@ useEffect(() => {
                 onKeyDown={handleKeyDown}
                 onPaste={e => { const file = e.clipboardData.files[0]; if (file) handleFile(file) }}
                 rows={1}
-                style={{ width: '100%', padding: '14px 90px 14px 80px', borderRadius: 10, border: `1px solid ${prompt ? (mode === 'premium' ? PURPLE : AMBER) + '40' : (mode === 'premium' ? PURPLE + '30' : BORDER)}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none', caretColor: mode === 'premium' ? PURPLE : AMBER }}
+                style={{ width: '100%', padding: isMobile ? '12px 92px 12px 14px' : '14px 90px 14px 80px', borderRadius: 10, border: `1px solid ${prompt ? (mode === 'premium' ? PURPLE : AMBER) + '40' : (mode === 'premium' ? PURPLE + '30' : BORDER)}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none', caretColor: mode === 'premium' ? PURPLE : AMBER }}
               />
-              <button onClick={() => setUseWebSearch(!useWebSearch)}
-                title={useWebSearch ? 'Web search ON' : 'Web search OFF'}
-                style={{
-                  position: 'absolute',
-                  left: 10,
-                  bottom: 10,
-                  background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : `${AMBER}20`) : CARD,
-                  border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`,
-                  borderRadius: 7,
-                  height: 36,
-                  padding: '0 12px',
-                  cursor: 'pointer',
-                  color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED,
-                  fontSize: 10,
-                  fontFamily: 'monospace',
-                  fontWeight: 600,
-                  letterSpacing: '0.08em',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.15s',
-                }}>WEB</button>
-              <div style={{ position: 'absolute', right: 10, bottom: 10, display: 'flex', gap: 6 }}>
+              {!isMobile && (
+                <button onClick={() => setUseWebSearch(!useWebSearch)}
+                  title={useWebSearch ? 'Web search ON' : 'Web search OFF'}
+                  style={{ position: 'absolute', left: 10, bottom: 10, background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : `${AMBER}20`) : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 36, padding: '0 12px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>WEB</button>
+              )}
+              <div style={{ position: 'absolute', right: 10, bottom: isMobile ? 8 : 10, display: 'flex', gap: 6 }}>
                 <button onClick={() => document.getElementById('file-input').click()}
-                  style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, width: 36, height: 36, cursor: 'pointer', color: MUTED, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⊕</button>
+                  style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, width: isMobile ? 40 : 36, height: isMobile ? 40 : 36, cursor: 'pointer', color: MUTED, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⊕</button>
                 <button onClick={handleSubmit} disabled={loading}
-                  style={{ background: prompt && !loading ? (mode === 'premium' ? PURPLE : AMBER) : MUTED2, border: 'none', borderRadius: 7, width: 36, height: 36, cursor: !loading && prompt ? 'pointer' : 'default', color: prompt ? '#fff' : '#555', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', fontWeight: 700 }}>↑</button>
+                  style={{ background: prompt && !loading ? (mode === 'premium' ? PURPLE : AMBER) : MUTED2, border: 'none', borderRadius: 7, width: isMobile ? 40 : 36, height: isMobile ? 40 : 36, cursor: !loading && prompt ? 'pointer' : 'default', color: prompt ? '#fff' : '#555', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', fontWeight: 700 }}>↑</button>
               </div>
             </div>
           </div>
