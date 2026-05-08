@@ -1,8 +1,9 @@
-import 'dotenv/config';
+import 'dotenv/config'
 
-const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
-const TAVILY_URL = 'https://api.tavily.com/search';
+const TAVILY_API_KEY = process.env.TAVILY_API_KEY
+const TAVILY_URL = 'https://api.tavily.com/search'
 
+console.log('[tavily] startup check:', TAVILY_API_KEY ? `key present (${TAVILY_API_KEY.slice(0,10)}...)` : 'KEY MISSING')
 export async function searchWeb(query, { maxResults = 5, searchDepth = 'basic' } = {}) {
   if (!TAVILY_API_KEY) {
     console.warn('[tavily] TAVILY_API_KEY not set — skipping web search');
