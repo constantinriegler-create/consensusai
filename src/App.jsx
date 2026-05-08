@@ -418,6 +418,7 @@ function FeatureCard({ feature, isMobile = false }) {
 }
 
 function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
+  const isMobile = useIsMobile()
   const [editing, setEditing] = useState(false)
   const [val, setVal] = useState(chat.title)
 
@@ -438,7 +439,17 @@ function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
             if (e.key === 'Enter') save()
             if (e.key === 'Escape') setEditing(false)
           }}
-          style={{ width: '100%', background: '#1a1a1a', border: '1px solid #333', borderRadius: 5, color: '#e8e6e0', fontSize: 16, padding: '5px 8px', outline: 'none', boxSizing: 'border-box' }}
+          style={{
+            width: '100%',
+            background: '#1a1a1a',
+            border: '1px solid #333',
+            borderRadius: 5,
+            color: '#e8e6e0',
+            fontSize: isMobile ? 16 : 12,
+            padding: '5px 8px',
+            outline: 'none',
+            boxSizing: 'border-box',
+          }}
         />
       </div>
     )
@@ -452,7 +463,7 @@ function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
       }}
       onClick={onSelect}
       style={{
-        padding: '9px 10px',
+        padding: isMobile ? '9px 10px' : '8px 10px',
         borderRadius: 7,
         cursor: 'pointer',
         marginBottom: 2,
@@ -466,7 +477,7 @@ function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        minHeight: 34,
+        minHeight: isMobile ? 34 : undefined,
       }}
     >
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -476,8 +487,39 @@ function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
 
       {active && (
         <span style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
-          <button onClick={e => { e.stopPropagation(); setVal(chat.title); setEditing(true) }} style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', fontSize: 12, padding: '0 4px' }}>✎</button>
-          <button onClick={e => { e.stopPropagation(); if (window.confirm('Delete this chat? This cannot be undone.')) onDelete() }} style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', fontSize: 12, padding: '0 4px' }}>🗑</button>
+          <button
+            onClick={e => {
+              e.stopPropagation()
+              setVal(chat.title)
+              setEditing(true)
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#444',
+              cursor: 'pointer',
+              fontSize: 11,
+              padding: isMobile ? '0 4px' : '0 2px',
+            }}
+          >
+            ✎
+          </button>
+          <button
+            onClick={e => {
+              e.stopPropagation()
+              if (window.confirm('Delete this chat? This cannot be undone.')) onDelete()
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#444',
+              cursor: 'pointer',
+              fontSize: 11,
+              padding: isMobile ? '0 4px' : '0 2px',
+            }}
+          >
+            🗑
+          </button>
         </span>
       )}
     </div>
@@ -1520,16 +1562,92 @@ export default function App() {
                   if (file) handleFile(file)
                 }}
                 rows={1}
-                style={{ width: '100%', minHeight: 64, maxHeight: 160, padding: isMobile ? '14px 88px 14px 64px' : '14px 90px 14px 80px', borderRadius: 10, border: `1px solid ${prompt ? (mode === 'premium' ? PURPLE : AMBER) + '40' : (mode === 'premium' ? PURPLE + '30' : BORDER)}`, background: SURFACE, color: TEXT, fontSize: 16, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none', caretColor: mode === 'premium' ? PURPLE : AMBER }}
+                style={{
+                  width: '100%',
+                  minHeight: isMobile ? 64 : undefined,
+                  maxHeight: isMobile ? 160 : undefined,
+                  padding: isMobile ? '14px 88px 14px 64px' : '14px 90px 14px 80px',
+                  borderRadius: 10,
+                  border: `1px solid ${prompt ? (mode === 'premium' ? PURPLE : AMBER) + '40' : (mode === 'premium' ? PURPLE + '30' : BORDER)}`,
+                  background: SURFACE,
+                  color: TEXT,
+                  fontSize: isMobile ? 16 : 15,
+                  resize: 'none',
+                  lineHeight: 1.6,
+                  boxSizing: 'border-box',
+                  transition: 'border-color 0.2s',
+                  outline: 'none',
+                  caretColor: mode === 'premium' ? PURPLE : AMBER,
+                }}
               />
 
-              <button onClick={() => setUseWebSearch(!useWebSearch)} title={useWebSearch ? 'Web search ON' : 'Web search OFF'} style={{ position: 'absolute', left: 10, bottom: 14, background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : `${AMBER}20`) : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 36, padding: isMobile ? '0 10px' : '0 12px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>
+              <button
+                onClick={() => setUseWebSearch(!useWebSearch)}
+                title={useWebSearch ? 'Web search ON' : 'Web search OFF'}
+                style={{
+                  position: 'absolute',
+                  left: 10,
+                  bottom: isMobile ? 14 : 10,
+                  background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : `${AMBER}20`) : CARD,
+                  border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`,
+                  borderRadius: 7,
+                  height: 36,
+                  padding: isMobile ? '0 10px' : '0 12px',
+                  cursor: 'pointer',
+                  color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED,
+                  fontSize: 10,
+                  fontFamily: 'monospace',
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.15s',
+                }}
+              >
                 WEB
               </button>
 
-              <div style={{ position: 'absolute', right: 10, bottom: 14, display: 'flex', gap: 6 }}>
-                <button onClick={() => document.getElementById('file-input').click()} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, width: 36, height: 36, cursor: 'pointer', color: MUTED, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⊕</button>
-                <button onClick={handleSubmit} disabled={loading} style={{ background: prompt && !loading ? (mode === 'premium' ? PURPLE : AMBER) : MUTED2, border: 'none', borderRadius: 7, width: 36, height: 36, cursor: !loading && prompt ? 'pointer' : 'default', color: prompt ? '#fff' : '#555', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', fontWeight: 700 }}>↑</button>
+              <div style={{ position: 'absolute', right: 10, bottom: isMobile ? 14 : 10, display: 'flex', gap: 6 }}>
+                <button
+                  onClick={() => document.getElementById('file-input').click()}
+                  style={{
+                    background: CARD,
+                    border: `1px solid ${BORDER}`,
+                    borderRadius: 7,
+                    width: 36,
+                    height: 36,
+                    cursor: 'pointer',
+                    color: MUTED,
+                    fontSize: 16,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  ⊕
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  style={{
+                    background: prompt && !loading ? (mode === 'premium' ? PURPLE : AMBER) : MUTED2,
+                    border: 'none',
+                    borderRadius: 7,
+                    width: 36,
+                    height: 36,
+                    cursor: !loading && prompt ? 'pointer' : 'default',
+                    color: prompt ? '#fff' : '#555',
+                    fontSize: 16,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'background 0.2s',
+                    fontWeight: 700,
+                  }}
+                >
+                  ↑
+                </button>
               </div>
             </div>
           </div>
