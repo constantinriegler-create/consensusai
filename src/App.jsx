@@ -1237,26 +1237,28 @@ useEffect(() => {
                 </div>
               )
             )}
-            <div style={{ marginBottom: 10, display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: isMobile ? 6 : 0 }}>
-              <ModeToggle mode={mode} setMode={setMode} disabled={loading} />
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2 }}>
-                {mode === 'standard'
-                  ? `${credits.standard_credits} standard ${credits.standard_credits === 1 ? 'query' : 'queries'} left`
-                  : `${credits.premium_credits} premium ${credits.premium_credits === 1 ? 'query' : 'queries'} left`}
-                {(mode === 'standard' ? credits.standard_credits : credits.premium_credits) === 0 && (
-                  <button onClick={() => setShowBuyModal(true)} style={{ marginLeft: 8, background: 'none', border: 'none', color: AMBER, fontSize: 10, fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}>
-                    buy more
-                  </button>
-                )}
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <ModeToggle mode={mode} setMode={setMode} disabled={loading} />
+                  {isMobile && (
+                    <button onClick={() => setUseWebSearch(!useWebSearch)}
+                      title={useWebSearch ? 'Web search ON' : 'Web search OFF'}
+                      style={{ background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : `${AMBER}20`) : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 32, padding: '0 10px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'inline-flex', alignItems: 'center', transition: 'all 0.15s', flexShrink: 0 }}>WEB</button>
+                  )}
+                </div>
+                <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, textAlign: 'right' }}>
+                  {mode === 'standard'
+                    ? `${credits.standard_credits} standard ${credits.standard_credits === 1 ? 'query' : 'queries'} left`
+                    : `${credits.premium_credits} premium ${credits.premium_credits === 1 ? 'query' : 'queries'} left`}
+                  {(mode === 'standard' ? credits.standard_credits : credits.premium_credits) === 0 && (
+                    <button onClick={() => setShowBuyModal(true)} style={{ marginLeft: 8, background: 'none', border: 'none', color: AMBER, fontSize: 10, fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}>
+                      buy more
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-{isMobile && (
-              <div style={{ marginBottom: 6 }}>
-                <button onClick={() => setUseWebSearch(!useWebSearch)}
-                  title={useWebSearch ? 'Web search ON' : 'Web search OFF'}
-                  style={{ background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : `${AMBER}20`) : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 34, padding: '0 12px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'inline-flex', alignItems: 'center', transition: 'all 0.15s' }}>WEB</button>
-              </div>
-            )}
             <div style={{ position: 'relative' }}>
               <textarea
                 placeholder={mode === 'premium' ? 'Ask anything — models will debate it...' : 'Ask anything...'}
