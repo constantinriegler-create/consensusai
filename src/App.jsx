@@ -924,11 +924,11 @@ useEffect(() => {
   }
 
   function exportPDF(msg, question) {
-    const content = `ConsensusAI Export\n${'='.repeat(50)}\n\nMode: ${msg.isPremium ? 'Premium' : 'Standard'}\nQuestion: ${question}\n\nAnswer:\n${msg.content.summary}\n\nGPT-4o:\n${msg.individual?.openai || ''}\n\nClaude:\n${msg.individual?.claude || ''}\n\nDeepSeek:\n${msg.individual?.deepseek || ''}\n\nGrok:\n${msg.individual?.grok || ''}`
+    const content = `VELE AI Export\n${'='.repeat(50)}\n\nMode: ${msg.isPremium ? 'Premium' : 'Standard'}\nQuestion: ${question}\n\nAnswer:\n${msg.content.summary}\n\nGPT-4o:\n${msg.individual?.openai || ''}\n\nClaude:\n${msg.individual?.claude || ''}\n\nDeepSeek:\n${msg.individual?.deepseek || ''}\n\nGrok:\n${msg.individual?.grok || ''}`
     const blob = new Blob([content], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url; a.download = `consensusai-${Date.now()}.txt`; a.click()
+    a.href = url; a.download = `vele-ai-${Date.now()}.txt`; a.click()
     URL.revokeObjectURL(url)
   }
 
@@ -1015,7 +1015,7 @@ useEffect(() => {
           <div style={{ padding: '20px 16px 16px', borderBottom: `1px solid ${BORDER2}` }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>ConsensusAI</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>VELE AI</div>
                 <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.08em', marginTop: 2 }}>MULTI-MODEL SYNTHESIS</div>
               </div>
               <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 16, padding: 4, lineHeight: 1 }}>✕</button>
