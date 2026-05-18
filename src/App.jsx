@@ -514,7 +514,7 @@ function LoginPage() {
   return (
     <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', padding: 20 }}>
       <div style={{ width: 400, padding: 48, background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 20, borderTop: `2px solid ${AMBER}` }}>
-        <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>CONSENSUSAI</div>
+        <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>VELE AI</div>
         <h1 style={{ fontSize: 28, fontWeight: 700, color: TEXT, marginBottom: 8, letterSpacing: '-0.02em' }}>
           {authMode === 'signup' ? 'Create your account.' : 'The honest AI.'}
         </h1>
@@ -1085,7 +1085,7 @@ useEffect(() => {
         <div style={{ flex: 1, overflowY: 'auto', padding: '48px 0' }}>
           {messages.length === 0 && !loading && (
             <div style={{ maxWidth: 600, margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px' }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>CONSENSUSAI / TERMINAL</div>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>VELE AI / TERMINAL</div>
               <div style={{ fontSize: isMobile ? 26 : 36, fontWeight: 700, color: TEXT, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 12 }}>
                 {getGreeting()}{name ? `, ${name}` : ''}.
               </div>
