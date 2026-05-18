@@ -143,36 +143,6 @@ export async function deleteAllChats(userId) {
   if (chatError) throw new Error('Could not delete chats')
 }
 
-export async function hasSeenAnnouncement(userId) {
-  const { data, error } = await supabase
-    .from('credits')
-    .select('seen_rebrand_announcement')
-    .eq('user_id', userId)
-    .maybeSingle()
-  if (error) {
-    console.error('[announcement] check failed:', error.message)
-    return false
-  }
-  const seen = data?.seen_rebrand_announcement === true
-  console.log(`[announcement] user ${userId} seen=${seen}, raw=`, data?.seen_rebrand_announcement)
-  return seen
-}
-
-export async function markAnnouncementSeen(userId) {
-  // upsert so it works even if the credits row doesn't exist yet
-  const { error } = await supabase
-    .from('credits')
-    .upsert(
-      { user_id: userId, seen_rebrand_announcement: true },
-      { onConflict: 'user_id' }
-    )
-  if (error) {
-    console.error('[announcement] mark seen failed:', error.message)
-    throw new Error('Could not update announcement status')
-  }
-  console.log(`[announcement] marked seen for user ${userId}`)
-}
-
 export async function getUserChats(userId) {
   const { data, error } = await supabase
     .from('chats')

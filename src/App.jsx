@@ -728,7 +728,7 @@ export default function App() {
   const [mode, setMode] = useState('standard')
   const [showBuyModal, setShowBuyModal] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
-  const [showAnnouncement, setShowAnnouncement] = useState(false)
+  const [showWhatsNew, setShowWhatsNew] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [deleteAllError, setDeleteAllError] = useState('')
   const [lightboxImage, setLightboxImage] = useState(null)
@@ -787,17 +787,10 @@ useEffect(() => {
     try {
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
-      const [res, annRes] = await Promise.all([
-        fetch('https://consensusai-production-0e01.up.railway.app/api/me', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch('https://consensusai-production-0e01.up.railway.app/api/announcement', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-      ])
+      const res = await fetch('https://consensusai-production-0e01.up.railway.app/api/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
       const data = await res.json()
-      const annData = await annRes.json()
-      if (!annData.seen) setShowAnnouncement(true)
       if (data.credits) setCredits(data.credits)
       if (data.chats) {
         const formatted = data.chats.map(chat => ({
@@ -1016,27 +1009,7 @@ useEffect(() => {
 
       <input type="file" accept="image/*,.pdf,.txt,.md" style={{ display: 'none' }} id="file-input" onChange={e => handleFile(e.target.files[0])} />
 
-      {showAnnouncement && (
-        <UpdateAnnouncementModal onDismiss={async () => {
-          setShowAnnouncement(false)
-          try {
-            const session = await supabase.auth.getSession()
-            const token = session.data.session?.access_token
-            const res = await fetch('https://consensusai-production-0e01.up.railway.app/api/announcement/seen', {
-              method: 'POST',
-              headers: { 'Authorization': `Bearer ${token}` },
-            })
-            if (!res.ok) {
-              const body = await res.json().catch(() => ({}))
-              console.error('[announcement] mark seen failed:', res.status, body)
-            } else {
-              console.log('[announcement] successfully marked as seen')
-            }
-          } catch (err) {
-            console.error('[announcement] network error:', err)
-          }
-        }} />
-      )}
+      {showWhatsNew && <UpdateAnnouncementModal onDismiss={() => setShowWhatsNew(false)} />}
 
       {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} user={user} onPurchase={() => loadUserData(user)} />}
 
@@ -1170,6 +1143,13 @@ useEffect(() => {
           )}
           <div style={{ flex: 1 }}/>
           <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.08em' }}>{timeStr}</div>
+          <button onClick={() => setShowWhatsNew(true)}
+            style={{ position: 'relative', background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, cursor: 'pointer', fontSize: 11, fontFamily: 'monospace', padding: '4px 8px', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: 5, transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = PURPLE; e.currentTarget.style.color = PURPLE }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED }}>
+            ✦ {!isMobile && 'WHAT\'S NEW'}
+            <span style={{ position: 'absolute', top: -4, right: -4, width: 7, height: 7, borderRadius: '50%', background: PURPLE, border: '1px solid #080808' }} />
+          </button>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             {[GREEN, GREEN, GREEN, GREEN].map((c, i) => <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: c }}/>)}
           </div>
