@@ -378,7 +378,7 @@ function UpdateAnnouncementModal({ onDismiss }) {
       <div style={{ background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 20, padding: isMobile ? 28 : 44, width: '100%', maxWidth: 480, borderTop: `2px solid ${PURPLE}`, animation: 'msgSlideIn 300ms ease-out both' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 32 }}>
           <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 56, height: 56, borderRadius: 14, marginBottom: 20 }} />
-          <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 10 }}>ANNOUNCEMENT</div>
+          <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 10 }}>UPDATE</div>
           <h2 style={{ fontSize: isMobile ? 22 : 26, fontWeight: 700, color: TEXT, margin: 0, marginBottom: 6, textAlign: 'center' }}>Welcome to VELE AI</h2>
           <p style={{ fontSize: 14, color: MUTED, margin: 0, textAlign: 'center' }}>ConsensusAI is now VELE AI</p>
         </div>
