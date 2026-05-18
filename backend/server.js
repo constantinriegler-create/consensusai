@@ -3,7 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import { router } from './orchestrator/router.js'
 import { premiumRouter } from './orchestrator/premium.js'
-import { requireAuth, getCredits, addCredits, deductCredit, saveChat, saveMessages, getUserChats, deleteChat, deleteAllChats } from './auth.js'
+import { requireAuth, getCredits, addCredits, deductCredit, saveChat, saveMessages, getUserChats, deleteChat, deleteAllChats, hasSeenAnnouncement, markAnnouncementSeen } from './auth.js'
 import { stripe, PACKS } from './stripe.js'
 import supabase from './supabase.js'
 
@@ -99,6 +99,25 @@ app.post('/api/promo', async (req, res) => {
 
  
 })
+// Announcement seen status
+app.get('/api/announcement', requireAuth, async (req, res) => {
+  try {
+    const seen = await hasSeenAnnouncement(req.user.id)
+    res.json({ seen })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+app.post('/api/announcement/seen', requireAuth, async (req, res) => {
+  try {
+    await markAnnouncementSeen(req.user.id)
+    res.json({ ok: true })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
 // Get user credits + chats
 app.get('/api/me', requireAuth, async (req, res) => {
   try {

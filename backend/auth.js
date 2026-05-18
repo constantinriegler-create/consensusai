@@ -143,6 +143,23 @@ export async function deleteAllChats(userId) {
   if (chatError) throw new Error('Could not delete chats')
 }
 
+export async function hasSeenAnnouncement(userId) {
+  const { data } = await supabase
+    .from('credits')
+    .select('seen_rebrand_announcement')
+    .eq('user_id', userId)
+    .single()
+  return data?.seen_rebrand_announcement === true
+}
+
+export async function markAnnouncementSeen(userId) {
+  const { error } = await supabase
+    .from('credits')
+    .update({ seen_rebrand_announcement: true })
+    .eq('user_id', userId)
+  if (error) throw new Error('Could not update announcement status')
+}
+
 export async function getUserChats(userId) {
   const { data, error } = await supabase
     .from('chats')

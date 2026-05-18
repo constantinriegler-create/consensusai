@@ -366,6 +366,45 @@ function PremiumProgress({ currentStatus, rounds }) {
   )
 }
 
+function UpdateAnnouncementModal({ onDismiss }) {
+  const isMobile = window.innerWidth <= 768
+  const updates = [
+    { title: 'New Brand', desc: 'We\'ve rebranded from ConsensusAI to VELE AI with a fresh new look' },
+    { title: 'Improved Chat Icons', desc: 'Updated delete and rename icons in the sidebar for better consistency' },
+    { title: 'Enhanced Design', desc: 'New logo, favicon, and visual improvements throughout the app' },
+  ]
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.75)' }}>
+      <div style={{ background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 20, padding: isMobile ? 28 : 44, width: '100%', maxWidth: 480, borderTop: `2px solid ${PURPLE}`, animation: 'msgSlideIn 300ms ease-out both' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 32 }}>
+          <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 56, height: 56, borderRadius: 14, marginBottom: 20 }} />
+          <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 10 }}>ANNOUNCEMENT</div>
+          <h2 style={{ fontSize: isMobile ? 22 : 26, fontWeight: 700, color: TEXT, margin: 0, marginBottom: 6, textAlign: 'center' }}>Welcome to VELE AI</h2>
+          <p style={{ fontSize: 14, color: MUTED, margin: 0, textAlign: 'center' }}>ConsensusAI is now VELE AI</p>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
+          {updates.map((u, i) => (
+            <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '14px 16px', background: '#141414', borderRadius: 10, border: `1px solid ${BORDER}` }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: PURPLE, flexShrink: 0, marginTop: 5 }} />
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, marginBottom: 3 }}>{u.title}</div>
+                <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.6 }}>{u.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <button onClick={onDismiss}
+          style={{ width: '100%', padding: '13px', borderRadius: 10, background: PURPLE, border: 'none', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', letterSpacing: '0.02em', transition: 'opacity 0.15s' }}
+          onMouseEnter={e => e.currentTarget.style.opacity = '0.85'} onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+          Got it!
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function BuyCreditsModal({ onClose, user, onPurchase }) {
   const [loading, setLoading] = useState(null)
   const [promoCode, setPromoCode] = useState('')
@@ -689,6 +728,7 @@ export default function App() {
   const [mode, setMode] = useState('standard')
   const [showBuyModal, setShowBuyModal] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
+  const [showAnnouncement, setShowAnnouncement] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [deleteAllError, setDeleteAllError] = useState('')
   const [lightboxImage, setLightboxImage] = useState(null)
@@ -747,10 +787,17 @@ useEffect(() => {
     try {
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
-      const res = await fetch('https://consensusai-production-0e01.up.railway.app/api/me', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
+      const [res, annRes] = await Promise.all([
+        fetch('https://consensusai-production-0e01.up.railway.app/api/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch('https://consensusai-production-0e01.up.railway.app/api/announcement', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+      ])
       const data = await res.json()
+      const annData = await annRes.json()
+      if (!annData.seen) setShowAnnouncement(true)
       if (data.credits) setCredits(data.credits)
       if (data.chats) {
         const formatted = data.chats.map(chat => ({
@@ -968,6 +1015,18 @@ useEffect(() => {
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: BG, color: TEXT, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
 
       <input type="file" accept="image/*,.pdf,.txt,.md" style={{ display: 'none' }} id="file-input" onChange={e => handleFile(e.target.files[0])} />
+
+      {showAnnouncement && (
+        <UpdateAnnouncementModal onDismiss={async () => {
+          setShowAnnouncement(false)
+          const session = await supabase.auth.getSession()
+          const token = session.data.session?.access_token
+          fetch('https://consensusai-production-0e01.up.railway.app/api/announcement/seen', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+          }).catch(() => {})
+        }} />
+      )}
 
       {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} user={user} onPurchase={() => loadUserData(user)} />}
 
