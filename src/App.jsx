@@ -1019,12 +1019,22 @@ useEffect(() => {
       {showAnnouncement && (
         <UpdateAnnouncementModal onDismiss={async () => {
           setShowAnnouncement(false)
-          const session = await supabase.auth.getSession()
-          const token = session.data.session?.access_token
-          fetch('https://consensusai-production-0e01.up.railway.app/api/announcement/seen', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-          }).catch(() => {})
+          try {
+            const session = await supabase.auth.getSession()
+            const token = session.data.session?.access_token
+            const res = await fetch('https://consensusai-production-0e01.up.railway.app/api/announcement/seen', {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${token}` },
+            })
+            if (!res.ok) {
+              const body = await res.json().catch(() => ({}))
+              console.error('[announcement] mark seen failed:', res.status, body)
+            } else {
+              console.log('[announcement] successfully marked as seen')
+            }
+          } catch (err) {
+            console.error('[announcement] network error:', err)
+          }
         }} />
       )}
 
