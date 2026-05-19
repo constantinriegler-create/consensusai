@@ -659,11 +659,13 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
     
 
 function LoginPage() {
-  const [authMode, setAuthMode] = useState('signin') // 'signin' | 'signup'
+  const [authMode, setAuthMode] = useState('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [focused, setFocused] = useState(null)
+  const isMobile = window.innerWidth <= 768
 
   async function handleGoogleLogin() {
     setLoading('google')
@@ -677,23 +679,14 @@ function LoginPage() {
 
   async function handleEmailSubmit(e) {
     e.preventDefault()
-    if (!email.trim() || !password.trim()) {
-      setError('Email and password are required')
-      return
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
-      return
-    }
+    if (!email.trim() || !password.trim()) { setError('Email and password are required'); return }
+    if (password.length < 6) { setError('Password must be at least 6 characters'); return }
     setLoading('email')
     setError(null)
-
     const { error } = authMode === 'signup'
       ? await supabase.auth.signUp({ email: email.trim(), password })
       : await supabase.auth.signInWithPassword({ email: email.trim(), password })
-
     if (error) {
-      // Friendlier error messages
       const msg = error.message.toLowerCase()
       if (msg.includes('invalid login')) setError('Incorrect email or password')
       else if (msg.includes('already registered') || msg.includes('already exists')) setError('An account with this email already exists. Try signing in instead.')
@@ -701,79 +694,118 @@ function LoginPage() {
       else setError(error.message)
       setLoading(false)
     }
-    // On success, onAuthStateChange handles the redirect automatically
   }
 
+  const inputStyle = (field) => ({
+    width: '100%', padding: '13px 15px', borderRadius: 9,
+    border: `1.5px solid ${focused === field ? PURPLE : BORDER}`,
+    background: 'var(--c-input-bg)', color: TEXT, fontSize: 14,
+    outline: 'none', boxSizing: 'border-box',
+    fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
+    transition: 'border-color 0.15s',
+  })
+
   return (
-    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', padding: 20 }}>
-      <div style={{ width: 400, padding: 48, background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 20, borderTop: `2px solid ${AMBER}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 32, height: 32, borderRadius: 8 }} />
-          <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em' }}>VELE AI</div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', padding: '20px 20px 40px' }}>
+      <div style={{ width: '100%', maxWidth: 420 }}>
+
+        {/* Hero header — outside the card */}
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 64, height: 64, borderRadius: 18, marginBottom: 16, boxShadow: `0 0 32px ${PURPLE}30` }} />
+          <div style={{ fontSize: 11, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.2em', marginBottom: 14 }}>VELE AI</div>
+          <h1 style={{ fontSize: isMobile ? 34 : 40, fontWeight: 800, color: TEXT, margin: 0, marginBottom: 12, letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+            {authMode === 'signup' ? 'Create account.' : 'The honest AI.'}
+          </h1>
+          <p style={{ color: MUTED, fontSize: 15, lineHeight: 1.65, margin: '0 auto', maxWidth: 340 }}>
+            {authMode === 'signup'
+              ? 'Get 3 free standard queries. No credit card required.'
+              : '4 models answer simultaneously. One synthesized, honest answer.'}
+          </p>
         </div>
-        <h1 style={{ fontSize: 28, fontWeight: 700, color: TEXT, marginBottom: 8, letterSpacing: '-0.02em' }}>
-          {authMode === 'signup' ? 'Create your account.' : 'The honest AI.'}
-        </h1>
-        <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.7, marginBottom: 32 }}>
-          {authMode === 'signup'
-            ? 'Get 3 free standard queries to start. No credit card required.'
-            : '4 AI models answer your question simultaneously. See where they agree, disagree, and why.'}
-        </p>
 
-        {error && <div style={{ background: 'var(--c-red-bg)', border: '1px solid var(--c-red-border)', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: RED, marginBottom: 16 }}>{error}</div>}
+        {/* Model strip — sign-in only */}
+        {authMode === 'signin' && (
+          <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 28 }}>
+            {MODEL_META.map(m => (
+              <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: CARD, border: `1px solid ${BORDER2}` }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
+                <span style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.04em' }}>{m.label}</span>
+              </div>
+            ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: `${PURPLE}15`, border: `1px solid ${PURPLE}40` }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: PURPLE, flexShrink: 0 }} />
+              <span style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.04em' }}>Synthesis</span>
+            </div>
+          </div>
+        )}
 
-        <form onSubmit={handleEmailSubmit} style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 6 }}>EMAIL</div>
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            autoComplete="email"
-            disabled={!!loading}
-            style={{ width: '100%', padding: '12px 14px', borderRadius: 8, border: `1px solid ${BORDER}`, background: CARD, color: TEXT, fontSize: 14, marginBottom: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'monospace' }}
-          />
-          <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 6 }}>PASSWORD</div>
-          <input
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder={authMode === 'signup' ? 'At least 6 characters' : 'Your password'}
-            autoComplete={authMode === 'signup' ? 'new-password' : 'current-password'}
-            disabled={!!loading}
-            style={{ width: '100%', padding: '12px 14px', borderRadius: 8, border: `1px solid ${BORDER}`, background: CARD, color: TEXT, fontSize: 14, marginBottom: 16, outline: 'none', boxSizing: 'border-box', fontFamily: 'monospace' }}
-          />
-          <button
-            type="submit"
-            disabled={!!loading}
-            style={{ width: '100%', padding: '13px', borderRadius: 10, background: loading ? MUTED2 : AMBER, border: 'none', color: loading ? TEXT : BG, fontSize: 14, fontWeight: 600, cursor: loading ? 'default' : 'pointer', transition: 'background 0.2s' }}>
-            {loading === 'email' ? (authMode === 'signup' ? 'Creating account...' : 'Signing in...') : (authMode === 'signup' ? 'Create account' : 'Sign in')}
+        {/* Form card */}
+        <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 20, padding: isMobile ? '28px 24px' : '36px 36px', borderTop: `2px solid ${PURPLE}` }}>
+
+          {error && (
+            <div style={{ background: 'var(--c-red-bg)', border: '1px solid var(--c-red-border)', borderRadius: 9, padding: '11px 14px', fontSize: 13, color: RED, marginBottom: 20 }}>
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleEmailSubmit}>
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 7 }}>EMAIL</div>
+              <input
+                type="email" value={email} onChange={e => setEmail(e.target.value)}
+                onFocus={() => setFocused('email')} onBlur={() => setFocused(null)}
+                placeholder="you@example.com" autoComplete="email" disabled={!!loading}
+                style={inputStyle('email')}
+              />
+            </div>
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 7 }}>PASSWORD</div>
+              <input
+                type="password" value={password} onChange={e => setPassword(e.target.value)}
+                onFocus={() => setFocused('password')} onBlur={() => setFocused(null)}
+                placeholder={authMode === 'signup' ? 'At least 6 characters' : 'Your password'}
+                autoComplete={authMode === 'signup' ? 'new-password' : 'current-password'}
+                disabled={!!loading}
+                style={inputStyle('password')}
+              />
+            </div>
+            <button type="submit" disabled={!!loading}
+              style={{ width: '100%', padding: '14px', borderRadius: 10, background: loading ? MUTED2 : PURPLE, border: 'none', color: '#fff', fontSize: 15, fontWeight: 600, cursor: loading ? 'default' : 'pointer', letterSpacing: '0.01em', transition: 'opacity 0.15s' }}
+              onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = '0.85' }}
+              onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+              {loading === 'email' ? (authMode === 'signup' ? 'Creating account...' : 'Signing in...') : (authMode === 'signup' ? 'Create account' : 'Sign in')}
+            </button>
+          </form>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
+            <div style={{ flex: 1, height: 1, background: BORDER }} />
+            <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.15em' }}>OR</div>
+            <div style={{ flex: 1, height: 1, background: BORDER }} />
+          </div>
+
+          <button onClick={handleGoogleLogin} disabled={!!loading}
+            style={{ width: '100%', padding: '13px', borderRadius: 10, background: loading ? MUTED2 : '#fff', border: 'none', color: '#000', fontSize: 14, fontWeight: 600, cursor: loading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'opacity 0.15s' }}
+            onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = '0.85' }}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+            <svg width="18" height="18" viewBox="0 0 48 48">
+              <path fill="#4285F4" d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.2 7.3-10.5 7.3-17.3z"/>
+              <path fill="#34A853" d="M24 48c6.6 0 12.2-2.2 16.2-5.9l-7.9-6c-2.2 1.5-5 2.3-8.3 2.3-6.4 0-11.8-4.3-13.7-10.1H2.1v6.2C6.1 42.6 14.5 48 24 48z"/>
+              <path fill="#FBBC05" d="M10.3 28.3c-.5-1.5-.8-3-.8-4.6s.3-3.2.8-4.6v-6.2H2.1C.8 15.9 0 19.9 0 24s.8 8.1 2.1 11.1l8.2-6.8z"/>
+              <path fill="#EA4335" d="M24 9.5c3.6 0 6.8 1.2 9.3 3.6l7-7C36.2 2.2 30.6 0 24 0 14.5 0 6.1 5.4 2.1 13.3l8.2 6.2C12.2 13.8 17.6 9.5 24 9.5z"/>
+            </svg>
+            {loading === 'google' ? 'Redirecting...' : 'Continue with Google'}
           </button>
-        </form>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-          <div style={{ flex: 1, height: 1, background: BORDER }} />
-          <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.15em' }}>OR</div>
-          <div style={{ flex: 1, height: 1, background: BORDER }} />
         </div>
 
-        <button onClick={handleGoogleLogin} disabled={!!loading}
-          style={{ width: '100%', padding: '13px', borderRadius: 10, background: loading ? MUTED2 : '#fff', border: 'none', color: '#000', fontSize: 14, fontWeight: 600, cursor: loading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'background 0.2s' }}>
-          <svg width="18" height="18" viewBox="0 0 48 48">
-            <path fill="#4285F4" d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.2 7.3-10.5 7.3-17.3z"/>
-            <path fill="#34A853" d="M24 48c6.6 0 12.2-2.2 16.2-5.9l-7.9-6c-2.2 1.5-5 2.3-8.3 2.3-6.4 0-11.8-4.3-13.7-10.1H2.1v6.2C6.1 42.6 14.5 48 24 48z"/>
-            <path fill="#FBBC05" d="M10.3 28.3c-.5-1.5-.8-3-.8-4.6s.3-3.2.8-4.6v-6.2H2.1C.8 15.9 0 19.9 0 24s.8 8.1 2.1 11.1l8.2-6.8z"/>
-            <path fill="#EA4335" d="M24 9.5c3.6 0 6.8 1.2 9.3 3.6l7-7C36.2 2.2 30.6 0 24 0 14.5 0 6.1 5.4 2.1 13.3l8.2 6.2C12.2 13.8 17.6 9.5 24 9.5z"/>
-          </svg>
-          {loading === 'google' ? 'Redirecting...' : 'Continue with Google'}
-        </button>
-
-        <p style={{ textAlign: 'center', fontSize: 12, color: MUTED, marginTop: 24, lineHeight: 1.6 }}>
+        {/* Sign up / sign in toggle — outside card */}
+        <p style={{ textAlign: 'center', fontSize: 13, color: MUTED, marginTop: 20, lineHeight: 1.6 }}>
           {authMode === 'signup' ? 'Already have an account? ' : "Don't have an account? "}
           <button
             onClick={() => { setAuthMode(authMode === 'signup' ? 'signin' : 'signup'); setError(null) }}
-            style={{ background: 'none', border: 'none', color: AMBER, cursor: 'pointer', padding: 0, fontSize: 12, fontWeight: 600, textDecoration: 'underline' }}>
-            {authMode === 'signup' ? 'Sign in' : 'Sign up'}
+            style={{ background: 'none', border: 'none', color: PURPLE, cursor: 'pointer', padding: 0, fontSize: 13, fontWeight: 600, transition: 'opacity 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+            {authMode === 'signup' ? 'Sign in' : 'Sign up →'}
           </button>
         </p>
       </div>
