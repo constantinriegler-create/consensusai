@@ -21,3 +21,34 @@ body {
   width: 100%;
   overflow: hidden;
 }
+
+/* ── Theme variables ─────────────────────────────────────────── */
+:root {
+  --c-bg: #080808; --c-surface: #0f0f0f; --c-surface-deep: #0a0a0a;
+  --c-card: #141414; --c-border: #222; --c-border2: #1a1a1a;
+  --c-border3: #252525; --c-border4: #2a2a2a;
+  --c-text: #e8e6e0; --c-muted: #555; --c-muted2: #333;
+  --c-muted3: #444; --c-muted4: #666; --c-muted5: #aaa;
+  --c-secondary: #888; --c-subtle: #999; --c-bright: #ccc;
+  --c-text-h2: #ddd; --c-text-h3: #bbb;
+  --c-readable: #9ca3af;
+  --c-amber: #e8e8e8; --c-amber-dim: #1a1a1a;
+  --c-amber-a20: #e8e8e820; --c-amber-a30: #e8e8e830; --c-amber-a40: #e8e8e840;
+  --c-red-a99: #ef444499; --c-red-bg: #1a0a0a; --c-red-border: #3a1a1a;
+  --c-danger-sep: #1a0a0a; --c-input-bg: #0a0a0a; --c-placeholder: #555;
+}
+
+html[data-theme="light"] {
+  --c-bg: #f8f8f8; --c-surface: #ffffff; --c-surface-deep: #f0f0f0;
+  --c-card: #f0f0f0; --c-border: #d8d8d8; --c-border2: #e8e8e8;
+  --c-border3: #d0d0d0; --c-border4: #d4d4d4;
+  --c-text: #1a1a1a; --c-muted: #888; --c-muted2: #aaa;
+  --c-muted3: #bbb; --c-muted4: #555; --c-muted5: #555;
+  --c-secondary: #666; --c-subtle: #777; --c-bright: #333;
+  --c-text-h2: #333; --c-text-h3: #555;
+  --c-readable: #6b7280;
+  --c-amber: #1a1a1a; --c-amber-dim: #f0f0f0;
+  --c-amber-a20: #1a1a1a20; --c-amber-a30: #1a1a1a30; --c-amber-a40: #1a1a1a40;
+  --c-red-a99: #ef444499; --c-red-bg: #fff0f0; --c-red-border: #ffd0d0;
+  --c-danger-sep: #ffd0d0; --c-input-bg: #f5f5f5; --c-placeholder: #c0c0c0;
+}

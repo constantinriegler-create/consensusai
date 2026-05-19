@@ -716,7 +716,7 @@ function LoginPage() {
           <h1 style={{ fontSize: isMobile ? 34 : 40, fontWeight: 800, color: TEXT, margin: 0, marginBottom: 12, letterSpacing: '-0.03em', lineHeight: 1.1 }}>
             {authMode === 'signup' ? 'Create account.' : 'The honest AI.'}
           </h1>
-          <p style={{ color: MUTED, fontSize: 15, lineHeight: 1.65, margin: '0 auto', maxWidth: 340 }}>
+          <p style={{ color: 'var(--c-readable)', fontSize: 15, lineHeight: 1.65, margin: '0 auto', maxWidth: 340 }}>
             {authMode === 'signup'
               ? 'Get 3 free standard queries. No credit card required.'
               : '4 models answer simultaneously. One synthesized, honest answer.'}
@@ -729,7 +729,7 @@ function LoginPage() {
             {MODEL_META.map(m => (
               <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: CARD, border: `1px solid ${BORDER2}` }}>
                 <div style={{ width: 6, height: 6, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
-                <span style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.04em' }}>{m.label}</span>
+                <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.04em' }}>{m.label}</span>
               </div>
             ))}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: `${PURPLE}15`, border: `1px solid ${PURPLE}40` }}>
@@ -750,7 +750,7 @@ function LoginPage() {
 
           <form onSubmit={handleEmailSubmit}>
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 7 }}>EMAIL</div>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.1em', marginBottom: 7 }}>EMAIL</div>
               <input
                 type="email" value={email} onChange={e => setEmail(e.target.value)}
                 onFocus={() => setFocused('email')} onBlur={() => setFocused(null)}
@@ -759,7 +759,7 @@ function LoginPage() {
               />
             </div>
             <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 7 }}>PASSWORD</div>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.1em', marginBottom: 7 }}>PASSWORD</div>
               <input
                 type="password" value={password} onChange={e => setPassword(e.target.value)}
                 onFocus={() => setFocused('password')} onBlur={() => setFocused(null)}
@@ -779,7 +779,7 @@ function LoginPage() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
             <div style={{ flex: 1, height: 1, background: BORDER }} />
-            <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.15em' }}>OR</div>
+            <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.15em' }}>OR</div>
             <div style={{ flex: 1, height: 1, background: BORDER }} />
           </div>
 
@@ -798,7 +798,7 @@ function LoginPage() {
         </div>
 
         {/* Sign up / sign in toggle — outside card */}
-        <p style={{ textAlign: 'center', fontSize: 13, color: MUTED, marginTop: 20, lineHeight: 1.6 }}>
+        <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--c-readable)', marginTop: 20, lineHeight: 1.6 }}>
           {authMode === 'signup' ? 'Already have an account? ' : "Don't have an account? "}
           <button
             onClick={() => { setAuthMode(authMode === 'signup' ? 'signin' : 'signup'); setError(null) }}
@@ -1176,7 +1176,7 @@ useEffect(() => {
 
   if (authLoading) return (
     <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG }}>
-      <div style={{ fontSize: 11, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em' }}>LOADING...</div>
+      <div style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.1em' }}>LOADING...</div>
     </div>
   )
 
@@ -1543,32 +1543,6 @@ useEffect(() => {
         </div>
 
         <style>{`
-          :root {
-            --c-bg: #080808; --c-surface: #0f0f0f; --c-surface-deep: #0a0a0a;
-            --c-card: #141414; --c-border: #222; --c-border2: #1a1a1a;
-            --c-border3: #252525; --c-border4: #2a2a2a;
-            --c-text: #e8e6e0; --c-muted: #555; --c-muted2: #333;
-            --c-muted3: #444; --c-muted4: #666; --c-muted5: #aaa;
-            --c-secondary: #888; --c-subtle: #999; --c-bright: #ccc;
-            --c-text-h2: #ddd; --c-text-h3: #bbb;
-            --c-amber: #e8e8e8; --c-amber-dim: #1a1a1a;
-            --c-amber-a20: #e8e8e820; --c-amber-a30: #e8e8e830; --c-amber-a40: #e8e8e840;
-            --c-red-a99: #ef444499; --c-red-bg: #1a0a0a; --c-red-border: #3a1a1a;
-            --c-danger-sep: #1a0a0a; --c-input-bg: #0a0a0a; --c-placeholder: #2a2a2a;
-          }
-          html[data-theme="light"] {
-            --c-bg: #f8f8f8; --c-surface: #ffffff; --c-surface-deep: #f0f0f0;
-            --c-card: #f0f0f0; --c-border: #d8d8d8; --c-border2: #e8e8e8;
-            --c-border3: #d0d0d0; --c-border4: #d4d4d4;
-            --c-text: #1a1a1a; --c-muted: #888; --c-muted2: #aaa;
-            --c-muted3: #bbb; --c-muted4: #555; --c-muted5: #555;
-            --c-secondary: #666; --c-subtle: #777; --c-bright: #333;
-            --c-text-h2: #333; --c-text-h3: #555;
-            --c-amber: #1a1a1a; --c-amber-dim: #f0f0f0;
-            --c-amber-a20: #1a1a1a20; --c-amber-a30: #1a1a1a30; --c-amber-a40: #1a1a1a40;
-            --c-red-a99: #ef444499; --c-red-bg: #fff0f0; --c-red-border: #ffd0d0;
-            --c-danger-sep: #ffd0d0; --c-input-bg: #f5f5f5; --c-placeholder: #c0c0c0;
-          }
           @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
           @keyframes msgSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
           textarea::placeholder { color: var(--c-placeholder) !important; }
