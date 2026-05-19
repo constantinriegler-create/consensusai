@@ -1177,7 +1177,7 @@ useEffect(() => {
               {settingsView === 'menu' && (
                 <>
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 20 }}>SETTINGS</div>
-                  {menuRow('Account', '👤', () => setSettingsView('account'))}
+                  {menuRow('Account', '⊙', () => setSettingsView('account'))}
                   {menuRow('Credits', '⬡', () => setSettingsView('credits'))}
                   {menuRow('Appearance', '◑', () => setSettingsView('appearance'))}
                   <div style={{ borderTop: `1px solid #1a0a0a`, paddingTop: 12, marginTop: 4 }}>
