@@ -269,8 +269,8 @@ function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
   return (
     <div onDoubleClick={() => { setVal(chat.title); setEditing(true) }} onClick={onSelect}
       style={{ padding: '8px 10px', borderRadius: 7, cursor: 'pointer', marginBottom: 2, background: active ? '#1a1a1a' : 'none', color: active ? TEXT : MUTED, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', borderLeft: active ? `2px solid ${AMBER}` : '2px solid transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-        <span style={{ color: chat.mode === 'premium' ? PURPLE : '#fff', marginRight: 4, flexShrink: 0 }}>◆</span>
+      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ color: chat.mode === 'premium' ? PURPLE : '#fff', flexShrink: 0 }}>◆</span>
         {chat.title}
       </span>
       {active && (
