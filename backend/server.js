@@ -1,11 +1,14 @@
 import './env.js'
 import express from 'express'
 import cors from 'cors'
+import { Resend } from 'resend'
 import { router } from './orchestrator/router.js'
 import { premiumRouter } from './orchestrator/premium.js'
 import { requireAuth, getCredits, addCredits, deductCredit, saveChat, saveMessages, getUserChats, deleteChat, deleteAllChats } from './auth.js'
 import { stripe, PACKS } from './stripe.js'
 import supabase from './supabase.js'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 const requiredEnv = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'DEEPSEEK_API_KEY', 'XAI_API_KEY', 'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'STRIPE_SECRET_KEY']
 for (const name of requiredEnv) {
@@ -141,32 +144,32 @@ app.post('/api/feedback', requireAuth, async (req, res) => {
   }
 
   if (!process.env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY not set')
-    return res.status(500).json({ error: 'Email service not configured' })
+    console.error('RESEND_API_KEY not configured')
+    return res.status(500).json({ error: 'Email service not configured — add RESEND_API_KEY to Railway env vars' })
   }
 
   try {
-    const emailRes = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: process.env.RESEND_FROM_EMAIL || 'VELE AI <onboarding@resend.dev>',
-        to: 'constantin.n.riegler@gmail.com',
-        subject: `VELE AI Feedback from ${userEmail}`,
-        text: `Feedback from: ${userEmail}\nUser ID: ${userId}\n\n---\n\n${feedback.trim()}`,
-      }),
+    const { error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+      to: 'constantin.n.riegler@gmail.com',
+      subject: `VELE AI Feedback from ${userEmail}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+          <h2 style="color:#a855f7">VELE AI Feedback</h2>
+          <p><strong>From:</strong> ${userEmail}</p>
+          <p><strong>User ID:</strong> ${userId}</p>
+          <hr style="border:1px solid #eee;margin:20px 0">
+          <p style="white-space:pre-wrap;font-size:15px;line-height:1.6">${feedback.trim()}</p>
+        </div>
+      `,
     })
 
-    if (!emailRes.ok) {
-      const body = await emailRes.json().catch(() => ({}))
-      console.error('Resend error:', body)
+    if (error) {
+      console.error('Resend error:', error)
       return res.status(500).json({ error: 'Failed to send email' })
     }
 
-    console.log(`Feedback received from ${userEmail} (${userId})`)
+    console.log(`Feedback sent from ${userEmail} (${userId})`)
     res.json({ ok: true })
   } catch (err) {
     console.error('Feedback send error:', err)
