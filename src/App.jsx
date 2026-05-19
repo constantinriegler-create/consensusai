@@ -96,6 +96,50 @@ function FormattedText({ text }) {
   )
 }
 
+function calcAgreementScore(content, resolution) {
+  if (resolution) {
+    if (resolution.type === 'consensus') return 94
+    if (resolution.type === 'majority') return 68
+    return 42
+  }
+  const agreed = content?.agreed?.length || 0
+  const partial = content?.partial?.length || 0
+  const conflicted = content?.conflicted?.length || 0
+  const total = agreed + partial + conflicted
+  if (total === 0) {
+    if (content?.confidence === 'High') return 85
+    if (content?.confidence === 'Medium') return 58
+    return 32
+  }
+  return Math.round((agreed + partial * 0.5) / total * 100)
+}
+
+function ModelAgreementBar({ content, resolution, isPremium }) {
+  const score = calcAgreementScore(content, resolution)
+  const isHigh = score >= 80
+  const isMed = score >= 50
+  const color = isHigh ? GREEN : isMed ? YELLOW : RED
+  const label = isHigh ? 'High' : isMed ? 'Medium' : 'Low'
+  const tooltip = isPremium
+    ? resolution?.type === 'consensus' ? '3 or more models voted for the same answer'
+      : resolution?.type === 'majority' ? 'A majority of models agreed on this answer'
+      : 'Models were split — Claude resolved the tie'
+    : `${content?.agreed?.length || 0} consensus · ${content?.partial?.length || 0} partial · ${content?.conflicted?.length || 0} conflict`
+
+  return (
+    <div title={tooltip} style={{ marginBottom: 16, padding: '12px 16px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, cursor: 'default' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em' }}>MODEL AGREEMENT</div>
+        <div style={{ fontSize: 11, fontFamily: 'monospace', color, fontWeight: 600 }}>{score}% · {label}</div>
+      </div>
+      <div style={{ height: 5, background: '#1a1a1a', borderRadius: 3, overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: `${score}%`, background: `linear-gradient(90deg, ${color}99, ${color})`, borderRadius: 3, transition: 'width 0.8s cubic-bezier(0.4,0,0.2,1)' }} />
+      </div>
+      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 6 }}>Based on 4 model responses · hover for details</div>
+    </div>
+  )
+}
+
 function ConfidenceBar({ color, points, label }) {
   if (!points || points.length === 0) return null
   return (
@@ -1316,6 +1360,8 @@ useEffect(() => {
                     </div>
                     <FormattedText text={msg.content.summary} />
                   </div>
+
+                  <ModelAgreementBar content={msg.content} resolution={msg.isPremium ? msg.resolution : null} isPremium={msg.isPremium} />
 
                   {msg.isPremium && msg.votes && <VoteTally votes={msg.votes} counts={msg.resolution?.counts} resolution={msg.resolution} />}
 
