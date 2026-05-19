@@ -445,9 +445,7 @@ function FeedbackModal({ onClose, user }) {
 function UpdateAnnouncementModal({ onDismiss }) {
   const isMobile = window.innerWidth <= 768
   const updates = [
-    { title: 'New Brand', desc: 'We\'ve rebranded from ConsensusAI to VELE AI with a fresh new look' },
-    { title: 'Improved Chat Icons', desc: 'Updated delete and rename icons in the sidebar for better consistency' },
-    { title: 'Enhanced Design', desc: 'New logo, favicon, and visual improvements throughout the app' },
+    { title: 'Send Feedback', desc: 'Share your thoughts and suggestions directly with us through the new feedback feature' },
   ]
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.75)' }}>
@@ -456,7 +454,8 @@ function UpdateAnnouncementModal({ onDismiss }) {
           <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 56, height: 56, borderRadius: 14, marginBottom: 20 }} />
           <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 10 }}>UPDATE</div>
           <h2 style={{ fontSize: isMobile ? 22 : 26, fontWeight: 700, color: TEXT, margin: 0, marginBottom: 6, textAlign: 'center' }}>Welcome to VELE AI</h2>
-          <p style={{ fontSize: 14, color: MUTED, margin: 0, textAlign: 'center' }}>ConsensusAI is now VELE AI</p>
+          <p style={{ fontSize: 14, color: MUTED, margin: 0, marginBottom: 6, textAlign: 'center' }}>ConsensusAI is now VELE AI</p>
+          <p style={{ fontSize: 11, color: MUTED2, margin: 0, fontFamily: 'monospace', letterSpacing: '0.05em', textAlign: 'center' }}>19. Apr 2026</p>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
