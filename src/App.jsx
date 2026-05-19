@@ -1290,7 +1290,22 @@ useEffect(() => {
             {MODEL_META.map(m => <ModelRow key={m.key} label={m.label} color={GREEN} />)}
             <ModelRow label="Synthesis" color={GREEN} />
 
-            <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ marginTop: 12, marginBottom: 8, display: 'flex', gap: 8 }}>
+              <div style={{ flex: 1, background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: AMBER }}>{credits.standard_credits}</div>
+                <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>STD</div>
+              </div>
+              <div style={{ flex: 1, background: `${PURPLE}10`, border: `1px solid ${PURPLE}30`, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: PURPLE, textShadow: mode === 'premium' ? `0 0 8px ${PURPLE}60` : 'none', transition: 'text-shadow 0.2s' }}>{credits.premium_credits}</div>
+                <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>PREMIUM</div>
+              </div>
+              <button onClick={() => setShowBuyModal(true)}
+                style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 6, padding: '6px 10px', color: MUTED, fontSize: 12, cursor: 'pointer' }}>
+                +
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <button onClick={() => { setShowSettings(true); setDeleteAllError(''); setSettingsView('menu') }}
                 onMouseEnter={() => setSettingsHovered(true)} onMouseLeave={() => setSettingsHovered(false)}
                 style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 8, background: settingsHovered ? CARD : 'none', border: `1px solid ${settingsHovered ? BORDER : BORDER2}`, color: settingsHovered ? TEXT : MUTED, fontSize: 12, fontFamily: 'monospace', cursor: 'pointer', transition: 'all 0.15s', letterSpacing: '0.04em' }}>
