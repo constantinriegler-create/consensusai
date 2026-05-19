@@ -486,6 +486,7 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
   const [promoCode, setPromoCode] = useState('')
   const [promoStatus, setPromoStatus] = useState(null)
   const [promoMessage, setPromoMessage] = useState('')
+  const [promoLoading, setPromoLoading] = useState(false)
   const isMobile = window.innerWidth <= 768
 
   async function handleBuy(packType) {
@@ -507,30 +508,33 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
   }
 
   async function handlePromo() {
-    if (!promoCode.trim()) return
+    if (!promoCode.trim() || promoLoading || promoStatus === 'success') return
+    setPromoLoading(true)
+    setPromoStatus(null)
+    setPromoMessage('')
     try {
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
       const res = await fetch('https://consensusai-production-0e01.up.railway.app/api/promo', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  },
-  body: JSON.stringify({ code: promoCode.trim() })
-})
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ code: promoCode.trim() }),
+      })
       const data = await res.json()
       if (res.ok) {
         setPromoStatus('success')
         setPromoMessage(data.message)
-        setTimeout(() => { onPurchase && onPurchase(); onClose() }, 1500)
+        onPurchase && onPurchase()
+        setTimeout(() => onClose(), 2000)
       } else {
         setPromoStatus('error')
         setPromoMessage(data.error || 'Invalid promo code')
       }
-    } catch (err) {
+    } catch {
       setPromoStatus('error')
-      setPromoMessage('Something went wrong')
+      setPromoMessage('Network error — please try again')
+    } finally {
+      setPromoLoading(false)
     }
   }
 
@@ -577,8 +581,9 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
               style={{ flex: 1, padding: '9px 14px', borderRadius: 8, border: `1px solid ${promoStatus === 'error' ? RED : promoStatus === 'success' ? GREEN : BORDER}`, background: '#0a0a0a', color: TEXT, fontSize: 13, outline: 'none', fontFamily: 'monospace' }}
             />
             <button onClick={handlePromo}
-              style={{ padding: '9px 16px', borderRadius: 8, background: CARD, border: `1px solid ${BORDER}`, color: MUTED, fontSize: 12, cursor: 'pointer', fontFamily: 'monospace' }}>
-              APPLY
+              disabled={promoLoading || promoStatus === 'success' || !promoCode.trim()}
+              style={{ padding: '9px 16px', borderRadius: 8, background: promoStatus === 'success' ? GREEN + '20' : CARD, border: `1px solid ${promoStatus === 'success' ? GREEN : promoCode.trim() ? AMBER : BORDER}`, color: promoStatus === 'success' ? GREEN : promoCode.trim() ? AMBER : MUTED, fontSize: 12, cursor: promoLoading || !promoCode.trim() ? 'default' : 'pointer', fontFamily: 'monospace', fontWeight: 600, transition: 'all 0.15s', opacity: promoLoading ? 0.6 : 1 }}>
+              {promoLoading ? '...' : promoStatus === 'success' ? '✓' : 'APPLY'}
             </button>
           </div>
           {promoStatus && (
