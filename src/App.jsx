@@ -855,6 +855,7 @@ export default function App() {
   const [showWhatsNew, setShowWhatsNew] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [settingsView, setSettingsView] = useState('menu')
   const [deleteAllError, setDeleteAllError] = useState('')
   const [lightboxImage, setLightboxImage] = useState(null)
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches)
@@ -869,7 +870,7 @@ export default function App() {
   const [attachment, setAttachment] = useState(null)
   const [chats, setChats] = useState([])
   const [activeChatId, setActiveChatId] = useState(null)
-  const [keyHovered, setKeyHovered] = useState(false)
+  const [settingsHovered, setSettingsHovered] = useState(false)
   const [noCreditsError, setNoCreditsError] = useState(false)
   const messagesEndRef = useRef(null)
   const [useWebSearch, setUseWebSearch] = useState(() => {
@@ -1086,6 +1087,7 @@ useEffect(() => {
       setMessages([])
       setActiveChatId(null)
       setShowSettings(false)
+      setSettingsView('menu')
     } catch (err) {
       setDeleteAllError(err.message)
     }
@@ -1149,52 +1151,108 @@ useEffect(() => {
 
       {lightboxImage && <Lightbox src={lightboxImage} onClose={() => setLightboxImage(null)} />}
 
-      {showSettings && (
-        <div onClick={() => setShowSettings(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ position: 'relative', background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? 20 : 36, width: isMobile ? 'calc(100vw - 32px)' : 440, borderTop: `2px solid ${AMBER}` }}>
-            <button onClick={() => setShowSettings(false)}
-              onMouseEnter={(e) => { e.currentTarget.style.color = TEXT; e.currentTarget.style.background = BORDER }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = MUTED; e.currentTarget.style.background = 'transparent' }}
-              style={{ position: 'absolute', top: 14, right: 14, width: 28, height: 28, borderRadius: 6, background: 'transparent', border: 'none', color: MUTED, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s', padding: 0 }}>
-              ✕
-            </button>
-            <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 12 }}>SETTINGS</div>
-            <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 24, color: TEXT }}>Account</h3>
-            <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, padding: 16, marginBottom: 20 }}>
-              <div style={{ fontSize: 11, color: MUTED, marginBottom: 4 }}>Signed in as</div>
-              <div style={{ fontSize: 14, color: TEXT }}>{user.email}</div>
-            </div>
-            <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, padding: 16, marginBottom: 24 }}>
-              <div style={{ fontSize: 11, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 12 }}>CREDITS</div>
-              <div style={{ display: 'flex', gap: 16 }}>
-                <div>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: AMBER }}>{credits.standard_credits}</div>
-                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2 }}>STANDARD</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: PURPLE }}>{credits.premium_credits}</div>
-                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2 }}>PREMIUM</div>
-                </div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
-              <button onClick={() => { setShowSettings(false); setShowBuyModal(true) }}
-                style={{ flex: 1, padding: '11px', borderRadius: 8, background: AMBER, border: 'none', color: '#000', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-                Buy Credits
-              </button>
-              <button onClick={async () => { await supabase.auth.signOut(); setShowSettings(false) }}
-                style={{ padding: '11px 18px', borderRadius: 8, background: 'none', border: `1px solid ${BORDER}`, color: MUTED, fontSize: 14, cursor: 'pointer' }}>
-                Sign out
-              </button>
-            </div>
-            <div style={{ borderTop: `1px solid #2a1a1a`, paddingTop: 20 }}>
-              <div style={{ fontSize: 9, fontFamily: 'monospace', color: RED, letterSpacing: '0.15em', marginBottom: 12 }}>DANGER ZONE</div>
-              <HoldToDelete onConfirm={handleDeleteAllChats} />
-              {deleteAllError && <div style={{ marginTop: 8, fontSize: 11, color: RED, fontFamily: 'monospace' }}>{deleteAllError}</div>}
+      {showSettings && (() => {
+        const closeSettings = () => { setShowSettings(false); setSettingsView('menu'); setDeleteAllError('') }
+        const menuRow = (label, icon, onClick, danger = false) => (
+          <button key={label} onClick={onClick}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '13px 14px', borderRadius: 10, background: 'none', border: `1px solid ${BORDER2}`, color: danger ? RED : TEXT, fontSize: 13, cursor: 'pointer', marginBottom: 8, textAlign: 'left', transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = danger ? RED : BORDER; e.currentTarget.style.background = danger ? '#1a0505' : '#141414' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER2; e.currentTarget.style.background = 'none' }}>
+            <span style={{ fontSize: 16, flexShrink: 0 }}>{icon}</span>
+            <span style={{ flex: 1 }}>{label}</span>
+            {!danger && <span style={{ color: MUTED, fontSize: 12 }}>›</span>}
+          </button>
+        )
+        const backBtn = (label) => (
+          <button onClick={() => setSettingsView('menu')}
+            style={{ background: 'none', border: 'none', color: MUTED, fontSize: 12, fontFamily: 'monospace', cursor: 'pointer', padding: '0 0 16px', display: 'flex', alignItems: 'center', gap: 6, letterSpacing: '0.05em' }}>
+            ‹ {label}
+          </button>
+        )
+        return (
+          <div onClick={closeSettings} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+            <div onClick={e => e.stopPropagation()} style={{ position: 'relative', background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? 20 : 32, width: isMobile ? 'calc(100vw - 32px)' : 400, borderTop: `2px solid ${AMBER}`, animation: 'msgSlideIn 200ms ease-out both' }}>
+              <button onClick={closeSettings} style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', color: MUTED, fontSize: 18, cursor: 'pointer', lineHeight: 1, padding: 4 }}>✕</button>
+
+              {settingsView === 'menu' && (
+                <>
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 20 }}>SETTINGS</div>
+                  {menuRow('Account', '👤', () => setSettingsView('account'))}
+                  {menuRow('Credits', '⬡', () => setSettingsView('credits'))}
+                  {menuRow('Appearance', '◑', () => setSettingsView('appearance'))}
+                  <div style={{ borderTop: `1px solid #1a0a0a`, paddingTop: 12, marginTop: 4 }}>
+                    <div style={{ fontSize: 9, fontFamily: 'monospace', color: RED + '99', letterSpacing: '0.15em', marginBottom: 10 }}>DANGER ZONE</div>
+                    {menuRow('Delete All Chats', '⊘', () => setSettingsView('delete'), true)}
+                  </div>
+                </>
+              )}
+
+              {settingsView === 'account' && (
+                <>
+                  {backBtn('SETTINGS')}
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>ACCOUNT</div>
+                  <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, padding: '14px 16px', marginBottom: 20 }}>
+                    <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.08em', marginBottom: 6 }}>SIGNED IN AS</div>
+                    <div style={{ fontSize: 14, color: TEXT, wordBreak: 'break-all' }}>{user.email}</div>
+                  </div>
+                  <button onClick={async () => { await supabase.auth.signOut(); closeSettings() }}
+                    style={{ width: '100%', padding: '12px', borderRadius: 10, background: 'none', border: `1px solid ${BORDER}`, color: MUTED, fontSize: 13, cursor: 'pointer' }}>
+                    Sign Out
+                  </button>
+                </>
+              )}
+
+              {settingsView === 'credits' && (
+                <>
+                  {backBtn('SETTINGS')}
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>CREDITS</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
+                    <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, padding: '16px', textAlign: 'center' }}>
+                      <div style={{ fontSize: 28, fontWeight: 700, color: AMBER }}>{credits.standard_credits}</div>
+                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 4 }}>STANDARD</div>
+                    </div>
+                    <div style={{ background: `${PURPLE}10`, border: `1px solid ${PURPLE}30`, borderRadius: 10, padding: '16px', textAlign: 'center' }}>
+                      <div style={{ fontSize: 28, fontWeight: 700, color: PURPLE }}>{credits.premium_credits}</div>
+                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 4 }}>PREMIUM</div>
+                    </div>
+                  </div>
+                  <button onClick={() => { closeSettings(); setShowBuyModal(true) }}
+                    style={{ width: '100%', padding: '12px', borderRadius: 10, background: AMBER, border: 'none', color: '#000', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                    Buy More Credits
+                  </button>
+                </>
+              )}
+
+              {settingsView === 'appearance' && (
+                <>
+                  {backBtn('SETTINGS')}
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>APPEARANCE</div>
+                  <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, overflow: 'hidden' }}>
+                    {[{ label: 'Dark', icon: '◑', active: true }, { label: 'Light', icon: '○', active: false, soon: true }].map(opt => (
+                      <div key={opt.label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderBottom: opt.label === 'Dark' ? `1px solid ${BORDER2}` : 'none', opacity: opt.soon ? 0.45 : 1 }}>
+                        <span style={{ fontSize: 15 }}>{opt.icon}</span>
+                        <span style={{ flex: 1, fontSize: 13, color: TEXT }}>{opt.label}</span>
+                        {opt.soon && <span style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2 }}>SOON</span>}
+                        {opt.active && <div style={{ width: 18, height: 18, borderRadius: '50%', background: PURPLE, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }}/></div>}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {settingsView === 'delete' && (
+                <>
+                  {backBtn('SETTINGS')}
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: RED, letterSpacing: '0.15em', marginBottom: 16 }}>DELETE ALL CHATS</div>
+                  <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.6, marginBottom: 24 }}>This will permanently delete all your chats and message history. Hold the button below to confirm.</p>
+                  <HoldToDelete onConfirm={handleDeleteAllChats} />
+                  {deleteAllError && <div style={{ marginTop: 10, fontSize: 11, color: RED, fontFamily: 'monospace' }}>{deleteAllError}</div>}
+                </>
+              )}
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {isMobile && (
         <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 49, opacity: sidebarOpen ? 1 : 0, pointerEvents: sidebarOpen ? 'auto' : 'none', transition: 'opacity 250ms ease-out' }} />
@@ -1232,40 +1290,28 @@ useEffect(() => {
             {MODEL_META.map(m => <ModelRow key={m.key} label={m.label} color={GREEN} />)}
             <ModelRow label="Synthesis" color={GREEN} />
 
-            {/* Credits display */}
-            <div style={{ marginTop: 12, marginBottom: 8, display: 'flex', gap: 8 }}>
-              <div style={{ flex: 1, background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: AMBER }}>{credits.standard_credits}</div>
-                <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>STD</div>
-              </div>
-              <div style={{ flex: 1, background: `${PURPLE}10`, border: `1px solid ${PURPLE}30`, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
-               <div style={{ fontSize: 14, fontWeight: 700, color: PURPLE, textShadow: mode === 'premium' ? `0 0 8px ${PURPLE}60` : 'none', transition: 'text-shadow 0.2s' }}>{credits.premium_credits}</div>
-                <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>PREMIUM</div>
-              </div>
-              <button onClick={() => setShowBuyModal(true)}
-                style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 6, padding: '6px 10px', color: MUTED, fontSize: 12, cursor: 'pointer' }}>
-                +
+            <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <button onClick={() => { setShowSettings(true); setDeleteAllError(''); setSettingsView('menu') }}
+                onMouseEnter={() => setSettingsHovered(true)} onMouseLeave={() => setSettingsHovered(false)}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 8, background: settingsHovered ? CARD : 'none', border: `1px solid ${settingsHovered ? BORDER : BORDER2}`, color: settingsHovered ? TEXT : MUTED, fontSize: 12, fontFamily: 'monospace', cursor: 'pointer', transition: 'all 0.15s', letterSpacing: '0.04em' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                Settings
+              </button>
+
+              <button onClick={() => setShowFeedback(true)}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 8, background: 'none', border: `1px solid ${BORDER2}`, color: MUTED, fontSize: 12, fontFamily: 'monospace', cursor: 'pointer', transition: 'all 0.15s', letterSpacing: '0.04em' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = PURPLE; e.currentTarget.style.color = PURPLE }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER2; e.currentTarget.style.color = MUTED }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                Send Feedback
               </button>
             </div>
 
-            <button onClick={() => { setShowSettings(true); setDeleteAllError('') }}
-              onMouseEnter={() => setKeyHovered(true)} onMouseLeave={() => setKeyHovered(false)}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 8px', borderRadius: 7, background: keyHovered ? '#0f2a0f' : '#0a1a0a', border: `1px solid ${keyHovered ? '#2a5a2a' : '#1a3a1a'}`, color: GREEN, fontSize: 12, fontFamily: 'monospace', cursor: 'pointer', transition: 'all 0.15s' }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: GREEN, flexShrink: 0 }}/>
-              {name ? name.toUpperCase() : user.email?.split('@')[0].toUpperCase()}
-            </button>
-
-            <button onClick={() => setShowFeedback(true)}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 8px', marginTop: 8, borderRadius: 7, background: 'none', border: `1px solid ${BORDER2}`, color: MUTED, fontSize: 11, fontFamily: 'monospace', cursor: 'pointer', transition: 'all 0.15s', letterSpacing: '0.05em' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = PURPLE; e.currentTarget.style.color = PURPLE }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER2; e.currentTarget.style.color = MUTED }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
-              SEND FEEDBACK
-            </button>
-
-            <div style={{ marginTop: 10, fontSize: 10, color: MUTED2, fontFamily: 'monospace', lineHeight: 1.8 }}>
+            <div style={{ marginTop: 12, fontSize: 10, color: MUTED2, fontFamily: 'monospace', lineHeight: 1.8 }}>
               by Constantin Riegler
             </div>
           </div>
