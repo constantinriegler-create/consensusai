@@ -2,16 +2,16 @@ import { useState, useRef, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import supabase from './supabase.js'
 
-const AMBER = '#e8e8e8'
-const AMBER_DIM = '#1a1a1a'
-const BG = '#080808'
-const SURFACE = '#0f0f0f'
-const CARD = '#141414'
-const BORDER = '#222'
-const BORDER2 = '#1a1a1a'
-const TEXT = '#e8e6e0'
-const MUTED = '#555'
-const MUTED2 = '#333'
+const AMBER = 'var(--c-amber)'
+const AMBER_DIM = 'var(--c-amber-dim)'
+const BG = 'var(--c-bg)'
+const SURFACE = 'var(--c-surface)'
+const CARD = 'var(--c-card)'
+const BORDER = 'var(--c-border)'
+const BORDER2 = 'var(--c-border2)'
+const TEXT = 'var(--c-text)'
+const MUTED = 'var(--c-muted)'
+const MUTED2 = 'var(--c-muted2)'
 const GREEN = '#22c55e'
 const YELLOW = '#888888'
 const RED = '#ef4444'
@@ -51,13 +51,13 @@ function FormattedText({ text }) {
   cleaned = cleaned.replace(/(?<![a-zA-Z0-9])\$(?!\$)(?![^$]*\$)/g, '')
   const parts = cleaned.split(/(```[\s\S]*?```|\$\$[\s\S]*?\$\$|\$[^$\n]+\$)/g)
   return (
-    <div style={{ fontSize: 15, lineHeight: 1.85, color: '#e8e6e0' }}>
+    <div style={{ fontSize: 15, lineHeight: 1.85, color: TEXT }}>
       {parts.map((part, i) => {
         if (part.startsWith('```') && part.endsWith('```')) {
           const code = part.slice(3, -3).replace(/^\w+\n/, '')
           return (
-            <div key={i} style={{ background: '#141414', border: '1px solid #252525', borderRadius: 8, padding: '14px 20px', margin: '14px 0', fontFamily: 'monospace', fontSize: 13, color: '#e8e8e8', overflowX: 'auto', borderLeft: '2px solid #e8e8e830' }}>
-              <div style={{ fontSize: 9, fontFamily: 'monospace', color: '#444', letterSpacing: '0.1em', marginBottom: 8 }}>CODE</div>
+            <div key={i} style={{ background: CARD, border: `1px solid var(--c-border3)`, borderRadius: 8, padding: '14px 20px', margin: '14px 0', fontFamily: 'monospace', fontSize: 13, color: AMBER, overflowX: 'auto', borderLeft: '2px solid var(--c-amber-a30)' }}>
+              <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--c-muted3)', letterSpacing: '0.1em', marginBottom: 8 }}>CODE</div>
               <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{code}</pre>
             </div>
           )
@@ -66,28 +66,28 @@ function FormattedText({ text }) {
           const math = part.replace(/^\$+|\$+$/g, '')
           const isBlock = part.startsWith('$$')
           if (isBlock) return (
-            <div key={i} style={{ background: '#141414', border: '1px solid #252525', borderRadius: 8, padding: '14px 20px', margin: '14px 0', fontFamily: 'monospace', fontSize: 15, color: '#e8e8e8', textAlign: 'center', borderLeft: '2px solid #e8e8e830' }}>
-              <div style={{ fontSize: 9, fontFamily: 'monospace', color: '#444', letterSpacing: '0.1em', marginBottom: 8 }}>FORMULA</div>
+            <div key={i} style={{ background: CARD, border: `1px solid var(--c-border3)`, borderRadius: 8, padding: '14px 20px', margin: '14px 0', fontFamily: 'monospace', fontSize: 15, color: AMBER, textAlign: 'center', borderLeft: '2px solid var(--c-amber-a30)' }}>
+              <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--c-muted3)', letterSpacing: '0.1em', marginBottom: 8 }}>FORMULA</div>
               {math}
             </div>
           )
           const superscript = math.replace(/\^2/g,'²').replace(/\^3/g,'³').replace(/\^n/g,'ⁿ')
-          return <span key={i} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 5, padding: '2px 8px', fontFamily: 'monospace', fontSize: 14, color: '#e8e8e8', display: 'inline', margin: '0 2px' }}>{superscript}</span>
+          return <span key={i} style={{ background: AMBER_DIM, border: `1px solid var(--c-border4)`, borderRadius: 5, padding: '2px 8px', fontFamily: 'monospace', fontSize: 14, color: AMBER, display: 'inline', margin: '0 2px' }}>{superscript}</span>
         }
         return (
           <span key={i}>
             <ReactMarkdown components={{
               p: ({children}) => <span>{children}</span>,
-              strong: ({children}) => <strong style={{ color: '#fff', fontWeight: 600 }}>{children}</strong>,
-              em: ({children}) => <em style={{ color: '#aaa' }}>{children}</em>,
-              h1: ({children}) => <div style={{ fontSize: 20, fontWeight: 700, color: '#fff', margin: '20px 0 10px' }}>{children}</div>,
-              h2: ({children}) => <div style={{ fontSize: 17, fontWeight: 600, color: '#ddd', margin: '18px 0 8px' }}>{children}</div>,
-              h3: ({children}) => <div style={{ fontSize: 15, fontWeight: 600, color: '#bbb', margin: '14px 0 6px' }}>{children}</div>,
+              strong: ({children}) => <strong style={{ color: TEXT, fontWeight: 600 }}>{children}</strong>,
+              em: ({children}) => <em style={{ color: 'var(--c-muted5)' }}>{children}</em>,
+              h1: ({children}) => <div style={{ fontSize: 20, fontWeight: 700, color: TEXT, margin: '20px 0 10px' }}>{children}</div>,
+              h2: ({children}) => <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--c-text-h2)', margin: '18px 0 8px' }}>{children}</div>,
+              h3: ({children}) => <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--c-text-h3)', margin: '14px 0 6px' }}>{children}</div>,
               ul: ({children}) => <ul style={{ paddingLeft: 20, margin: '8px 0' }}>{children}</ul>,
               ol: ({children}) => <ol style={{ paddingLeft: 20, margin: '8px 0' }}>{children}</ol>,
-              li: ({children}) => <li style={{ color: '#aaa', marginBottom: 4, fontSize: 14 }}>{children}</li>,
-              code: ({children}) => <span style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 4, padding: '1px 6px', fontFamily: 'monospace', fontSize: 13, color: '#e8e8e8' }}>{children}</span>,
-              blockquote: ({children}) => <div style={{ borderLeft: '2px solid #333', paddingLeft: 16, margin: '12px 0', color: '#666' }}>{children}</div>,
+              li: ({children}) => <li style={{ color: 'var(--c-muted5)', marginBottom: 4, fontSize: 14 }}>{children}</li>,
+              code: ({children}) => <span style={{ background: AMBER_DIM, border: `1px solid var(--c-border4)`, borderRadius: 4, padding: '1px 6px', fontFamily: 'monospace', fontSize: 13, color: AMBER }}>{children}</span>,
+              blockquote: ({children}) => <div style={{ borderLeft: `2px solid ${MUTED2}`, paddingLeft: 16, margin: '12px 0', color: 'var(--c-muted4)' }}>{children}</div>,
             }}>{part}</ReactMarkdown>
           </span>
         )
@@ -132,7 +132,7 @@ function ModelAgreementBar({ content, resolution, isPremium }) {
         <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em' }}>MODEL AGREEMENT</div>
         <div style={{ fontSize: 11, fontFamily: 'monospace', color, fontWeight: 600 }}>{score}% · {label}</div>
       </div>
-      <div style={{ height: 5, background: '#1a1a1a', borderRadius: 3, overflow: 'hidden' }}>
+      <div style={{ height: 5, background: BORDER2, borderRadius: 3, overflow: 'hidden' }}>
         <div style={{ height: '100%', width: `${score}%`, background: `linear-gradient(90deg, ${color}99, ${color})`, borderRadius: 3, transition: 'width 0.8s cubic-bezier(0.4,0,0.2,1)' }} />
       </div>
       <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 6 }}>Based on 4 model responses · hover for details</div>
@@ -151,7 +151,7 @@ function ConfidenceBar({ color, points, label }) {
       {points.map((point, i) => (
         <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 8, alignItems: 'flex-start', paddingLeft: 14 }}>
           <div style={{ width: 2, minHeight: 16, background: color, opacity: 0.4, flexShrink: 0, marginTop: 3, borderRadius: 1 }}/>
-          <span style={{ fontSize: 13, color: '#aaa', lineHeight: 1.6 }}><FormattedText text={point} /></span>
+          <span style={{ fontSize: 13, color: 'var(--c-muted5)', lineHeight: 1.6 }}><FormattedText text={point} /></span>
         </div>
       ))}
     </div>
@@ -213,7 +213,7 @@ function VoteTally({ votes, counts, resolution }) {
           <span style={{ fontSize: 10, fontFamily: 'monospace', color: badge.color, letterSpacing: '0.12em', fontWeight: 600 }}>{badge.label}</span>
         </div>
       </div>
-      {winnerModel && <div style={{ marginBottom: 16, fontSize: 12, color: '#aaa' }}>
+      {winnerModel && <div style={{ marginBottom: 16, fontSize: 12, color: 'var(--c-muted5)' }}>
         Winner: <span style={{ color: winnerModel.color, fontWeight: 600 }}>{winnerModel.label}</span>
       </div>}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>
@@ -224,7 +224,7 @@ function VoteTally({ votes, counts, resolution }) {
           return (
             <div key={m.key} style={{ background: isWinner ? `${m.color}15` : SURFACE, border: `1px solid ${isWinner ? m.color + '60' : BORDER2}`, borderRadius: 7, padding: '10px 12px', textAlign: 'center' }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: m.color, marginBottom: 4 }}>{m.label.toUpperCase()}</div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: isWinner ? m.color : '#888' }}>{count}</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: isWinner ? m.color : 'var(--c-secondary)' }}>{count}</div>
               <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>{count === 1 ? 'VOTE' : 'VOTES'}</div>
             </div>
           )
@@ -236,7 +236,7 @@ function VoteTally({ votes, counts, resolution }) {
           const votedIdx = 'ABCD'.indexOf(votedLetter)
           const votedFor = votedIdx >= 0 ? MODEL_META[votedIdx] : null
           return (
-            <div key={voterIdx} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, marginBottom: 4, color: '#999' }}>
+            <div key={voterIdx} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, marginBottom: 4, color: 'var(--c-subtle)' }}>
               <span style={{ color: voter.color, fontFamily: 'monospace', fontSize: 11, minWidth: 72 }}>{voter.label}</span>
               <span style={{ color: MUTED2 }}>→</span>
               {votedFor ? <span style={{ color: votedFor.color, fontFamily: 'monospace', fontSize: 11 }}>{votedFor.label}</span>
@@ -269,7 +269,7 @@ function DebateHistory({ rounds }) {
                 {MODEL_META.map((m, i) => (
                   <div key={m.key} style={{ background: SURFACE, border: `1px solid ${BORDER2}`, borderRadius: 8, padding: 14, borderLeft: `2px solid ${m.color}60` }}>
                     <div style={{ fontSize: 9, fontFamily: 'monospace', color: m.color, letterSpacing: '0.1em', marginBottom: 8 }}>{m.label.toUpperCase()}</div>
-                    <div style={{ fontSize: 12, color: '#999', lineHeight: 1.6, maxHeight: 300, overflowY: 'auto' }}>
+                    <div style={{ fontSize: 12, color: 'var(--c-subtle)', lineHeight: 1.6, maxHeight: 300, overflowY: 'auto' }}>
                       <FormattedText text={rounds[rk]?.[i]} />
                     </div>
                   </div>
@@ -288,13 +288,13 @@ function FeatureCard({ feature }) {
   const [hovered, setHovered] = useState(false)
   return (
     <div onClick={() => setOpen(!open)} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      style={{ background: open ? '#141414' : hovered ? '#141414' : SURFACE, border: `1px solid ${open ? BORDER : BORDER2}`, borderRadius: 10, padding: '14px 16px', borderLeft: `2px solid ${open ? AMBER : AMBER + '30'}`, cursor: 'pointer', transition: 'all 0.15s', gridColumn: open ? 'span 2' : 'span 1' }}>
+      style={{ background: open ? CARD : hovered ? CARD : SURFACE, border: `1px solid ${open ? BORDER : BORDER2}`, borderRadius: 10, padding: '14px 16px', borderLeft: `2px solid ${open ? AMBER : 'var(--c-amber-a30)'}`, cursor: 'pointer', transition: 'all 0.15s', gridColumn: open ? 'span 2' : 'span 1' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: open ? 10 : 4 }}>
         <div style={{ fontSize: 11, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.06em' }}>{feature.label.toUpperCase()}</div>
         <div style={{ fontSize: 10, color: MUTED2, fontFamily: 'monospace' }}>{open ? '▲' : '▼'}</div>
       </div>
       <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.5, marginBottom: open ? 12 : 0 }}>{feature.desc}</div>
-      {open && <div style={{ fontSize: 13, color: '#888', lineHeight: 1.7, borderTop: `1px solid ${BORDER2}`, paddingTop: 12 }}>{feature.detail}</div>}
+      {open && <div style={{ fontSize: 13, color: 'var(--c-secondary)', lineHeight: 1.7, borderTop: `1px solid ${BORDER2}`, paddingTop: 12 }}>{feature.detail}</div>}
     </div>
   )
 }
@@ -307,22 +307,22 @@ function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
     <div style={{ padding: '4px 6px', marginBottom: 2 }}>
       <input autoFocus value={val} onChange={e => setVal(e.target.value)} onBlur={save}
         onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false) }}
-        style={{ width: '100%', background: '#1a1a1a', border: '1px solid #333', borderRadius: 5, color: '#e8e6e0', fontSize: 12, padding: '5px 8px', outline: 'none', boxSizing: 'border-box' }} />
+        style={{ width: '100%', background: AMBER_DIM, border: `1px solid ${MUTED2}`, borderRadius: 5, color: TEXT, fontSize: 12, padding: '5px 8px', outline: 'none', boxSizing: 'border-box' }} />
     </div>
   )
   return (
     <div onDoubleClick={() => { setVal(chat.title); setEditing(true) }} onClick={onSelect}
-      style={{ padding: '8px 10px', borderRadius: 7, cursor: 'pointer', marginBottom: 2, background: active ? '#1a1a1a' : 'none', color: active ? TEXT : MUTED, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', borderLeft: active ? `2px solid ${AMBER}` : '2px solid transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      style={{ padding: '8px 10px', borderRadius: 7, cursor: 'pointer', marginBottom: 2, background: active ? AMBER_DIM : 'none', color: active ? TEXT : MUTED, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', borderLeft: active ? `2px solid ${AMBER}` : '2px solid transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ color: chat.mode === 'premium' ? PURPLE : '#fff', flexShrink: 0 }}>◆</span>
+        <span style={{ color: chat.mode === 'premium' ? PURPLE : TEXT, flexShrink: 0 }}>◆</span>
         {chat.title}
       </span>
       {active && (
         <span style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
           <button onClick={e => { e.stopPropagation(); setVal(chat.title); setEditing(true) }}
             title="Rename"
-            style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', padding: '2px 3px', display: 'flex', alignItems: 'center', borderRadius: 4, transition: 'color 0.15s' }}
-            onMouseEnter={e => e.currentTarget.style.color = '#aaa'} onMouseLeave={e => e.currentTarget.style.color = '#555'}>
+            style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', padding: '2px 3px', display: 'flex', alignItems: 'center', borderRadius: 4, transition: 'color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--c-text)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--c-muted)'}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -330,8 +330,8 @@ function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
           </button>
           <button onClick={e => { e.stopPropagation(); if (window.confirm('Delete this chat? This cannot be undone.')) onDelete() }}
             title="Delete"
-            style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', padding: '2px 3px', display: 'flex', alignItems: 'center', borderRadius: 4, transition: 'color 0.15s' }}
-            onMouseEnter={e => e.currentTarget.style.color = '#ef4444'} onMouseLeave={e => e.currentTarget.style.color = '#555'}>
+            style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', padding: '2px 3px', display: 'flex', alignItems: 'center', borderRadius: 4, transition: 'color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.color = '#ef4444'} onMouseLeave={e => e.currentTarget.style.color = 'var(--c-muted)'}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="3 6 5 6 21 6"/>
               <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
@@ -349,7 +349,7 @@ function ModelRow({ label, color }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
       <div style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0 }}/>
-      <span style={{ fontSize: 12, color: '#888', fontFamily: 'monospace' }}>{label}</span>
+      <span style={{ fontSize: 12, color: 'var(--c-secondary)', fontFamily: 'monospace' }}>{label}</span>
     </div>
   )
 }
@@ -358,7 +358,7 @@ function ModeToggle({ mode, setMode, disabled }) {
   return (
     <div className="mode-toggle-wrap" style={{ display: 'inline-flex', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, padding: 2, fontSize: 11, fontFamily: 'monospace' }}>
       <button onClick={() => !disabled && setMode('standard')} disabled={disabled} className="mode-btn"
-        style={{ padding: '5px 12px', borderRadius: 5, border: 'none', background: mode === 'standard' ? AMBER : 'transparent', color: mode === 'standard' ? '#000' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'all 0.15s' }}>
+        style={{ padding: '5px 12px', borderRadius: 5, border: 'none', background: mode === 'standard' ? AMBER : 'transparent', color: mode === 'standard' ? BG : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'all 0.15s' }}>
         STANDARD
       </button>
       <button onClick={() => !disabled && setMode('premium')} disabled={disabled} className="mode-btn"
@@ -398,14 +398,14 @@ function PremiumProgress({ currentStatus, rounds }) {
           const isDone = i < active
           const isActive = i === active
           return (
-            <div key={s.key} style={{ flex: 1, padding: '8px 6px', borderRadius: 6, background: isDone ? `${PURPLE}20` : isActive ? `${PURPLE}10` : '#0a0a0a', border: `1px solid ${isDone ? PURPLE + '60' : isActive ? PURPLE : BORDER2}`, textAlign: 'center', transition: 'all 0.3s' }}>
+            <div key={s.key} style={{ flex: 1, padding: '8px 6px', borderRadius: 6, background: isDone ? `${PURPLE}20` : isActive ? `${PURPLE}10` : 'var(--c-surface-deep)', border: `1px solid ${isDone ? PURPLE + '60' : isActive ? PURPLE : BORDER2}`, textAlign: 'center', transition: 'all 0.3s' }}>
               <div style={{ fontSize: 9, fontFamily: 'monospace', color: isDone || isActive ? PURPLE : MUTED2, marginBottom: 2 }}>{isDone ? '✓' : isActive ? '●' : '○'}</div>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: isDone || isActive ? '#ccc' : MUTED2 }}>{s.label}</div>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: isDone || isActive ? 'var(--c-bright)' : MUTED2 }}>{s.label}</div>
             </div>
           )
         })}
       </div>
-      {currentStatus && <div style={{ marginTop: 14, fontSize: 11, fontFamily: 'monospace', color: '#888' }}>{currentStatus}</div>}
+      {currentStatus && <div style={{ marginTop: 14, fontSize: 11, fontFamily: 'monospace', color: 'var(--c-secondary)' }}>{currentStatus}</div>}
     </div>
   )
 }
@@ -440,7 +440,7 @@ function FeedbackModal({ onClose, user }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-      <div style={{ background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? 24 : 36, width: '100%', maxWidth: 460, borderTop: `2px solid ${PURPLE}`, animation: 'msgSlideIn 250ms ease-out both' }}>
+      <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? 24 : 36, width: '100%', maxWidth: 460, borderTop: `2px solid ${PURPLE}`, animation: 'msgSlideIn 250ms ease-out both' }}>
         {status === 'success' ? (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
             <div style={{ fontSize: 32, marginBottom: 16 }}>✓</div>
@@ -456,13 +456,13 @@ function FeedbackModal({ onClose, user }) {
             <div style={{ marginBottom: 14 }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 6 }}>EMAIL (OPTIONAL)</div>
               <input value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com"
-                style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: `1px solid ${BORDER}`, background: '#0a0a0a', color: TEXT, fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+                style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: `1px solid ${BORDER}`, background: 'var(--c-input-bg)', color: TEXT, fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }} />
             </div>
 
             <div style={{ marginBottom: 20 }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 6 }}>FEEDBACK <span style={{ color: RED }}>*</span></div>
               <textarea value={feedback} onChange={e => { setFeedback(e.target.value); setErrorMsg('') }} placeholder="What's on your mind? Bug reports, feature ideas, general thoughts..."
-                rows={5} style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: `1px solid ${errorMsg ? RED : BORDER}`, background: '#0a0a0a', color: TEXT, fontSize: 13, outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit', lineHeight: 1.6 }} />
+                rows={5} style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: `1px solid ${errorMsg ? RED : BORDER}`, background: 'var(--c-input-bg)', color: TEXT, fontSize: 13, outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit', lineHeight: 1.6 }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
                 {errorMsg ? <span style={{ fontSize: 11, color: RED, fontFamily: 'monospace' }}>{errorMsg}</span> : <span />}
                 <span style={{ fontSize: 11, color: feedback.length > 4800 ? RED : MUTED2, fontFamily: 'monospace' }}>{feedback.length}/5000</span>
@@ -493,7 +493,7 @@ function UpdateAnnouncementModal({ onDismiss }) {
   ]
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.75)' }}>
-      <div style={{ background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 20, padding: isMobile ? 28 : 44, width: '100%', maxWidth: 480, borderTop: `2px solid ${PURPLE}`, animation: 'msgSlideIn 300ms ease-out both' }}>
+      <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 20, padding: isMobile ? 28 : 44, width: '100%', maxWidth: 480, borderTop: `2px solid ${PURPLE}`, animation: 'msgSlideIn 300ms ease-out both' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 32 }}>
           <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 56, height: 56, borderRadius: 14, marginBottom: 20 }} />
           <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 10 }}>UPDATE</div>
@@ -504,7 +504,7 @@ function UpdateAnnouncementModal({ onDismiss }) {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
           {updates.map((u, i) => (
-            <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '14px 16px', background: '#141414', borderRadius: 10, border: `1px solid ${BORDER}` }}>
+            <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '14px 16px', background: CARD, borderRadius: 10, border: `1px solid ${BORDER}` }}>
               <div style={{ width: 6, height: 6, borderRadius: '50%', background: PURPLE, flexShrink: 0, marginTop: 5 }} />
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, marginBottom: 3 }}>{u.title}</div>
@@ -583,7 +583,7 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? 20 : 36, width: isMobile ? 'calc(100vw - 32px)' : 480, borderTop: `2px solid ${AMBER}`, maxHeight: '90vh', overflowY: 'auto' }}>
+      <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? 20 : 36, width: isMobile ? 'calc(100vw - 32px)' : 480, borderTop: `2px solid ${AMBER}`, maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 12 }}>BUY CREDITS</div>
         <h3 style={{ fontSize: isMobile ? 17 : 20, fontWeight: 600, marginBottom: 6, color: TEXT }}>Get more queries</h3>
         <p style={{ color: MUTED, fontSize: 13, marginBottom: isMobile ? 16 : 28, lineHeight: 1.6 }}>Credits never expire. Use them whenever you need.</p>
@@ -593,9 +593,9 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
             <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.1em', marginBottom: 8 }}>STANDARD</div>
             <div style={{ fontSize: 28, fontWeight: 700, color: TEXT, marginBottom: 4 }}>$1.99</div>
             <div style={{ fontSize: 12, color: MUTED, marginBottom: 16 }}>10 queries</div>
-            <div style={{ fontSize: 11, color: '#888', marginBottom: 16, lineHeight: 1.6 }}>4 AI models answer simultaneously. Claude synthesizes the result.</div>
+            <div style={{ fontSize: 11, color: 'var(--c-secondary)', marginBottom: 16, lineHeight: 1.6 }}>4 AI models answer simultaneously. Claude synthesizes the result.</div>
             <button onClick={() => handleBuy('standard')} disabled={!!loading}
-              style={{ width: '100%', padding: '10px', borderRadius: 8, background: AMBER, border: 'none', color: '#000', fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading === 'premium' ? 0.5 : 1 }}>
+              style={{ width: '100%', padding: '10px', borderRadius: 8, background: AMBER, border: 'none', color: BG, fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading === 'premium' ? 0.5 : 1 }}>
               {loading === 'standard' ? 'Loading...' : 'Buy Standard'}
             </button>
           </div>
@@ -604,7 +604,7 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
             <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.1em', marginBottom: 8 }}>◆ PREMIUM</div>
             <div style={{ fontSize: 28, fontWeight: 700, color: TEXT, marginBottom: 4 }}>$4.99</div>
             <div style={{ fontSize: 12, color: MUTED, marginBottom: 16 }}>10 queries</div>
-            <div style={{ fontSize: 11, color: '#888', marginBottom: 16, lineHeight: 1.6 }}>4 models debate in 2 rounds, vote blindly on the best answer.</div>
+            <div style={{ fontSize: 11, color: 'var(--c-secondary)', marginBottom: 16, lineHeight: 1.6 }}>4 models debate in 2 rounds, vote blindly on the best answer.</div>
             <button onClick={() => handleBuy('premium')} disabled={!!loading}
               style={{ width: '100%', padding: '10px', borderRadius: 8, background: PURPLE, border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading === 'standard' ? 0.5 : 1 }}>
               {loading === 'premium' ? 'Loading...' : 'Buy Premium'}
@@ -621,7 +621,7 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
               value={promoCode}
               onChange={e => { setPromoCode(e.target.value); setPromoStatus(null) }}
               onKeyDown={e => e.key === 'Enter' && handlePromo()}
-              style={{ flex: 1, padding: '9px 14px', borderRadius: 8, border: `1px solid ${promoStatus === 'error' ? RED : promoStatus === 'success' ? GREEN : BORDER}`, background: '#0a0a0a', color: TEXT, fontSize: 13, outline: 'none', fontFamily: 'monospace' }}
+              style={{ flex: 1, padding: '9px 14px', borderRadius: 8, border: `1px solid ${promoStatus === 'error' ? RED : promoStatus === 'success' ? GREEN : BORDER}`, background: 'var(--c-input-bg)', color: TEXT, fontSize: 13, outline: 'none', fontFamily: 'monospace' }}
             />
             <button onClick={handlePromo}
               disabled={promoLoading || promoStatus === 'success' || !promoCode.trim()}
@@ -708,7 +708,7 @@ function LoginPage() {
             : '4 AI models answer your question simultaneously. See where they agree, disagree, and why.'}
         </p>
 
-        {error && <div style={{ background: '#1a0a0a', border: '1px solid #3a1a1a', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: RED, marginBottom: 16 }}>{error}</div>}
+        {error && <div style={{ background: 'var(--c-red-bg)', border: '1px solid var(--c-red-border)', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: RED, marginBottom: 16 }}>{error}</div>}
 
         <form onSubmit={handleEmailSubmit} style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 6 }}>EMAIL</div>
@@ -734,7 +734,7 @@ function LoginPage() {
           <button
             type="submit"
             disabled={!!loading}
-            style={{ width: '100%', padding: '13px', borderRadius: 10, background: loading ? MUTED2 : AMBER, border: 'none', color: '#000', fontSize: 14, fontWeight: 600, cursor: loading ? 'default' : 'pointer', transition: 'background 0.2s' }}>
+            style={{ width: '100%', padding: '13px', borderRadius: 10, background: loading ? MUTED2 : AMBER, border: 'none', color: loading ? TEXT : BG, fontSize: 14, fontWeight: 600, cursor: loading ? 'default' : 'pointer', transition: 'background 0.2s' }}>
             {loading === 'email' ? (authMode === 'signup' ? 'Creating account...' : 'Signing in...') : (authMode === 'signup' ? 'Create account' : 'Sign in')}
           </button>
         </form>
@@ -880,6 +880,13 @@ export default function App() {
 useEffect(() => {
   localStorage.setItem('useWebSearch', useWebSearch)
 }, [useWebSearch])
+
+  const [themeMode, setThemeMode] = useState(() => localStorage.getItem('theme') || 'dark')
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', themeMode)
+    localStorage.setItem('theme', themeMode)
+  }, [themeMode])
 
   // Auth listener
   useEffect(() => {
@@ -1142,7 +1149,7 @@ useEffect(() => {
       {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} user={user} onPurchase={() => loadUserData(user)} />}
 
       {paymentSuccess && (
-        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 200, background: '#0f0f0f', border: `1px solid ${GREEN}`, borderRadius: 10, padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: `0 0 24px ${GREEN}20`, animation: 'msgSlideIn 300ms ease-out both' }}>
+        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 200, background: SURFACE, border: `1px solid ${GREEN}`, borderRadius: 10, padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: `0 0 24px ${GREEN}20`, animation: 'msgSlideIn 300ms ease-out both' }}>
           <span style={{ color: GREEN, fontSize: 16 }}>✓</span>
           <span style={{ fontSize: 13, fontFamily: 'monospace', color: TEXT }}>Credits added to your account!</span>
           <button onClick={() => setPaymentSuccess(false)} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 14, padding: 0, marginLeft: 4 }}>✕</button>
@@ -1156,7 +1163,7 @@ useEffect(() => {
         const menuRow = (label, icon, onClick, danger = false) => (
           <button key={label} onClick={onClick}
             style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '13px 14px', borderRadius: 10, background: 'none', border: `1px solid ${BORDER2}`, color: danger ? RED : TEXT, fontSize: 13, cursor: 'pointer', marginBottom: 8, textAlign: 'left', transition: 'all 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = danger ? RED : BORDER; e.currentTarget.style.background = danger ? '#1a0505' : '#141414' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = danger ? RED : BORDER; e.currentTarget.style.background = danger ? 'var(--c-red-bg)' : CARD }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER2; e.currentTarget.style.background = 'none' }}>
             <span style={{ fontSize: 16, flexShrink: 0 }}>{icon}</span>
             <span style={{ flex: 1 }}>{label}</span>
@@ -1171,7 +1178,7 @@ useEffect(() => {
         )
         return (
           <div onClick={closeSettings} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-            <div onClick={e => e.stopPropagation()} style={{ position: 'relative', background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? 20 : 32, width: isMobile ? 'calc(100vw - 32px)' : 400, borderTop: `2px solid ${AMBER}`, animation: 'msgSlideIn 200ms ease-out both' }}>
+            <div onClick={e => e.stopPropagation()} style={{ position: 'relative', background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? 20 : 32, width: isMobile ? 'calc(100vw - 32px)' : 400, borderTop: `2px solid ${AMBER}`, animation: 'msgSlideIn 200ms ease-out both' }}>
               <button onClick={closeSettings} style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', color: MUTED, fontSize: 18, cursor: 'pointer', lineHeight: 1, padding: 4 }}>✕</button>
 
               {settingsView === 'menu' && (
@@ -1180,10 +1187,11 @@ useEffect(() => {
                   {menuRow('Account', '⊙', () => setSettingsView('account'))}
                   {menuRow('Credits', '⬡', () => setSettingsView('credits'))}
                   {menuRow('Appearance', '◑', () => setSettingsView('appearance'))}
-                  <div style={{ borderTop: `1px solid #1a0a0a`, paddingTop: 12, marginTop: 4 }}>
-                    <div style={{ fontSize: 9, fontFamily: 'monospace', color: RED + '99', letterSpacing: '0.15em', marginBottom: 10 }}>DANGER ZONE</div>
+                  <div style={{ borderTop: `1px solid var(--c-danger-sep)`, paddingTop: 12, marginTop: 4 }}>
+                    <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--c-red-a99)', letterSpacing: '0.15em', marginBottom: 10 }}>DANGER ZONE</div>
                     {menuRow('Delete All Chats', '⊘', () => setSettingsView('delete'), true)}
                   </div>
+
                 </>
               )}
 
@@ -1217,7 +1225,7 @@ useEffect(() => {
                     </div>
                   </div>
                   <button onClick={() => { closeSettings(); setShowBuyModal(true) }}
-                    style={{ width: '100%', padding: '12px', borderRadius: 10, background: AMBER, border: 'none', color: '#000', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                    style={{ width: '100%', padding: '12px', borderRadius: 10, background: AMBER, border: 'none', color: BG, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
                     Buy More Credits
                   </button>
                 </>
@@ -1228,12 +1236,12 @@ useEffect(() => {
                   {backBtn('SETTINGS')}
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>APPEARANCE</div>
                   <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, overflow: 'hidden' }}>
-                    {[{ label: 'Dark', icon: '◑', active: true }, { label: 'Light', icon: '○', active: false, soon: true }].map(opt => (
-                      <div key={opt.label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderBottom: opt.label === 'Dark' ? `1px solid ${BORDER2}` : 'none', opacity: opt.soon ? 0.45 : 1 }}>
+                    {[{ label: 'Dark', icon: '◑', value: 'dark' }, { label: 'Light', icon: '○', value: 'light' }].map((opt, idx, arr) => (
+                      <div key={opt.value} onClick={() => setThemeMode(opt.value)}
+                        style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderBottom: idx < arr.length - 1 ? `1px solid ${BORDER2}` : 'none', cursor: 'pointer', background: themeMode === opt.value ? `${PURPLE}10` : 'transparent', transition: 'background 0.15s' }}>
                         <span style={{ fontSize: 15 }}>{opt.icon}</span>
                         <span style={{ flex: 1, fontSize: 13, color: TEXT }}>{opt.label}</span>
-                        {opt.soon && <span style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2 }}>SOON</span>}
-                        {opt.active && <div style={{ width: 18, height: 18, borderRadius: '50%', background: PURPLE, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }}/></div>}
+                        {themeMode === opt.value && <div style={{ width: 18, height: 18, borderRadius: '50%', background: PURPLE, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }}/></div>}
                       </div>
                     ))}
                   </div>
@@ -1270,7 +1278,7 @@ useEffect(() => {
               </div>
               <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 16, padding: 4, lineHeight: 1 }}>✕</button>
             </div>
-            <button onClick={() => { newChat(); if (isMobile) setSidebarOpen(false) }} style={{ width: '100%', padding: '8px 12px', borderRadius: 7, background: AMBER_DIM, border: `1px solid ${AMBER}30`, color: AMBER, fontSize: 12, cursor: 'pointer', textAlign: 'left', fontWeight: 500 }}>
+            <button onClick={() => { newChat(); if (isMobile) setSidebarOpen(false) }} style={{ width: '100%', padding: '8px 12px', borderRadius: 7, background: AMBER_DIM, border: '1px solid var(--c-amber-a30)', color: AMBER, fontSize: 12, cursor: 'pointer', textAlign: 'left', fontWeight: 500 }}>
               + New chat
             </button>
           </div>
@@ -1345,7 +1353,7 @@ useEffect(() => {
             onMouseEnter={e => { e.currentTarget.style.borderColor = PURPLE; e.currentTarget.style.color = PURPLE }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED }}>
             ✦ {!isMobile && 'WHAT\'S NEW'}
-            <span style={{ position: 'absolute', top: -4, right: -4, width: 7, height: 7, borderRadius: '50%', background: PURPLE, border: '1px solid #080808' }} />
+            <span style={{ position: 'absolute', top: -4, right: -4, width: 7, height: 7, borderRadius: '50%', background: PURPLE, border: `1px solid ${BG}` }} />
           </button>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             {[GREEN, GREEN, GREEN, GREEN].map((c, i) => <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: c }}/>)}
@@ -1491,9 +1499,35 @@ useEffect(() => {
         </div>
 
         <style>{`
+          :root {
+            --c-bg: #080808; --c-surface: #0f0f0f; --c-surface-deep: #0a0a0a;
+            --c-card: #141414; --c-border: #222; --c-border2: #1a1a1a;
+            --c-border3: #252525; --c-border4: #2a2a2a;
+            --c-text: #e8e6e0; --c-muted: #555; --c-muted2: #333;
+            --c-muted3: #444; --c-muted4: #666; --c-muted5: #aaa;
+            --c-secondary: #888; --c-subtle: #999; --c-bright: #ccc;
+            --c-text-h2: #ddd; --c-text-h3: #bbb;
+            --c-amber: #e8e8e8; --c-amber-dim: #1a1a1a;
+            --c-amber-a20: #e8e8e820; --c-amber-a30: #e8e8e830; --c-amber-a40: #e8e8e840;
+            --c-red-a99: #ef444499; --c-red-bg: #1a0a0a; --c-red-border: #3a1a1a;
+            --c-danger-sep: #1a0a0a; --c-input-bg: #0a0a0a; --c-placeholder: #2a2a2a;
+          }
+          html[data-theme="light"] {
+            --c-bg: #f8f8f8; --c-surface: #ffffff; --c-surface-deep: #f0f0f0;
+            --c-card: #f0f0f0; --c-border: #d8d8d8; --c-border2: #e8e8e8;
+            --c-border3: #d0d0d0; --c-border4: #d4d4d4;
+            --c-text: #1a1a1a; --c-muted: #888; --c-muted2: #aaa;
+            --c-muted3: #bbb; --c-muted4: #555; --c-muted5: #555;
+            --c-secondary: #666; --c-subtle: #777; --c-bright: #333;
+            --c-text-h2: #333; --c-text-h3: #555;
+            --c-amber: #1a1a1a; --c-amber-dim: #f0f0f0;
+            --c-amber-a20: #1a1a1a20; --c-amber-a30: #1a1a1a30; --c-amber-a40: #1a1a1a40;
+            --c-red-a99: #ef444499; --c-red-bg: #fff0f0; --c-red-border: #ffd0d0;
+            --c-danger-sep: #ffd0d0; --c-input-bg: #f5f5f5; --c-placeholder: #c0c0c0;
+          }
           @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
           @keyframes msgSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-          textarea::placeholder { color: #2a2a2a !important; }
+          textarea::placeholder { color: var(--c-placeholder) !important; }
           .chat-message { animation: msgSlideIn 250ms ease-out both; }
           @media (max-width: 768px) {
             .source-link { word-break: break-all !important; }
@@ -1523,7 +1557,7 @@ useEffect(() => {
               ) : (
                 <div style={{ marginBottom: 10, padding: '6px 12px', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 11, fontFamily: 'monospace', color: AMBER }}>+</span>
-                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#aaa', flex: 1 }}>{attachment.name}</span>
+                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--c-muted5)', flex: 1 }}>{attachment.name}</span>
                   <button onClick={() => setAttachment(null)} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 14, padding: 0 }}>✕</button>
                 </div>
               )
@@ -1535,7 +1569,7 @@ useEffect(() => {
                   {isMobile && (
                     <button onClick={() => setUseWebSearch(!useWebSearch)}
                       title={useWebSearch ? 'Web search ON' : 'Web search OFF'}
-                      style={{ background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : `${AMBER}20`) : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 32, padding: '0 10px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'inline-flex', alignItems: 'center', transition: 'all 0.15s', flexShrink: 0 }}>WEB</button>
+                      style={{ background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : 'var(--c-amber-a20)') : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 32, padding: '0 10px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'inline-flex', alignItems: 'center', transition: 'all 0.15s', flexShrink: 0 }}>WEB</button>
                   )}
                 </div>
                 <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, textAlign: 'right' }}>
@@ -1558,18 +1592,18 @@ useEffect(() => {
                 onKeyDown={handleKeyDown}
                 onPaste={e => { const file = e.clipboardData.files[0]; if (file) handleFile(file) }}
                 rows={1}
-                style={{ width: '100%', padding: isMobile ? '12px 92px 12px 14px' : '14px 90px 14px 80px', borderRadius: 10, border: `1px solid ${prompt ? (mode === 'premium' ? PURPLE : AMBER) + '40' : (mode === 'premium' ? PURPLE + '30' : BORDER)}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none', caretColor: mode === 'premium' ? PURPLE : AMBER }}
+                style={{ width: '100%', padding: isMobile ? '12px 92px 12px 14px' : '14px 90px 14px 80px', borderRadius: 10, border: `1px solid ${prompt ? (mode === 'premium' ? `${PURPLE}40` : 'var(--c-amber-a40)') : (mode === 'premium' ? `${PURPLE}30` : BORDER)}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none', caretColor: mode === 'premium' ? PURPLE : AMBER }}
               />
               {!isMobile && (
                 <button onClick={() => setUseWebSearch(!useWebSearch)}
                   title={useWebSearch ? 'Web search ON' : 'Web search OFF'}
-                  style={{ position: 'absolute', left: 10, bottom: 10, background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : `${AMBER}20`) : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 36, padding: '0 12px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>WEB</button>
+                  style={{ position: 'absolute', left: 10, bottom: 10, background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : 'var(--c-amber-a20)') : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 36, padding: '0 12px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>WEB</button>
               )}
               <div style={{ position: 'absolute', right: 10, bottom: isMobile ? 8 : 10, display: 'flex', gap: 6 }}>
                 <button onClick={() => document.getElementById('file-input').click()}
                   style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, width: isMobile ? 40 : 36, height: isMobile ? 40 : 36, cursor: 'pointer', color: MUTED, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⊕</button>
                 <button onClick={handleSubmit} disabled={loading}
-                  style={{ background: prompt && !loading ? (mode === 'premium' ? PURPLE : AMBER) : MUTED2, border: 'none', borderRadius: 7, width: isMobile ? 40 : 36, height: isMobile ? 40 : 36, cursor: !loading && prompt ? 'pointer' : 'default', color: prompt ? '#fff' : '#555', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', fontWeight: 700 }}>↑</button>
+                  style={{ background: prompt && !loading ? (mode === 'premium' ? PURPLE : AMBER) : MUTED2, border: 'none', borderRadius: 7, width: isMobile ? 40 : 36, height: isMobile ? 40 : 36, cursor: !loading && prompt ? 'pointer' : 'default', color: prompt ? (mode === 'premium' ? '#fff' : BG) : MUTED, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', fontWeight: 700 }}>↑</button>
               </div>
             </div>
           </div>
