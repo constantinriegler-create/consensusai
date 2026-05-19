@@ -489,36 +489,48 @@ function FeedbackModal({ onClose, user }) {
 function UpdateAnnouncementModal({ onDismiss }) {
   const isMobile = window.innerWidth <= 768
   const updates = [
-    { title: 'Send Feedback', desc: 'Share your thoughts and suggestions directly with us through the new feedback feature' },
+    { title: 'VELE AI Rebrand', desc: 'New name, logo, and branding throughout the app' },
+    { title: 'Settings Menu', desc: 'New gear icon with Account, Credits, Appearance, and Delete All Chats options' },
+    { title: 'Dark / Light Mode', desc: 'Choose your preferred theme in Settings → Appearance' },
+    { title: 'Send Feedback', desc: 'Share your thoughts directly with us through the new feedback feature' },
+    { title: 'Confidence Bar', desc: 'See how much the AI models agree on each answer with a visual indicator' },
+    { title: 'Improved Chat Management', desc: 'Cleaner delete and rename icons with consistent design across the sidebar' },
+    { title: 'Bug Fixes', desc: 'Fixed promo code Apply button and improved error handling throughout' },
   ]
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.75)' }}>
-      <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 20, padding: isMobile ? 28 : 44, width: '100%', maxWidth: 480, borderTop: `2px solid ${PURPLE}`, animation: 'msgSlideIn 300ms ease-out both' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 32 }}>
-          <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 56, height: 56, borderRadius: 14, marginBottom: 20 }} />
-          <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 10 }}>UPDATE</div>
-          <h2 style={{ fontSize: isMobile ? 22 : 26, fontWeight: 700, color: TEXT, margin: 0, marginBottom: 6, textAlign: 'center' }}>Welcome to VELE AI</h2>
-          <p style={{ fontSize: 14, color: MUTED, margin: 0, marginBottom: 6, textAlign: 'center' }}>ConsensusAI is now VELE AI</p>
-          <p style={{ fontSize: 11, color: MUTED2, margin: 0, fontFamily: 'monospace', letterSpacing: '0.05em', textAlign: 'center' }}>19. Apr 2026</p>
+      <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 20, width: '100%', maxWidth: 480, borderTop: `2px solid ${PURPLE}`, animation: 'msgSlideIn 300ms ease-out both', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: isMobile ? '28px 28px 20px' : '36px 44px 20px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 52, height: 52, borderRadius: 14, marginBottom: 16 }} />
+            <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 8 }}>UPDATE</div>
+            <h2 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: TEXT, margin: 0, marginBottom: 4, textAlign: 'center' }}>What's New in VELE AI</h2>
+            <p style={{ fontSize: 13, color: MUTED, margin: 0, marginBottom: 4, textAlign: 'center' }}>Lots of improvements today!</p>
+            <p style={{ fontSize: 10, color: MUTED2, margin: 0, fontFamily: 'monospace', letterSpacing: '0.06em', textAlign: 'center' }}>Latest update: 19. May 2026</p>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
-          {updates.map((u, i) => (
-            <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '14px 16px', background: CARD, borderRadius: 10, border: `1px solid ${BORDER}` }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: PURPLE, flexShrink: 0, marginTop: 5 }} />
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, marginBottom: 3 }}>{u.title}</div>
-                <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.6 }}>{u.desc}</div>
+        <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '0 28px' : '0 44px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {updates.map((u, i) => (
+              <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '11px 14px', background: CARD, borderRadius: 9, border: `1px solid ${BORDER2}` }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: PURPLE, flexShrink: 0, marginTop: 4 }} />
+                <div>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{u.title} </span>
+                  <span style={{ fontSize: 12, color: MUTED, lineHeight: 1.5 }}>{u.desc}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        <button onClick={onDismiss}
-          style={{ width: '100%', padding: '13px', borderRadius: 10, background: PURPLE, border: 'none', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', letterSpacing: '0.02em', transition: 'opacity 0.15s' }}
-          onMouseEnter={e => e.currentTarget.style.opacity = '0.85'} onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-          Got it!
-        </button>
+        <div style={{ padding: isMobile ? '20px 28px 28px' : '20px 44px 36px', flexShrink: 0 }}>
+          <button onClick={onDismiss}
+            style={{ width: '100%', padding: '13px', borderRadius: 10, background: PURPLE, border: 'none', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', letterSpacing: '0.02em', transition: 'opacity 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.85'} onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+            Got it!
+          </button>
+        </div>
       </div>
     </div>
   )
