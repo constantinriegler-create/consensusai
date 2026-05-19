@@ -366,6 +366,82 @@ function PremiumProgress({ currentStatus, rounds }) {
   )
 }
 
+function FeedbackModal({ onClose, user }) {
+  const isMobile = window.innerWidth <= 768
+  const [email, setEmail] = useState(user?.email || '')
+  const [feedback, setFeedback] = useState('')
+  const [status, setStatus] = useState(null) // null | 'loading' | 'success' | 'error'
+  const [errorMsg, setErrorMsg] = useState('')
+
+  async function handleSubmit() {
+    if (feedback.trim().length < 10) { setErrorMsg('Feedback must be at least 10 characters.'); return }
+    setStatus('loading')
+    setErrorMsg('')
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      const res = await fetch('https://consensusai-production-0e01.up.railway.app/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ email: email.trim(), feedback: feedback.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setErrorMsg(data.error || 'Something went wrong.'); setStatus('error'); return }
+      setStatus('success')
+    } catch {
+      setErrorMsg('Network error. Please try again.')
+      setStatus('error')
+    }
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <div style={{ background: '#0f0f0f', border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? 24 : 36, width: '100%', maxWidth: 460, borderTop: `2px solid ${PURPLE}`, animation: 'msgSlideIn 250ms ease-out both' }}>
+        {status === 'success' ? (
+          <div style={{ textAlign: 'center', padding: '20px 0' }}>
+            <div style={{ fontSize: 32, marginBottom: 16 }}>✓</div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: TEXT, marginBottom: 8 }}>Feedback sent!</div>
+            <div style={{ fontSize: 13, color: MUTED, marginBottom: 28 }}>Thanks for helping improve VELE AI.</div>
+            <button onClick={onClose} style={{ padding: '10px 28px', borderRadius: 8, background: PURPLE, border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Close</button>
+          </div>
+        ) : (
+          <>
+            <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 10 }}>FEEDBACK</div>
+            <h3 style={{ fontSize: 18, fontWeight: 600, color: TEXT, margin: '0 0 20px' }}>Send Feedback</h3>
+
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 6 }}>EMAIL (OPTIONAL)</div>
+              <input value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com"
+                style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: `1px solid ${BORDER}`, background: '#0a0a0a', color: TEXT, fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+            </div>
+
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 6 }}>FEEDBACK <span style={{ color: RED }}>*</span></div>
+              <textarea value={feedback} onChange={e => { setFeedback(e.target.value); setErrorMsg('') }} placeholder="What's on your mind? Bug reports, feature ideas, general thoughts..."
+                rows={5} style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: `1px solid ${errorMsg ? RED : BORDER}`, background: '#0a0a0a', color: TEXT, fontSize: 13, outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit', lineHeight: 1.6 }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+                {errorMsg ? <span style={{ fontSize: 11, color: RED, fontFamily: 'monospace' }}>{errorMsg}</span> : <span />}
+                <span style={{ fontSize: 11, color: feedback.length > 4800 ? RED : MUTED2, fontFamily: 'monospace' }}>{feedback.length}/5000</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={onClose} disabled={status === 'loading'}
+                style={{ flex: 1, padding: '10px', borderRadius: 8, background: 'none', border: `1px solid ${BORDER}`, color: MUTED, fontSize: 13, cursor: 'pointer' }}>
+                Cancel
+              </button>
+              <button onClick={handleSubmit} disabled={status === 'loading' || feedback.trim().length < 10}
+                style={{ flex: 2, padding: '10px', borderRadius: 8, background: feedback.trim().length >= 10 ? PURPLE : MUTED2, border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: feedback.trim().length >= 10 ? 'pointer' : 'default', transition: 'background 0.15s' }}>
+                {status === 'loading' ? 'Sending...' : 'Send Feedback'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function UpdateAnnouncementModal({ onDismiss }) {
   const isMobile = window.innerWidth <= 768
   const updates = [
@@ -729,6 +805,7 @@ export default function App() {
   const [showBuyModal, setShowBuyModal] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [showWhatsNew, setShowWhatsNew] = useState(false)
+  const [showFeedback, setShowFeedback] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [deleteAllError, setDeleteAllError] = useState('')
   const [lightboxImage, setLightboxImage] = useState(null)
@@ -1010,6 +1087,7 @@ useEffect(() => {
       <input type="file" accept="image/*,.pdf,.txt,.md" style={{ display: 'none' }} id="file-input" onChange={e => handleFile(e.target.files[0])} />
 
       {showWhatsNew && <UpdateAnnouncementModal onDismiss={() => setShowWhatsNew(false)} />}
+      {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} user={user} />}
 
       {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} user={user} onPurchase={() => loadUserData(user)} />}
 
@@ -1129,7 +1207,17 @@ useEffect(() => {
               {name ? name.toUpperCase() : user.email?.split('@')[0].toUpperCase()}
             </button>
 
-            <div style={{ marginTop: 12, fontSize: 10, color: MUTED2, fontFamily: 'monospace', lineHeight: 1.8 }}>
+            <button onClick={() => setShowFeedback(true)}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 8px', marginTop: 8, borderRadius: 7, background: 'none', border: `1px solid ${BORDER2}`, color: MUTED, fontSize: 11, fontFamily: 'monospace', cursor: 'pointer', transition: 'all 0.15s', letterSpacing: '0.05em' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = PURPLE; e.currentTarget.style.color = PURPLE }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER2; e.currentTarget.style.color = MUTED }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              SEND FEEDBACK
+            </button>
+
+            <div style={{ marginTop: 10, fontSize: 10, color: MUTED2, fontFamily: 'monospace', lineHeight: 1.8 }}>
               by Constantin Riegler
             </div>
           </div>

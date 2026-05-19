@@ -112,6 +112,68 @@ app.get('/api/me', requireAuth, async (req, res) => {
   }
 })
 
+// In-memory rate limiter: max 5 feedback submissions per user per hour
+const feedbackRateLimit = new Map()
+function checkFeedbackRateLimit(key) {
+  const now = Date.now()
+  const window = 60 * 60 * 1000 // 1 hour
+  const max = 5
+  const timestamps = (feedbackRateLimit.get(key) || []).filter(t => now - t < window)
+  if (timestamps.length >= max) return false
+  feedbackRateLimit.set(key, [...timestamps, now])
+  return true
+}
+
+// Feedback endpoint
+app.post('/api/feedback', requireAuth, async (req, res) => {
+  const { feedback, email } = req.body
+  const userId = req.user.id
+  const userEmail = email || req.user.email || 'Anonymous'
+
+  if (!feedback || feedback.trim().length < 10) {
+    return res.status(400).json({ error: 'Feedback must be at least 10 characters' })
+  }
+  if (feedback.trim().length > 5000) {
+    return res.status(400).json({ error: 'Feedback must be under 5000 characters' })
+  }
+  if (!checkFeedbackRateLimit(userId)) {
+    return res.status(429).json({ error: 'Too many submissions. Please wait before sending more feedback.' })
+  }
+
+  if (!process.env.RESEND_API_KEY) {
+    console.error('RESEND_API_KEY not set')
+    return res.status(500).json({ error: 'Email service not configured' })
+  }
+
+  try {
+    const emailRes = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: process.env.RESEND_FROM_EMAIL || 'VELE AI <onboarding@resend.dev>',
+        to: 'constantin.n.riegler@gmail.com',
+        subject: `VELE AI Feedback from ${userEmail}`,
+        text: `Feedback from: ${userEmail}\nUser ID: ${userId}\n\n---\n\n${feedback.trim()}`,
+      }),
+    })
+
+    if (!emailRes.ok) {
+      const body = await emailRes.json().catch(() => ({}))
+      console.error('Resend error:', body)
+      return res.status(500).json({ error: 'Failed to send email' })
+    }
+
+    console.log(`Feedback received from ${userEmail} (${userId})`)
+    res.json({ ok: true })
+  } catch (err) {
+    console.error('Feedback send error:', err)
+    res.status(500).json({ error: 'Failed to send feedback' })
+  }
+})
+
 // Delete all chats for authenticated user
 app.delete('/api/chats/all', requireAuth, async (req, res) => {
   try {
