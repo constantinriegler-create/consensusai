@@ -283,18 +283,18 @@ function DebateHistory({ rounds }) {
   )
 }
 
-function FeatureCard({ feature }) {
+function FeatureCard({ feature, isMobile }) {
   const [open, setOpen] = useState(false)
   const [hovered, setHovered] = useState(false)
   return (
     <div onClick={() => setOpen(!open)} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      style={{ background: open ? CARD : hovered ? CARD : SURFACE, border: `1px solid ${open ? BORDER : BORDER2}`, borderRadius: 10, padding: '14px 16px', borderLeft: `2px solid ${open ? AMBER : 'var(--c-amber-a30)'}`, cursor: 'pointer', transition: 'all 0.15s', gridColumn: open ? 'span 2' : 'span 1' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: open ? 10 : 4 }}>
-        <div style={{ fontSize: 11, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.06em' }}>{feature.label.toUpperCase()}</div>
-        <div style={{ fontSize: 10, color: MUTED2, fontFamily: 'monospace' }}>{open ? '▲' : '▼'}</div>
+      style={{ background: open ? CARD : hovered ? CARD : SURFACE, border: `1px solid ${open ? BORDER : BORDER2}`, borderRadius: 10, padding: isMobile ? '10px 11px' : '14px 16px', borderLeft: `2px solid ${open ? AMBER : 'var(--c-amber-a30)'}`, cursor: 'pointer', transition: 'all 0.15s', gridColumn: open ? 'span 2' : 'span 1' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: open ? 8 : 4 }}>
+        <div style={{ fontSize: isMobile ? 9 : 11, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.06em', lineHeight: 1.3 }}>{feature.label.toUpperCase()}</div>
+        <div style={{ fontSize: 9, color: MUTED2, fontFamily: 'monospace', flexShrink: 0, marginLeft: 4 }}>{open ? '▲' : '▼'}</div>
       </div>
-      <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.5, marginBottom: open ? 12 : 0 }}>{feature.desc}</div>
-      {open && <div style={{ fontSize: 13, color: 'var(--c-secondary)', lineHeight: 1.7, borderTop: `1px solid ${BORDER2}`, paddingTop: 12 }}>{feature.detail}</div>}
+      <div style={{ fontSize: isMobile ? 11 : 12, color: MUTED, lineHeight: 1.45, marginBottom: open ? 10 : 0, overflow: open ? 'visible' : 'hidden', display: open ? 'block' : '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{feature.desc}</div>
+      {open && <div style={{ fontSize: 12, color: 'var(--c-secondary)', lineHeight: 1.65, borderTop: `1px solid ${BORDER2}`, paddingTop: 10, marginTop: 2 }}>{feature.detail}</div>}
     </div>
   )
 }
@@ -1424,8 +1424,8 @@ useEffect(() => {
                   <span>PREMIUM MODE — DEEPER REASONING · BLIND VOTING · HIGHEST QUALITY ANSWER</span>
                 </div>
               )}
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10, marginBottom: 24 }}>
-                {FEATURE_DETAILS.map((f, i) => <FeatureCard key={i} feature={f} />)}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? 8 : 10, marginBottom: 24 }}>
+                {FEATURE_DETAILS.map((f, i) => <FeatureCard key={i} feature={f} isMobile={isMobile} />)}
               </div>
               <div style={{ fontSize: 11, color: MUTED2, fontFamily: 'monospace', marginBottom: 32, letterSpacing: '0.06em' }}>CREATED BY CONSTANTIN RIEGLER</div>
             </div>
