@@ -919,6 +919,7 @@ export default function App() {
   const [settingsHovered, setSettingsHovered] = useState(false)
   const [noCreditsError, setNoCreditsError] = useState(false)
   const messagesEndRef = useRef(null)
+  const inputRef = useRef(null)
   const [useWebSearch, setUseWebSearch] = useState(() => {
   return localStorage.getItem('useWebSearch') === 'true'
 })
@@ -1126,13 +1127,14 @@ useEffect(() => {
   }
 
   function newChat() {
-  setActiveChatId(null)
-  setMessages([])
-  setPrompt('')
-  setStreamingText('')
-  setStatusText('')
-  setLiveRounds(null)
-}
+    setActiveChatId(null)
+    setMessages([])
+    setPrompt('')
+    setStreamingText('')
+    setStatusText('')
+    setLiveRounds(null)
+    setTimeout(() => inputRef.current?.focus(), 0)
+  }
 
   function switchChat(chat) {
     setActiveChatId(chat.id)
@@ -1639,6 +1641,8 @@ useEffect(() => {
             </div>
             <div style={{ position: 'relative' }}>
               <textarea
+                ref={inputRef}
+                autoFocus
                 placeholder={mode === 'premium' ? 'Ask anything — models will debate' : 'Ask anything...'}
                 value={prompt}
                 onChange={e => setPrompt(e.target.value)}
