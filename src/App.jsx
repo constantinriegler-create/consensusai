@@ -1199,9 +1199,16 @@ useEffect(() => {
   if (!user) return <LoginPage />
 
   return (
-    <div style={{ display: 'flex', height: '100vh', height: '100dvh', overflow: 'hidden', background: BG, color: TEXT, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
+    <div style={{ display: 'flex', height: '100vh', height: '100dvh', overflow: 'hidden', background: 'transparent', color: TEXT, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
 
       <input type="file" accept="image/*,.pdf,.txt,.md" style={{ display: 'none' }} id="file-input" onChange={e => handleFile(e.target.files[0])} />
+
+      {/* Ambient orb layer — fixed, full viewport, behind all UI chrome */}
+      <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 0, pointerEvents: 'none', overflow: 'visible', opacity: themeMode === 'light' || (themeMode === 'system' && !window.matchMedia('(prefers-color-scheme: dark)').matches) ? 0 : 1 }}>
+        <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '10%', left: '10%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb1 15s ease-in-out infinite', willChange: 'transform' }} />
+        <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '40%', left: '60%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb2 18s ease-in-out infinite', willChange: 'transform' }} />
+        <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '60%', left: '20%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb3 12s ease-in-out infinite', willChange: 'transform' }} />
+      </div>
 
       {showWhatsNew && <UpdateAnnouncementModal onDismiss={() => setShowWhatsNew(false)} />}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} user={user} />}
@@ -1344,7 +1351,7 @@ useEffect(() => {
         <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 49, opacity: sidebarOpen ? 1 : 0, pointerEvents: sidebarOpen ? 'auto' : 'none', transition: 'opacity 250ms ease-out' }} />
       )}
       {(sidebarOpen || isMobile) && (
-        <div style={isMobile ? { position: 'fixed', top: 0, left: 0, height: '100dvh', width: '85vw', maxWidth: 320, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', zIndex: 50, overflowY: 'auto', transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)', transition: 'transform 320ms cubic-bezier(0.4, 0, 0.2, 1)' } : { width: 240, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+        <div style={isMobile ? { position: 'fixed', top: 0, left: 0, height: '100dvh', width: '85vw', maxWidth: 320, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', zIndex: 50, overflowY: 'auto', transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)', transition: 'transform 320ms cubic-bezier(0.4, 0, 0.2, 1)' } : { width: 240, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'relative', zIndex: 1 }}>
           <div style={{ padding: '20px 16px 16px', borderBottom: `1px solid ${BORDER2}` }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -1425,8 +1432,8 @@ useEffect(() => {
         </div>
       )}
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <div style={{ padding: '12px 20px', borderBottom: `1px solid ${BORDER2}`, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, position: 'relative', zIndex: 1 }}>
+        <div style={{ padding: '12px 20px', borderBottom: `1px solid ${BORDER2}`, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, background: BG }}>
           {!sidebarOpen && (
             <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, cursor: 'pointer', fontSize: 12, padding: '4px 10px', fontFamily: 'monospace' }}>☰</button>
           )}
@@ -1441,13 +1448,7 @@ useEffect(() => {
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '48px 0', position: 'relative' }}>
-          {/* Ambient lighting layer — only inside the content area */}
-          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'visible', opacity: themeMode === 'light' || (themeMode === 'system' && !window.matchMedia('(prefers-color-scheme: dark)').matches) ? 0 : 1 }}>
-            <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '10%', left: '10%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb1 15s ease-in-out infinite', willChange: 'transform' }} />
-            <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '40%', left: '60%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb2 18s ease-in-out infinite', willChange: 'transform' }} />
-            <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '60%', left: '20%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb3 12s ease-in-out infinite', willChange: 'transform' }} />
-          </div>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '48px 0', position: 'relative', zIndex: 1 }}>
           {messages.length === 0 && !loading && (
             <div style={{ maxWidth: 600, margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px', position: 'relative', zIndex: 1 }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>VELE AI / TERMINAL</div>
@@ -1600,7 +1601,7 @@ useEffect(() => {
           }
         `}</style>
 
-        <div style={{ padding: isMobile ? '12px 16px' : '16px 32px', paddingBottom: isMobile ? 'max(env(safe-area-inset-bottom), 12px)' : '16px', borderTop: `1px solid ${BORDER2}`, background: BG }}>
+        <div style={{ padding: isMobile ? '12px 16px' : '16px 32px', paddingBottom: isMobile ? 'max(env(safe-area-inset-bottom), 12px)' : '16px', borderTop: `1px solid ${BORDER2}`, background: BG, position: 'relative', zIndex: 1 }}>
           <div style={{ maxWidth: 720, margin: '0 auto' }}>
             {attachment && (
               attachment.type?.startsWith('image/') ? (
