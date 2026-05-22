@@ -1207,7 +1207,7 @@ useEffect(() => {
       <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 0, pointerEvents: 'none', overflow: 'visible', opacity: themeMode === 'light' || (themeMode === 'system' && !window.matchMedia('(prefers-color-scheme: dark)').matches) ? 0 : 1 }}>
         <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '10%', left: '10%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb1 15s ease-in-out infinite', willChange: 'transform' }} />
         <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '40%', left: '60%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb2 18s ease-in-out infinite', willChange: 'transform' }} />
-        <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '60%', left: '20%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb3 12s ease-in-out infinite', willChange: 'transform' }} />
+        <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '70%', left: '20%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb3 12s ease-in-out infinite', willChange: 'transform' }} />
       </div>
 
       {showWhatsNew && <UpdateAnnouncementModal onDismiss={() => setShowWhatsNew(false)} />}
@@ -1433,7 +1433,7 @@ useEffect(() => {
       )}
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, position: 'relative', zIndex: 1 }}>
-        <div style={{ padding: '12px 20px', borderBottom: `1px solid ${BORDER2}`, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, background: BG }}>
+        <div style={{ padding: '12px 20px', borderBottom: `1px solid ${BORDER2}`, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, background: 'transparent' }}>
           {!sidebarOpen && (
             <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, cursor: 'pointer', fontSize: 12, padding: '4px 10px', fontFamily: 'monospace' }}>☰</button>
           )}
@@ -1601,7 +1601,7 @@ useEffect(() => {
           }
         `}</style>
 
-        <div style={{ padding: isMobile ? '12px 16px' : '16px 32px', paddingBottom: isMobile ? 'max(env(safe-area-inset-bottom), 12px)' : '16px', borderTop: `1px solid ${BORDER2}`, background: BG, position: 'relative', zIndex: 1 }}>
+        <div style={{ padding: isMobile ? '12px 16px' : '16px 32px', paddingBottom: isMobile ? 'max(env(safe-area-inset-bottom), 12px)' : '16px', borderTop: `1px solid ${BORDER2}`, background: 'transparent', position: 'relative', zIndex: 1 }}>
           <div style={{ maxWidth: 720, margin: '0 auto' }}>
             {attachment && (
               attachment.type?.startsWith('image/') ? (
