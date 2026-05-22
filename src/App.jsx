@@ -1601,7 +1601,7 @@ useEffect(() => {
           }
         `}</style>
 
-        <div style={{ padding: isMobile ? '12px 16px' : '16px 32px', paddingBottom: isMobile ? 'max(env(safe-area-inset-bottom), 12px)' : '16px', borderTop: `1px solid ${BORDER2}`, background: 'transparent', position: 'relative', zIndex: 1 }}>
+        <div style={{ padding: isMobile ? '12px 16px' : '16px 32px', paddingBottom: isMobile ? 'max(env(safe-area-inset-bottom), 12px)' : '16px', background: 'transparent', position: 'relative', zIndex: 1 }}>
           <div style={{ maxWidth: 720, margin: '0 auto' }}>
             {attachment && (
               attachment.type?.startsWith('image/') ? (
