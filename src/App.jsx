@@ -1241,6 +1241,22 @@ useEffect(() => {
                     {menuRow('Delete All Chats', '⊘', () => setSettingsView('delete'), true)}
                   </div>
 
+                  <div style={{ borderTop: `1px solid ${BORDER2}`, paddingTop: 12, marginTop: 4 }}>
+                    <button
+                      onClick={async () => {
+                        if (!window.confirm('Sign out of VELE AI?')) return
+                        closeSettings()
+                        await supabase.auth.signOut()
+                      }}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '13px 14px', borderRadius: 10, background: 'none', border: `1px solid ${PURPLE}30`, color: PURPLE, fontSize: 13, cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = `${PURPLE}10`; e.currentTarget.style.borderColor = `${PURPLE}60` }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = `${PURPLE}30` }}
+                    >
+                      <span style={{ fontSize: 16, flexShrink: 0 }}>→</span>
+                      <span style={{ flex: 1 }}>Sign Out</span>
+                    </button>
+                  </div>
+
                 </>
               )}
 
