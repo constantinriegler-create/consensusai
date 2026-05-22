@@ -6,7 +6,9 @@
 
 body, #root {
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
   background: #0a0a0a;
   overflow: hidden;
+  overscroll-behavior: none;
 }

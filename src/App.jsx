@@ -706,7 +706,7 @@ function LoginPage() {
   })
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', padding: '20px 20px 40px' }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', padding: '20px 20px 40px' }}>
       <div style={{ width: '100%', maxWidth: 420 }}>
 
         {/* Hero header — outside the card */}
@@ -1175,7 +1175,7 @@ useEffect(() => {
   const timeStr = now.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })
 
   if (authLoading) return (
-    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG }}>
+    <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG }}>
       <div style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.1em' }}>LOADING...</div>
     </div>
   )
@@ -1183,7 +1183,7 @@ useEffect(() => {
   if (!user) return <LoginPage />
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: BG, color: TEXT, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
+    <div style={{ display: 'flex', height: '100vh', height: '100dvh', overflow: 'hidden', background: BG, color: TEXT, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
 
       <input type="file" accept="image/*,.pdf,.txt,.md" style={{ display: 'none' }} id="file-input" onChange={e => handleFile(e.target.files[0])} />
 
@@ -1310,7 +1310,7 @@ useEffect(() => {
         <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 49, opacity: sidebarOpen ? 1 : 0, pointerEvents: sidebarOpen ? 'auto' : 'none', transition: 'opacity 250ms ease-out' }} />
       )}
       {(sidebarOpen || isMobile) && (
-        <div style={isMobile ? { position: 'fixed', top: 0, left: 0, height: '100vh', width: '85vw', maxWidth: 320, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', zIndex: 50, overflowY: 'auto', transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)', transition: 'transform 320ms cubic-bezier(0.4, 0, 0.2, 1)' } : { width: 240, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+        <div style={isMobile ? { position: 'fixed', top: 0, left: 0, height: '100dvh', width: '85vw', maxWidth: 320, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', zIndex: 50, overflowY: 'auto', transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)', transition: 'transform 320ms cubic-bezier(0.4, 0, 0.2, 1)' } : { width: 240, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
           <div style={{ padding: '20px 16px 16px', borderBottom: `1px solid ${BORDER2}` }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -1557,7 +1557,7 @@ useEffect(() => {
           }
         `}</style>
 
-        <div style={{ padding: isMobile ? '12px 16px 16px' : '16px 32px 20px', borderTop: `1px solid ${BORDER2}`, background: BG }}>
+        <div style={{ padding: isMobile ? '12px 16px 16px' : '16px 32px 20px', paddingBottom: isMobile ? 'max(env(safe-area-inset-bottom), 16px)' : '20px', borderTop: `1px solid ${BORDER2}`, background: BG }}>
           <div style={{ maxWidth: 720, margin: '0 auto' }}>
             {attachment && (
               attachment.type?.startsWith('image/') ? (
