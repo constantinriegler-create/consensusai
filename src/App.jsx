@@ -898,6 +898,7 @@ export default function App() {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [showWhatsNew, setShowWhatsNew] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
+  const [showInfo, setShowInfo] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [settingsView, setSettingsView] = useState('menu')
   const [deleteAllError, setDeleteAllError] = useState('')
@@ -1189,6 +1190,46 @@ useEffect(() => {
 
       {showWhatsNew && <UpdateAnnouncementModal onDismiss={() => setShowWhatsNew(false)} />}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} user={user} />}
+      {showInfo && (() => {
+        const sections = [
+          {
+            title: 'ABOUT VELE AI',
+            body: 'VELE AI is a multi-model synthesis platform that queries multiple leading AI models simultaneously and synthesizes their responses into a single, high-quality answer. Instead of choosing one AI, you get the combined intelligence of many.'
+          },
+          {
+            title: 'STANDARD & PREMIUM',
+            body: 'Standard credits power queries using efficient models optimized for speed and everyday tasks. Premium credits unlock the most capable frontier models — including reasoning-focused and multimodal systems — for complex analysis, coding, and research.'
+          },
+          {
+            title: 'MODELS',
+            body: 'VELE queries a curated set of frontier models including GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro, Grok, and others. The synthesis engine weighs and merges their outputs to reduce individual model blind spots and hallucinations.'
+          },
+          {
+            title: 'WHY MULTI-MODEL?',
+            body: 'Each AI model has unique strengths, training data, and failure modes. By running your query across multiple models and synthesizing the results, VELE delivers more balanced, accurate, and comprehensive answers than any single model alone.'
+          }
+        ]
+        return (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+            onClick={() => setShowInfo(false)}>
+            <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 14, padding: '28px 28px 24px', maxWidth: 480, width: '100%', maxHeight: '80vh', overflowY: 'auto', position: 'relative' }}
+              onClick={e => e.stopPropagation()}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                <h3 style={{ fontSize: 13, fontWeight: 700, color: TEXT, fontFamily: 'monospace', letterSpacing: '0.1em' }}>VELE AI — INFO</h3>
+                <button onClick={() => setShowInfo(false)} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 0 }}>✕</button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                {sections.map(s => (
+                  <div key={s.title}>
+                    <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.12em', marginBottom: 7 }}>{s.title}</div>
+                    <p style={{ fontSize: 13, color: 'var(--c-readable)', lineHeight: 1.7, margin: 0 }}>{s.body}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} user={user} onPurchase={() => loadUserData(user)} />}
 
@@ -1338,11 +1379,7 @@ useEffect(() => {
           </div>
 
           <div style={{ padding: '12px 16px', borderTop: `1px solid ${BORDER2}` }}>
-            <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.12em', marginBottom: 10 }}>MODELS ONLINE</div>
-            {MODEL_META.map(m => <ModelRow key={m.key} label={m.label} color={GREEN} />)}
-            <ModelRow label="Synthesis" color={GREEN} />
-
-            <div style={{ marginTop: 12, marginBottom: 8, display: 'flex', gap: 8 }}>
+            <div style={{ marginTop: 0, marginBottom: 8, display: 'flex', gap: 8 }}>
               <div style={{ flex: 1, background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: AMBER }}>{credits.standard_credits}</div>
                 <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>STD</div>
@@ -1375,6 +1412,16 @@ useEffect(() => {
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
                 Send Feedback
+              </button>
+
+              <button onClick={() => setShowInfo(true)}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 8, background: 'none', border: `1px solid ${BORDER2}`, color: MUTED, fontSize: 12, fontFamily: 'monospace', cursor: 'pointer', transition: 'all 0.15s', letterSpacing: '0.04em' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = PURPLE; e.currentTarget.style.color = PURPLE }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER2; e.currentTarget.style.color = MUTED }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                Info
               </button>
             </div>
 
