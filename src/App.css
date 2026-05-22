@@ -4,7 +4,7 @@
   box-sizing: border-box;
 }
 
-body, #root {
+html, body, #root {
   height: 100vh;
   height: 100dvh;
   width: 100vw;
