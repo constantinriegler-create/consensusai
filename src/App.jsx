@@ -505,7 +505,7 @@ function UpdateAnnouncementModal({ onDismiss }) {
             <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 52, height: 52, borderRadius: 14, marginBottom: 16 }} />
             <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 8 }}>UPDATE</div>
             <h2 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: TEXT, margin: 0, marginBottom: 4, textAlign: 'center' }}>What's New in VELE AI</h2>
-            <p style={{ fontSize: 13, color: MUTED, margin: 0, marginBottom: 4, textAlign: 'center' }}>Lots of improvements today!</p>
+            <p style={{ fontSize: 13, color: MUTED, margin: 0, marginBottom: 4, textAlign: 'center' }}>Version 1.0</p>
             <p style={{ fontSize: 10, color: MUTED2, margin: 0, fontFamily: 'monospace', letterSpacing: '0.06em', textAlign: 'center' }}>Latest update: 19. May 2026</p>
           </div>
         </div>
