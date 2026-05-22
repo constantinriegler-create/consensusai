@@ -1450,11 +1450,11 @@ useEffect(() => {
                 {getGreeting()}{name ? `, ${name}` : ''}.
               </div>
               <div style={{ fontSize: 15, color: MUTED, marginBottom: mode === 'premium' ? 16 : 48, lineHeight: 1.7 }}>
-                {mode === 'premium'
+                <div>{mode === 'premium'
                   ? 'Ask anything. 4 AI models debate your question in multiple rounds, then vote blindly on the best answer.'
-                  : 'Ask anything. Your question goes to 4 AI models simultaneously.'}
-                {credits.standard_credits > 0 && <span style={{ color: GREEN }}> {credits.standard_credits} standard {credits.standard_credits === 1 ? 'query' : 'queries'} remaining.</span>}
-                {credits.premium_credits > 0 && <span style={{ color: PURPLE }}> {credits.premium_credits} premium {credits.premium_credits === 1 ? 'query' : 'queries'} remaining.</span>}
+                  : 'Ask anything. Your question goes to 4 AI models simultaneously.'}</div>
+                {credits.standard_credits > 0 && <div style={{ color: GREEN }}>{credits.standard_credits} standard {credits.standard_credits === 1 ? 'query' : 'queries'} remaining.</div>}
+                {credits.premium_credits > 0 && <div style={{ color: PURPLE }}>{credits.premium_credits} premium {credits.premium_credits === 1 ? 'query' : 'queries'} remaining.</div>}
               </div>
               {mode === 'premium' && (
                 <div style={{ fontSize: 12, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.08em', marginBottom: 48, display: 'flex', alignItems: 'center', gap: 8, opacity: 0.85 }}>
