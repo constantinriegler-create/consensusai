@@ -1443,10 +1443,10 @@ useEffect(() => {
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '48px 0', position: 'relative' }}>
           {/* Ambient lighting layer — only inside the content area */}
-          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden', opacity: themeMode === 'light' || (themeMode === 'system' && !window.matchMedia('(prefers-color-scheme: dark)').matches) ? 0 : 1 }}>
-            <div style={{ position: 'absolute', width: '60%', height: 300, background: 'radial-gradient(ellipse, rgba(167,139,250,0.28) 0%, transparent 70%)', top: -60, left: '30%', filter: 'blur(60px)', borderRadius: '50%', animation: 'floatOrb1 18s ease-in-out infinite', willChange: 'transform' }} />
-            <div style={{ position: 'absolute', width: '40%', height: 250, background: 'radial-gradient(ellipse, rgba(139,92,246,0.18) 0%, transparent 70%)', top: '35%', left: '-5%', filter: 'blur(80px)', borderRadius: '50%', animation: 'floatOrb2 24s ease-in-out infinite', willChange: 'transform' }} />
-            <div style={{ position: 'absolute', width: '50%', height: 200, background: 'radial-gradient(ellipse, rgba(167,139,250,0.15) 0%, transparent 70%)', bottom: 80, left: '25%', filter: 'blur(70px)', borderRadius: '50%', animation: 'floatOrb3 20s ease-in-out infinite', willChange: 'transform' }} />
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'visible', opacity: themeMode === 'light' || (themeMode === 'system' && !window.matchMedia('(prefers-color-scheme: dark)').matches) ? 0 : 1 }}>
+            <div style={{ position: 'absolute', width: '60%', height: 300, background: 'radial-gradient(ellipse, rgba(167,139,250,0.28) 0%, transparent 70%)', top: -60, left: '30%', filter: 'blur(60px)', borderRadius: '50%', animation: 'floatOrb1 8s ease-in-out infinite', willChange: 'transform' }} />
+            <div style={{ position: 'absolute', width: '40%', height: 250, background: 'radial-gradient(ellipse, rgba(139,92,246,0.18) 0%, transparent 70%)', top: '35%', left: '-5%', filter: 'blur(80px)', borderRadius: '50%', animation: 'floatOrb2 11s ease-in-out infinite', willChange: 'transform' }} />
+            <div style={{ position: 'absolute', width: '50%', height: 200, background: 'radial-gradient(ellipse, rgba(167,139,250,0.15) 0%, transparent 70%)', bottom: 80, left: '25%', filter: 'blur(70px)', borderRadius: '50%', animation: 'floatOrb3 9s ease-in-out infinite', willChange: 'transform' }} />
           </div>
           {messages.length === 0 && !loading && (
             <div style={{ maxWidth: 600, margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px', position: 'relative', zIndex: 1 }}>
@@ -1588,9 +1588,6 @@ useEffect(() => {
         <style>{`
           @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
           @keyframes msgSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-          @keyframes floatOrb1 { 0%{transform:translate(0px,0px) scale(1)} 33%{transform:translate(30px,-20px) scale(1.05)} 66%{transform:translate(-20px,15px) scale(0.97)} 100%{transform:translate(0px,0px) scale(1)} }
-          @keyframes floatOrb2 { 0%{transform:translate(0px,0px) scale(1)} 33%{transform:translate(-25px,20px) scale(1.03)} 66%{transform:translate(20px,-15px) scale(0.98)} 100%{transform:translate(0px,0px) scale(1)} }
-          @keyframes floatOrb3 { 0%{transform:translate(0px,0px) scale(1)} 33%{transform:translate(15px,25px) scale(1.04)} 66%{transform:translate(-30px,-10px) scale(0.96)} 100%{transform:translate(0px,0px) scale(1)} }
           textarea::placeholder { color: var(--c-placeholder) !important; }
           .chat-message { animation: msgSlideIn 250ms ease-out both; }
           @media (max-width: 768px) {

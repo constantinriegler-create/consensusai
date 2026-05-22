@@ -40,6 +40,23 @@ body {
   --c-danger-sep: #1a0a0a; --c-input-bg: #0a0a0a; --c-placeholder: #555;
 }
 
+/* ── Ambient orb animations ──────────────────────────────────── */
+@keyframes floatOrb1 {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  50%  { transform: translate(70px, -50px) scale(1.08); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+@keyframes floatOrb2 {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  50%  { transform: translate(-60px, 55px) scale(1.06); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+@keyframes floatOrb3 {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  50%  { transform: translate(50px, 60px) scale(1.07); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
 html[data-theme="light"] {
   --c-bg: #f8f8f8; --c-surface: #ffffff; --c-surface-deep: #f0f0f0;
   --c-card: #f0f0f0; --c-border: #d8d8d8; --c-border2: #e8e8e8;
