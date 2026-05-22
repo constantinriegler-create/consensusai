@@ -1444,9 +1444,9 @@ useEffect(() => {
         <div style={{ flex: 1, overflowY: 'auto', padding: '48px 0', position: 'relative' }}>
           {/* Ambient lighting layer — only inside the content area */}
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'visible', opacity: themeMode === 'light' || (themeMode === 'system' && !window.matchMedia('(prefers-color-scheme: dark)').matches) ? 0 : 1 }}>
-            <div style={{ position: 'absolute', width: '60%', height: 300, background: 'radial-gradient(ellipse, rgba(167,139,250,0.28) 0%, transparent 70%)', top: -60, left: '30%', filter: 'blur(60px)', borderRadius: '50%', animation: 'floatOrb1 8s ease-in-out infinite', willChange: 'transform' }} />
-            <div style={{ position: 'absolute', width: '40%', height: 250, background: 'radial-gradient(ellipse, rgba(139,92,246,0.18) 0%, transparent 70%)', top: '35%', left: '-5%', filter: 'blur(80px)', borderRadius: '50%', animation: 'floatOrb2 11s ease-in-out infinite', willChange: 'transform' }} />
-            <div style={{ position: 'absolute', width: '50%', height: 200, background: 'radial-gradient(ellipse, rgba(167,139,250,0.15) 0%, transparent 70%)', bottom: 80, left: '25%', filter: 'blur(70px)', borderRadius: '50%', animation: 'floatOrb3 9s ease-in-out infinite', willChange: 'transform' }} />
+            <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '10%', left: '10%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb1 15s ease-in-out infinite', willChange: 'transform' }} />
+            <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '40%', left: '60%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb2 18s ease-in-out infinite', willChange: 'transform' }} />
+            <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '60%', left: '20%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb3 12s ease-in-out infinite', willChange: 'transform' }} />
           </div>
           {messages.length === 0 && !loading && (
             <div style={{ maxWidth: 600, margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px', position: 'relative', zIndex: 1 }}>

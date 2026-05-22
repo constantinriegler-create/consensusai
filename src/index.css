@@ -41,20 +41,26 @@ body {
 }
 
 /* ── Ambient orb animations ──────────────────────────────────── */
-@keyframes floatOrb1 {
-  0%   { transform: translate(0px, 0px) scale(1); }
-  50%  { transform: translate(70px, -50px) scale(1.08); }
-  100% { transform: translate(0px, 0px) scale(1); }
+@keyframes orb1 {
+  0%   { transform: translate(0px, 0px); }
+  25%  { transform: translate(300px, -150px); }
+  50%  { transform: translate(500px, 100px); }
+  75%  { transform: translate(100px, 250px); }
+  100% { transform: translate(0px, 0px); }
 }
-@keyframes floatOrb2 {
-  0%   { transform: translate(0px, 0px) scale(1); }
-  50%  { transform: translate(-60px, 55px) scale(1.06); }
-  100% { transform: translate(0px, 0px) scale(1); }
+@keyframes orb2 {
+  0%   { transform: translate(0px, 0px); }
+  25%  { transform: translate(-200px, 200px); }
+  50%  { transform: translate(-400px, -100px); }
+  75%  { transform: translate(-100px, -200px); }
+  100% { transform: translate(0px, 0px); }
 }
-@keyframes floatOrb3 {
-  0%   { transform: translate(0px, 0px) scale(1); }
-  50%  { transform: translate(50px, 60px) scale(1.07); }
-  100% { transform: translate(0px, 0px) scale(1); }
+@keyframes orb3 {
+  0%   { transform: translate(0px, 0px); }
+  25%  { transform: translate(200px, 300px); }
+  50%  { transform: translate(-300px, 150px); }
+  75%  { transform: translate(100px, -200px); }
+  100% { transform: translate(0px, 0px); }
 }
 
 html[data-theme="light"] {
