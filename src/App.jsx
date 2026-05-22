@@ -1441,9 +1441,15 @@ useEffect(() => {
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '48px 0' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '48px 0', position: 'relative' }}>
+          {/* Ambient lighting layer — only inside the content area */}
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden', opacity: themeMode === 'light' || (themeMode === 'system' && !window.matchMedia('(prefers-color-scheme: dark)').matches) ? 0 : 1 }}>
+            <div style={{ position: 'absolute', width: '60%', height: 300, background: 'radial-gradient(ellipse, rgba(167,139,250,0.28) 0%, transparent 70%)', top: -60, left: '30%', filter: 'blur(60px)', borderRadius: '50%' }} />
+            <div style={{ position: 'absolute', width: '40%', height: 250, background: 'radial-gradient(ellipse, rgba(139,92,246,0.18) 0%, transparent 70%)', top: '35%', left: '-5%', filter: 'blur(80px)', borderRadius: '50%' }} />
+            <div style={{ position: 'absolute', width: '50%', height: 200, background: 'radial-gradient(ellipse, rgba(167,139,250,0.15) 0%, transparent 70%)', bottom: 80, left: '25%', filter: 'blur(70px)', borderRadius: '50%' }} />
+          </div>
           {messages.length === 0 && !loading && (
-            <div style={{ maxWidth: 600, margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px' }}>
+            <div style={{ maxWidth: 600, margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px', position: 'relative', zIndex: 1 }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>VELE AI / TERMINAL</div>
               <div style={{ fontSize: isMobile ? 26 : 36, fontWeight: 700, color: TEXT, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 12 }}>
                 {getGreeting()}{name ? `, ${name}` : ''}.
@@ -1469,7 +1475,7 @@ useEffect(() => {
           )}
 
           {messages.map((msg, i) => (
-            <div key={i} className="chat-message" style={{ maxWidth: 720, margin: '0 auto 48px', padding: isMobile ? '0 16px' : '0 32px' }}>
+            <div key={i} className="chat-message" style={{ maxWidth: 720, margin: '0 auto 48px', padding: isMobile ? '0 16px' : '0 32px', position: 'relative', zIndex: 1 }}>
               {msg.role === 'user' ? (
                 <div style={{ marginBottom: 8 }}>
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.1em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
