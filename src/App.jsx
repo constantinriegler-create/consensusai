@@ -1396,7 +1396,7 @@ useEffect(() => {
             style={{ position: 'relative', background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, cursor: 'pointer', fontSize: 11, fontFamily: 'monospace', padding: '4px 8px', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: 5, transition: 'all 0.15s' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = PURPLE; e.currentTarget.style.color = PURPLE }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED }}>
-            ✦ {!isMobile && 'WHAT\'S NEW'}
+            ✦ WHAT'S NEW
             <span style={{ position: 'absolute', top: -4, right: -4, width: 7, height: 7, borderRadius: '50%', background: PURPLE, border: `1px solid ${BG}` }} />
           </button>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
