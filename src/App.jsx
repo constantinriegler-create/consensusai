@@ -325,8 +325,8 @@ function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
             style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', padding: '2px 3px', display: 'flex', alignItems: 'center', borderRadius: 4, transition: 'color 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.color = 'var(--c-text)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--c-muted)'}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+              <line x1="3" y1="22" x2="21" y2="22"/>
             </svg>
           </button>
           <button onClick={e => { e.stopPropagation(); if (window.confirm('Delete this chat? This cannot be undone.')) onDelete() }}
@@ -1437,9 +1437,6 @@ useEffect(() => {
             ✦ WHAT'S NEW
             <span style={{ position: 'absolute', top: -4, right: -4, width: 7, height: 7, borderRadius: '50%', background: PURPLE, border: `1px solid ${BG}` }} />
           </button>
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            {[GREEN, GREEN, GREEN, GREEN].map((c, i) => <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: c }}/>)}
-          </div>
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '48px 0' }}>
