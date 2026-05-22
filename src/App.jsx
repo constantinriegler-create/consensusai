@@ -1201,9 +1201,9 @@ useEffect(() => {
   return (
     <div style={{ display: 'flex', height: '100vh', height: '100dvh', overflow: 'hidden', background: 'transparent', color: TEXT, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
       {/* Ambient background orbs — z-index: -1 so they sit under all content */}
-      <div style={{ position: 'fixed', top: '15%', left: '55%', width: isMobile ? 450 : 750, height: isMobile ? 450 : 750, borderRadius: '50%', background: 'rgba(124,58,237,0.38)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0, transform: 'translate(-50%,-50%)' }} />
-      <div style={{ position: 'fixed', top: '80%', left: '75%', width: isMobile ? 360 : 600, height: isMobile ? 360 : 600, borderRadius: '50%', background: 'rgba(22,163,74,0.22)', filter: 'blur(90px)', pointerEvents: 'none', zIndex: 0, transform: 'translate(-50%,-50%)' }} />
-      <div style={{ position: 'fixed', top: '55%', left: '40%', width: isMobile ? 270 : 450, height: isMobile ? 270 : 450, borderRadius: '50%', background: 'rgba(124,58,237,0.18)', filter: 'blur(100px)', pointerEvents: 'none', zIndex: 0, transform: 'translate(-50%,-50%)' }} />
+      <div style={{ position: 'fixed', top: '15%', left: '55%', width: isMobile ? 450 : 750, height: isMobile ? 450 : 750, borderRadius: '50%', background: 'rgba(124,58,237,0.25)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0, transform: 'translate(-50%,-50%)' }} />
+      <div style={{ position: 'fixed', top: '55%', left: '45%', width: isMobile ? 270 : 450, height: isMobile ? 270 : 450, borderRadius: '50%', background: 'rgba(124,58,237,0.12)', filter: 'blur(100px)', pointerEvents: 'none', zIndex: 0, transform: 'translate(-50%,-50%)' }} />
+      <div style={{ position: 'fixed', top: '90%', left: '55%', width: isMobile ? 360 : 600, height: isMobile ? 360 : 600, borderRadius: '50%', background: 'rgba(124,58,237,0.20)', filter: 'blur(90px)', pointerEvents: 'none', zIndex: 0, transform: 'translate(-50%,-50%)' }} />
 
       <input type="file" accept="image/*,.pdf,.txt,.md" style={{ display: 'none' }} id="file-input" onChange={e => handleFile(e.target.files[0])} />
 
