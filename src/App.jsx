@@ -1649,7 +1649,7 @@ useEffect(() => {
                 onKeyDown={handleKeyDown}
                 onPaste={e => { const file = e.clipboardData.files[0]; if (file) handleFile(file) }}
                 rows={1}
-                style={{ width: '100%', padding: isMobile ? '12px 92px 12px 14px' : '14px 90px 14px 80px', borderRadius: 10, border: `1px solid ${prompt ? (mode === 'premium' ? `${PURPLE}40` : 'var(--c-amber-a40)') : (mode === 'premium' ? `${PURPLE}30` : BORDER)}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none', caretColor: mode === 'premium' ? PURPLE : AMBER }}
+                style={{ width: '100%', padding: isMobile ? '12px 92px 12px 14px' : '14px 90px 14px 80px', borderRadius: 10, border: `1px solid ${mode === 'premium' ? (prompt ? `${PURPLE}90` : `${PURPLE}50`) : (prompt ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.22)')}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none', caretColor: mode === 'premium' ? PURPLE : AMBER }}
               />
               {!isMobile && (
                 <button onClick={() => setUseWebSearch(!useWebSearch)}
