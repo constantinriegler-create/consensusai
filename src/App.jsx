@@ -947,12 +947,16 @@ useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       setAuthLoading(false)
+      const savedAppearance = session?.user?.user_metadata?.appearance
+      if (savedAppearance) setThemeMode(savedAppearance)
     })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       if (session?.user) {
         setName(session.user.user_metadata?.full_name?.split(' ')[0] || '')
         loadUserData(session.user)
+        const savedAppearance = session.user.user_metadata?.appearance
+        if (savedAppearance) setThemeMode(savedAppearance)
       }
     })
     return () => subscription.unsubscribe()
@@ -1309,7 +1313,7 @@ useEffect(() => {
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>APPEARANCE</div>
                   <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, overflow: 'hidden' }}>
                     {[{ label: 'Dark', icon: '◑', value: 'dark' }, { label: 'Light', icon: '○', value: 'light' }, { label: 'System', icon: '◎', value: 'system' }].map((opt, idx, arr) => (
-                      <div key={opt.value} onClick={() => setThemeMode(opt.value)}
+                      <div key={opt.value} onClick={() => { setThemeMode(opt.value); supabase.auth.updateUser({ data: { appearance: opt.value } }) }}
                         style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderBottom: idx < arr.length - 1 ? `1px solid ${BORDER2}` : 'none', cursor: 'pointer', background: themeMode === opt.value ? `${PURPLE}10` : 'transparent', transition: 'background 0.15s' }}>
                         <span style={{ fontSize: 15 }}>{opt.icon}</span>
                         <span style={{ flex: 1, fontSize: 13, color: TEXT }}>{opt.label}</span>
@@ -1591,7 +1595,7 @@ useEffect(() => {
           }
         `}</style>
 
-        <div style={{ padding: isMobile ? '12px 16px 16px' : '16px 32px 20px', paddingBottom: isMobile ? 'max(env(safe-area-inset-bottom), 16px)' : '20px', borderTop: `1px solid ${BORDER2}`, background: BG }}>
+        <div style={{ padding: isMobile ? '12px 16px' : '16px 32px', paddingBottom: isMobile ? 'max(env(safe-area-inset-bottom), 12px)' : '16px', borderTop: `1px solid ${BORDER2}`, background: BG }}>
           <div style={{ maxWidth: 720, margin: '0 auto' }}>
             {attachment && (
               attachment.type?.startsWith('image/') ? (
@@ -1649,9 +1653,9 @@ useEffect(() => {
               {!isMobile && (
                 <button onClick={() => setUseWebSearch(!useWebSearch)}
                   title={useWebSearch ? 'Web search ON' : 'Web search OFF'}
-                  style={{ position: 'absolute', left: 10, bottom: 10, background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : 'var(--c-amber-a20)') : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 36, padding: '0 12px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>WEB</button>
+                  style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : 'var(--c-amber-a20)') : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 36, padding: '0 12px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>WEB</button>
               )}
-              <div style={{ position: 'absolute', right: 10, bottom: isMobile ? 8 : 10, display: 'flex', gap: 6 }}>
+              <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: 6 }}>
                 <button onClick={() => document.getElementById('file-input').click()}
                   style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, width: isMobile ? 40 : 36, height: isMobile ? 40 : 36, cursor: 'pointer', color: MUTED, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⊕</button>
                 <button onClick={handleSubmit} disabled={loading}
