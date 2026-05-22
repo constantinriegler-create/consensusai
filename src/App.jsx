@@ -1248,11 +1248,10 @@ useEffect(() => {
                         closeSettings()
                         await supabase.auth.signOut()
                       }}
-                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '13px 14px', borderRadius: 10, background: 'none', border: `1px solid ${PURPLE}30`, color: PURPLE, fontSize: 13, cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = `${PURPLE}10`; e.currentTarget.style.borderColor = `${PURPLE}60` }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = `${PURPLE}30` }}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '13px 14px', borderRadius: 10, background: 'none', border: `1px solid ${BORDER2}`, color: RED, fontSize: 13, cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s' }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = RED; e.currentTarget.style.background = 'var(--c-red-bg)' }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER2; e.currentTarget.style.background = 'none' }}
                     >
-                      <span style={{ fontSize: 16, flexShrink: 0 }}>→</span>
                       <span style={{ flex: 1 }}>Sign Out</span>
                     </button>
                   </div>
