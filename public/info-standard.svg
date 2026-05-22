@@ -1,0 +1,67 @@
+<svg width="100%" viewBox="0 0 680 480" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>VELE AI Standard – with optional live web search</title>
+  <desc>User prompt flows into VELE AI, distributed to 4 AI models plus optional web search in parallel, synthesized into one best answer.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <!-- User prompt -->
+  <rect x="270" y="24" width="140" height="44" rx="8" fill="#1a1a1a" stroke="#444" stroke-width="0.5"/>
+  <text x="340" y="46" text-anchor="middle" dominant-baseline="central" fill="#aaa" font-family="-apple-system,sans-serif" font-size="14" font-weight="500">User prompt</text>
+
+  <line x1="340" y1="68" x2="340" y2="94" marker-end="url(#arrow)" stroke="#555" stroke-width="1.5"/>
+
+  <!-- VELE AI -->
+  <rect x="210" y="94" width="260" height="56" rx="8" fill="#1e1a2e" stroke="#a855f7" stroke-width="0.5"/>
+  <text x="340" y="116" text-anchor="middle" dominant-baseline="central" fill="#c084fc" font-family="-apple-system,sans-serif" font-size="14" font-weight="500">VELE AI</text>
+  <text x="340" y="136" text-anchor="middle" dominant-baseline="central" fill="#a855f7" font-family="-apple-system,sans-serif" font-size="12">Distributes to 4 models in parallel</text>
+
+  <!-- Fan-out -->
+  <path d="M263 150 L76 200" fill="none" stroke="#555" stroke-width="0.5" opacity="0.6" marker-end="url(#arrow)"/>
+  <path d="M296 150 L200 200" fill="none" stroke="#555" stroke-width="0.5" opacity="0.6" marker-end="url(#arrow)"/>
+  <path d="M330 150 L324 200" fill="none" stroke="#555" stroke-width="0.5" opacity="0.6" marker-end="url(#arrow)"/>
+  <path d="M374 150 L448 200" fill="none" stroke="#555" stroke-width="0.5" opacity="0.6" marker-end="url(#arrow)"/>
+  <path d="M420 150 L582 200" fill="none" stroke="#555" stroke-width="0.5" stroke-dasharray="4 2" opacity="0.5" marker-end="url(#arrow)"/>
+
+  <!-- Model nodes -->
+  <rect x="20" y="200" width="112" height="56" rx="8" fill="#0d1f18" stroke="#0f6e56" stroke-width="0.5"/>
+  <text x="76" y="222" text-anchor="middle" dominant-baseline="central" fill="#6ee7b7" font-family="-apple-system,sans-serif" font-size="14" font-weight="500">GPT-4o</text>
+  <text x="76" y="242" text-anchor="middle" dominant-baseline="central" fill="#0f6e56" font-family="-apple-system,sans-serif" font-size="12">OpenAI</text>
+
+  <rect x="144" y="200" width="112" height="56" rx="8" fill="#0d1f18" stroke="#0f6e56" stroke-width="0.5"/>
+  <text x="200" y="222" text-anchor="middle" dominant-baseline="central" fill="#6ee7b7" font-family="-apple-system,sans-serif" font-size="14" font-weight="500">Claude</text>
+  <text x="200" y="242" text-anchor="middle" dominant-baseline="central" fill="#0f6e56" font-family="-apple-system,sans-serif" font-size="12">Anthropic</text>
+
+  <rect x="268" y="200" width="112" height="56" rx="8" fill="#0d1f18" stroke="#0f6e56" stroke-width="0.5"/>
+  <text x="324" y="222" text-anchor="middle" dominant-baseline="central" fill="#6ee7b7" font-family="-apple-system,sans-serif" font-size="14" font-weight="500">DeepSeek</text>
+  <text x="324" y="242" text-anchor="middle" dominant-baseline="central" fill="#0f6e56" font-family="-apple-system,sans-serif" font-size="12">DeepSeek</text>
+
+  <rect x="392" y="200" width="112" height="56" rx="8" fill="#0d1f18" stroke="#0f6e56" stroke-width="0.5"/>
+  <text x="448" y="222" text-anchor="middle" dominant-baseline="central" fill="#6ee7b7" font-family="-apple-system,sans-serif" font-size="14" font-weight="500">Grok</text>
+  <text x="448" y="242" text-anchor="middle" dominant-baseline="central" fill="#0f6e56" font-family="-apple-system,sans-serif" font-size="12">xAI</text>
+
+  <!-- Web search node -->
+  <rect x="516" y="200" width="132" height="56" rx="8" fill="#0d1624" stroke="#185fa5" stroke-width="0.5" stroke-dasharray="5 2"/>
+  <text x="582" y="222" text-anchor="middle" dominant-baseline="central" fill="#60a5fa" font-family="-apple-system,sans-serif" font-size="14" font-weight="500">Web search</text>
+  <text x="582" y="242" text-anchor="middle" dominant-baseline="central" fill="#185fa5" font-family="-apple-system,sans-serif" font-size="12">(optional)</text>
+
+  <!-- Fan-in -->
+  <path d="M76 256 L228 318" fill="none" stroke="#555" stroke-width="0.5" opacity="0.6" marker-end="url(#arrow)"/>
+  <path d="M200 256 L280 318" fill="none" stroke="#555" stroke-width="0.5" opacity="0.6" marker-end="url(#arrow)"/>
+  <path d="M324 256 L332 318" fill="none" stroke="#555" stroke-width="0.5" opacity="0.6" marker-end="url(#arrow)"/>
+  <path d="M448 256 L392 318" fill="none" stroke="#555" stroke-width="0.5" opacity="0.6" marker-end="url(#arrow)"/>
+  <path d="M582 256 L452 318" fill="none" stroke="#555" stroke-width="0.5" stroke-dasharray="4 2" opacity="0.5" marker-end="url(#arrow)"/>
+
+  <!-- Synthesis -->
+  <rect x="200" y="318" width="280" height="56" rx="8" fill="#1e1a2e" stroke="#a855f7" stroke-width="0.5"/>
+  <text x="340" y="340" text-anchor="middle" dominant-baseline="central" fill="#c084fc" font-family="-apple-system,sans-serif" font-size="14" font-weight="500">Synthesis</text>
+  <text x="340" y="360" text-anchor="middle" dominant-baseline="central" fill="#a855f7" font-family="-apple-system,sans-serif" font-size="12">Agreement · conflicts · confidence score</text>
+
+  <line x1="340" y1="374" x2="340" y2="398" marker-end="url(#arrow)" stroke="#555" stroke-width="1.5"/>
+
+  <!-- Result -->
+  <rect x="220" y="398" width="240" height="44" rx="8" fill="#1a1a1a" stroke="#444" stroke-width="0.5"/>
+  <text x="340" y="420" text-anchor="middle" dominant-baseline="central" fill="#aaa" font-family="-apple-system,sans-serif" font-size="14" font-weight="500">Best answer, back to you</text>
+</svg>

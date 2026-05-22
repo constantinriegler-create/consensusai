@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import supabase from './supabase.js'
+import InfoPage from './InfoPage.jsx'
 
 const AMBER = 'var(--c-amber)'
 const AMBER_DIM = 'var(--c-amber-dim)'
@@ -1190,46 +1191,9 @@ useEffect(() => {
 
       {showWhatsNew && <UpdateAnnouncementModal onDismiss={() => setShowWhatsNew(false)} />}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} user={user} />}
-      {showInfo && (() => {
-        const sections = [
-          {
-            title: 'ABOUT VELE AI',
-            body: 'VELE AI is a multi-model synthesis platform that queries multiple leading AI models simultaneously and synthesizes their responses into a single, high-quality answer. Instead of choosing one AI, you get the combined intelligence of many.'
-          },
-          {
-            title: 'STANDARD & PREMIUM',
-            body: 'Standard credits power queries using efficient models optimized for speed and everyday tasks. Premium credits unlock the most capable frontier models — including reasoning-focused and multimodal systems — for complex analysis, coding, and research.'
-          },
-          {
-            title: 'MODELS',
-            body: 'VELE queries a curated set of frontier models including GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro, Grok, and others. The synthesis engine weighs and merges their outputs to reduce individual model blind spots and hallucinations.'
-          },
-          {
-            title: 'WHY MULTI-MODEL?',
-            body: 'Each AI model has unique strengths, training data, and failure modes. By running your query across multiple models and synthesizing the results, VELE delivers more balanced, accurate, and comprehensive answers than any single model alone.'
-          }
-        ]
-        return (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
-            onClick={() => setShowInfo(false)}>
-            <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 14, padding: '28px 28px 24px', maxWidth: 480, width: '100%', maxHeight: '80vh', overflowY: 'auto', position: 'relative' }}
-              onClick={e => e.stopPropagation()}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-                <h3 style={{ fontSize: 13, fontWeight: 700, color: TEXT, fontFamily: 'monospace', letterSpacing: '0.1em' }}>VELE AI — INFO</h3>
-                <button onClick={() => setShowInfo(false)} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 0 }}>✕</button>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                {sections.map(s => (
-                  <div key={s.title}>
-                    <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.12em', marginBottom: 7 }}>{s.title}</div>
-                    <p style={{ fontSize: 13, color: 'var(--c-readable)', lineHeight: 1.7, margin: 0 }}>{s.body}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )
-      })()}
+      {showInfo && (
+        <InfoPage onClose={() => setShowInfo(false)} />
+      )}
 
       {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} user={user} onPurchase={() => loadUserData(user)} />}
 

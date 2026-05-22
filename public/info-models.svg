@@ -1,0 +1,24 @@
+<svg width="100%" viewBox="0 0 680 148" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>VELE AI – the 4 models</title>
+  <desc>The four AI models used in VELE AI: GPT-4o by OpenAI, Claude by Anthropic, DeepSeek, and Grok by xAI.</desc>
+
+  <!-- GPT-4o -->
+  <rect x="28" y="24" width="145" height="100" rx="12" fill="#10A37F" stroke="#0C8C6C" stroke-width="0.5"/>
+  <text x="100" y="62" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,sans-serif" font-size="14" font-weight="500" fill="#ffffff">GPT-4o</text>
+  <text x="100" y="88" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,sans-serif" font-size="12" fill="rgba(255,255,255,0.7)">OpenAI</text>
+
+  <!-- Claude -->
+  <rect x="189" y="24" width="145" height="100" rx="12" fill="#D4622A" stroke="#B8541F" stroke-width="0.5"/>
+  <text x="261" y="62" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,sans-serif" font-size="14" font-weight="500" fill="#ffffff">Claude</text>
+  <text x="261" y="88" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,sans-serif" font-size="12" fill="rgba(255,255,255,0.7)">Anthropic</text>
+
+  <!-- DeepSeek -->
+  <rect x="350" y="24" width="145" height="100" rx="12" fill="#1B4AC8" stroke="#163FA8" stroke-width="0.5"/>
+  <text x="422" y="62" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,sans-serif" font-size="14" font-weight="500" fill="#ffffff">DeepSeek</text>
+  <text x="422" y="88" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,sans-serif" font-size="12" fill="rgba(255,255,255,0.7)">DeepSeek</text>
+
+  <!-- Grok -->
+  <rect x="511" y="24" width="145" height="100" rx="12" fill="#111111" stroke="#2a2a2a" stroke-width="0.5"/>
+  <text x="583" y="62" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,sans-serif" font-size="14" font-weight="500" fill="#ffffff">Grok</text>
+  <text x="583" y="88" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,sans-serif" font-size="12" fill="rgba(255,255,255,0.7)">xAI</text>
+</svg>
