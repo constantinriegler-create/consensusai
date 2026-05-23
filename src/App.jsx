@@ -1321,7 +1321,7 @@ useEffect(() => {
                   {backBtn('SETTINGS')}
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>APPEARANCE</div>
                   <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, overflow: 'hidden' }}>
-                    {[{ label: 'Dark', icon: '◑', value: 'dark' }, { label: 'Light', icon: '○', value: 'light' }, { label: 'System', icon: '◎', value: 'system' }].map((opt, idx, arr) => (
+                    {[{ label: 'Default Dark', icon: '●', value: 'dark-plain' }, { label: 'Dark Ambient', icon: '◑', value: 'dark' }, { label: 'Light', icon: '○', value: 'light' }, { label: 'System', icon: '◎', value: 'system' }].map((opt, idx, arr) => (
                       <div key={opt.value} onClick={() => { setThemeMode(opt.value); supabase.auth.updateUser({ data: { appearance: opt.value } }) }}
                         style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderBottom: idx < arr.length - 1 ? `1px solid ${BORDER2}` : 'none', cursor: 'pointer', background: themeMode === opt.value ? `${PURPLE}10` : 'transparent', transition: 'background 0.15s' }}>
                         <span style={{ fontSize: 15 }}>{opt.icon}</span>
