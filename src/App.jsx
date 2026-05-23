@@ -498,14 +498,16 @@ function UpdateAnnouncementModal({ onDismiss }) {
   const { t } = useTranslation()
   const isMobile = window.innerWidth <= 768
   const updates = [
-    { title: 'VELE AI Rebrand', desc: 'New name, logo, and branding throughout the app' },
-    { title: 'Settings Menu', desc: 'New gear icon with Account, Credits, Appearance, and Delete All Chats options' },
-    { title: 'Dark / Light Mode', desc: 'Choose your preferred theme in Settings → Appearance' },
-    { title: 'Send Feedback', desc: 'Share your thoughts directly with us through the new feedback feature' },
-    { title: 'Confidence Bar', desc: 'See how much the AI models agree on each answer with a visual indicator' },
-    { title: 'Improved Chat Management', desc: 'Cleaner delete and rename icons with consistent design across the sidebar' },
-    { title: 'Bug Fixes', desc: 'Fixed promo code Apply button and improved error handling throughout' },
-  ]
+  { title: 'Mobile Layout Fixed', desc: 'Input bar and content now display correctly on all mobile browsers including iOS Safari' },
+  { title: 'Ambient Lighting', desc: 'Subtle animated purple glow in the background — dark mode only, disappears in light mode' },
+  { title: 'Language Support', desc: 'Choose between English and German in Settings → Language' },
+  { title: 'Info Page', desc: 'New Info button in the sidebar explaining Standard vs Premium, all 4 AI models, and how VELE AI works' },
+  { title: 'Web Search Toggle', desc: 'Enable live web search directly from the input bar for real-time answers' },
+  { title: 'Auto-focus Input', desc: 'Start typing immediately after opening a new chat — no extra click needed' },
+  { title: 'Theme Color', desc: 'Browser chrome now matches the app background in both light and dark mode' },
+  { title: 'Vote Results Fix', desc: 'Grok vote count and labels now clearly visible in light mode' },
+  { title: 'What\'s New Button', desc: 'Now fully visible on mobile with complete label shown' },
+]
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.75)' }}>
       <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 20, width: '100%', maxWidth: 480, borderTop: `2px solid ${PURPLE}`, animation: 'msgSlideIn 300ms ease-out both', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
