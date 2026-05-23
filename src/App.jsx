@@ -929,7 +929,6 @@ useEffect(() => {
 }, [useWebSearch])
 
   const [themeMode, setThemeMode] = useState(() => localStorage.getItem('theme') || 'system')
-  const [osDark, setOsDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches)
 
   useEffect(() => {
     localStorage.setItem('theme', themeMode)
@@ -939,16 +938,10 @@ useEffect(() => {
     }
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
     document.documentElement.setAttribute('data-theme', mq.matches ? 'dark' : 'light')
-    setOsDark(mq.matches)
-    const handler = e => {
-      document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light')
-      setOsDark(e.matches)
-    }
+    const handler = e => document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light')
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
   }, [themeMode])
-
-  const resolvedDark = themeMode === 'dark' || (themeMode === 'system' && osDark)
 
   // Auth listener
   useEffect(() => {
@@ -1210,12 +1203,12 @@ useEffect(() => {
 
       <input type="file" accept="image/*,.pdf,.txt,.md" style={{ display: 'none' }} id="file-input" onChange={e => handleFile(e.target.files[0])} />
 
-      {/* Ambient orb layer — fixed, full viewport, behind all UI chrome */}
-      {resolvedDark && <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 0, pointerEvents: 'none', overflow: 'visible' }}>
+      {/* Ambient orb layer — fixed, full viewport, hidden via CSS in light mode */}
+      <div className="ambient-orbs" style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 2, pointerEvents: 'none', overflow: 'visible' }}>
         <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '10%', left: '10%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb1 15s ease-in-out infinite', willChange: 'transform' }} />
         <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '40%', left: '60%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb2 18s ease-in-out infinite', willChange: 'transform' }} />
         <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '70%', left: '20%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb3 12s ease-in-out infinite', willChange: 'transform' }} />
-      </div>}
+      </div>
 
       {showWhatsNew && <UpdateAnnouncementModal onDismiss={() => setShowWhatsNew(false)} />}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} user={user} />}
@@ -1439,7 +1432,7 @@ useEffect(() => {
         </div>
       )}
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, position: 'relative', zIndex: 1 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         <div style={{ padding: '12px 20px', borderBottom: `1px solid ${BORDER2}`, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, background: 'transparent' }}>
           {!sidebarOpen && (
             <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, cursor: 'pointer', fontSize: 12, padding: '4px 10px', fontFamily: 'monospace' }}>☰</button>
@@ -1455,7 +1448,7 @@ useEffect(() => {
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '48px 0', position: 'relative', zIndex: 1 }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '48px 0', position: 'relative' }}>
           {messages.length === 0 && !loading && (
             <div style={{ maxWidth: 600, margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px', position: 'relative', zIndex: 1 }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>VELE AI / TERMINAL</div>
