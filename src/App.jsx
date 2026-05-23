@@ -197,6 +197,8 @@ function IndividualAnswers({ individual }) {
 function VoteTally({ votes, counts, resolution }) {
   const { t } = useTranslation()
   if (!votes || !counts) return null
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light'
+  const mc = (m) => (m.key === 'grok' && isLight) ? '#374151' : m.color
   const badgeMeta = {
     consensus: { label: t('voteResults_consensus'), color: GREEN },
     majority: { label: t('voteResults_majority'), color: YELLOW },
@@ -215,7 +217,7 @@ function VoteTally({ votes, counts, resolution }) {
         </div>
       </div>
       {winnerModel && <div style={{ marginBottom: 16, fontSize: 12, color: 'var(--c-muted5)' }}>
-        {t('winner')}: <span style={{ color: winnerModel.color, fontWeight: 600 }}>{winnerModel.label}</span>
+        {t('winner')}: <span style={{ color: mc(winnerModel), fontWeight: 600 }}>{winnerModel.label}</span>
       </div>}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>
         {MODEL_META.map((m, i) => {
@@ -223,9 +225,9 @@ function VoteTally({ votes, counts, resolution }) {
           const count = counts[letter] || 0
           const isWinner = resolution?.winner === letter
           return (
-            <div key={m.key} style={{ background: SURFACE, border: `1px solid ${isWinner ? m.color + '80' : BORDER2}`, borderRadius: 7, padding: '10px 12px', textAlign: 'center' }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: m.color, marginBottom: 4 }}>{m.label.toUpperCase()}</div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: isWinner ? m.color : 'var(--c-secondary)' }}>{count}</div>
+            <div key={m.key} style={{ background: SURFACE, border: `1px solid ${isWinner ? mc(m) + '80' : BORDER2}`, borderRadius: 7, padding: '10px 12px', textAlign: 'center' }}>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: mc(m), marginBottom: 4 }}>{m.label.toUpperCase()}</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: isWinner ? mc(m) : 'var(--c-secondary)' }}>{count}</div>
               <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>{count === 1 ? t('vote') : t('votes')}</div>
             </div>
           )
@@ -238,9 +240,9 @@ function VoteTally({ votes, counts, resolution }) {
           const votedFor = votedIdx >= 0 ? MODEL_META[votedIdx] : null
           return (
             <div key={voterIdx} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, marginBottom: 4, color: 'var(--c-subtle)' }}>
-              <span style={{ color: voter.color, fontFamily: 'monospace', fontSize: 11, minWidth: 72 }}>{voter.label}</span>
+              <span style={{ color: mc(voter), fontFamily: 'monospace', fontSize: 11, minWidth: 72 }}>{voter.label}</span>
               <span style={{ color: MUTED2 }}>→</span>
-              {votedFor ? <span style={{ color: votedFor.color, fontFamily: 'monospace', fontSize: 11 }}>{votedFor.label}</span>
+              {votedFor ? <span style={{ color: mc(votedFor), fontFamily: 'monospace', fontSize: 11 }}>{votedFor.label}</span>
                 : <span style={{ color: MUTED2, fontFamily: 'monospace', fontSize: 11 }}>(no vote)</span>}
             </div>
           )
