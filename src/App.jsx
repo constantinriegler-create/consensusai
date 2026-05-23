@@ -335,7 +335,36 @@ function DeleteChatModal({ onConfirm, onCancel }) {
   )
 }
 
-function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
+function DeleteSelectedModal({ count, onConfirm, onCancel }) {
+  const { t } = useTranslation()
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light'
+  return createPortal(
+    <>
+      <div onClick={onCancel} style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} />
+      <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000, background: isLight ? '#ffffff' : '#111111', border: `1px solid ${isLight ? '#e5e5e5' : '#2a2a2a'}`, borderRadius: 8, padding: 24, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', minWidth: 320, maxWidth: 400, width: 'calc(100vw - 48px)' }}>
+        <div style={{ fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.15em', color: isLight ? '#888' : '#555', marginBottom: 12 }}>{t('deleteNChatsTitle', { n: count })}</div>
+        <p style={{ fontFamily: 'monospace', fontSize: 13, color: isLight ? '#1a1a1a' : '#e8e6e0', margin: '0 0 20px', lineHeight: 1.6 }}>{t('deleteNChatsBody')}</p>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button onClick={onCancel}
+            style={{ background: 'transparent', border: `1px solid ${isLight ? '#d8d8d8' : '#333'}`, borderRadius: 6, color: isLight ? '#1a1a1a' : '#e8e6e0', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'border-color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = isLight ? '#aaa' : '#555'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = isLight ? '#d8d8d8' : '#333'}>
+            {t('cancel')}
+          </button>
+          <button onClick={onConfirm}
+            style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid #ef4444', borderRadius: 6, color: '#ef4444', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'background 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.25)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.15)'}>
+            {t('delete')}
+          </button>
+        </div>
+      </div>
+    </>,
+    document.body
+  )
+}
+
+function ChatItem({ chat, active, onSelect, onRename, onDelete, selectionMode = false, isSelected = false, onToggleSelect }) {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const [val, setVal] = useState(chat.title)
@@ -349,13 +378,21 @@ function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
     </div>
   )
   return (
-    <div onDoubleClick={() => { setVal(chat.title); setEditing(true) }} onClick={onSelect}
-      style={{ padding: '8px 10px', borderRadius: 7, cursor: 'pointer', marginBottom: 2, background: active ? AMBER_DIM : 'none', color: active ? TEXT : MUTED, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', borderLeft: active ? `2px solid ${AMBER}` : '2px solid transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div
+      onDoubleClick={selectionMode ? undefined : () => { setVal(chat.title); setEditing(true) }}
+      onClick={selectionMode ? onToggleSelect : onSelect}
+      style={{ padding: '8px 10px', borderRadius: 7, cursor: 'pointer', marginBottom: 2, background: selectionMode ? (isSelected ? `${PURPLE}15` : 'none') : (active ? AMBER_DIM : 'none'), color: selectionMode ? TEXT : (active ? TEXT : MUTED), fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', borderLeft: selectionMode ? `2px solid ${isSelected ? PURPLE : 'transparent'}` : (active ? `2px solid ${AMBER}` : '2px solid transparent'), display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ color: chat.mode === 'premium' ? PURPLE : TEXT, flexShrink: 0 }}>◆</span>
+        {selectionMode ? (
+          <span style={{ width: 15, height: 15, border: `1.5px solid ${isSelected ? PURPLE : MUTED}`, borderRadius: 3, background: isSelected ? PURPLE : 'transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.15s' }}>
+            {isSelected && <span style={{ color: '#fff', fontSize: 9, lineHeight: 1, fontWeight: 700 }}>✓</span>}
+          </span>
+        ) : (
+          <span style={{ color: chat.mode === 'premium' ? PURPLE : TEXT, flexShrink: 0 }}>◆</span>
+        )}
         {chat.title}
       </span>
-      {active && (
+      {!selectionMode && active && (
         <span style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
           <button onClick={e => { e.stopPropagation(); setVal(chat.title); setEditing(true) }}
             title={t('rename')}
@@ -1034,6 +1071,9 @@ export default function App() {
   const [activeChatId, setActiveChatId] = useState(null)
   const [settingsHovered, setSettingsHovered] = useState(false)
   const [noCreditsError, setNoCreditsError] = useState(false)
+  const [selectionMode, setSelectionMode] = useState(false)
+  const [selectedChatIds, setSelectedChatIds] = useState(new Set())
+  const [showDeleteSelectedModal, setShowDeleteSelectedModal] = useState(false)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
   const [useWebSearch, setUseWebSearch] = useState(() => {
@@ -1295,6 +1335,27 @@ useEffect(() => {
     }
   }
 
+  async function handleDeleteSelected() {
+    const idArr = [...selectedChatIds]
+    const idSet = new Set(idArr)
+    const session = await supabase.auth.getSession()
+    const token = session.data.session?.access_token
+    await Promise.all(idArr.map(id =>
+      fetch(`https://consensusai-production-0e01.up.railway.app/api/chats/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+    ))
+    setChats(prev => prev.filter(c => !idSet.has(c.id)))
+    if (idSet.has(activeChatId)) {
+      setActiveChatId(null)
+      setMessages([])
+    }
+    setSelectionMode(false)
+    setSelectedChatIds(new Set())
+    setShowDeleteSelectedModal(false)
+  }
+
   function handleKeyDown(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit() }
   }
@@ -1345,6 +1406,8 @@ useEffect(() => {
 
       {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} user={user} onPurchase={() => loadUserData(user)} />}
 
+      {showDeleteSelectedModal && <DeleteSelectedModal count={selectedChatIds.size} onConfirm={handleDeleteSelected} onCancel={() => setShowDeleteSelectedModal(false)} />}
+
       {paymentSuccess && (
         <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 200, background: SURFACE, border: `1px solid ${GREEN}`, borderRadius: 10, padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: `0 0 24px ${GREEN}20`, animation: 'msgSlideIn 300ms ease-out both' }}>
           <span style={{ color: GREEN, fontSize: 16 }}>✓</span>
@@ -1388,6 +1451,7 @@ useEffect(() => {
                   <div style={{ borderTop: `1px solid var(--c-danger-sep)`, paddingTop: 12, marginTop: 4 }}>
                     <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--c-red-a99)', letterSpacing: '0.15em', marginBottom: 10 }}>{t('dangerZone')}</div>
                     {menuRow(t('deleteAllChats'), '⊘', () => setSettingsView('delete'), true)}
+                    {menuRow(t('selectChatsToDelete'), '⊟', () => { setSelectionMode(true); setSelectedChatIds(new Set()); setShowSettings(false); setSettingsView('menu') })}
                   </div>
 
                   <div style={{ borderTop: `1px solid ${BORDER2}`, paddingTop: 12, marginTop: 4 }}>
@@ -1514,14 +1578,43 @@ useEffect(() => {
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '12px 8px' }}>
-            <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.12em', padding: '0 8px', marginBottom: 6 }}>{t('sessions')}</div>
+            {selectionMode ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px', marginBottom: 6 }}>
+                <div style={{ fontSize: 9, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.12em' }}>{t('selectChatsHeader')}</div>
+                <button onClick={() => { setSelectionMode(false); setSelectedChatIds(new Set()) }} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 13, padding: 2, lineHeight: 1 }}>✕</button>
+              </div>
+            ) : (
+              <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.12em', padding: '0 8px', marginBottom: 6 }}>{t('sessions')}</div>
+            )}
             {chats.map(chat => (
               <ChatItem key={chat.id} chat={chat} active={chat.id === activeChatId}
                 onSelect={() => { switchChat(chat); if (isMobile) setSidebarOpen(false) }}
                 onRename={newTitle => setChats(prev => prev.map(c => c.id === chat.id ? { ...c, title: newTitle } : c))}
-                onDelete={() => handleDeleteChat(chat.id)} />
+                onDelete={() => handleDeleteChat(chat.id)}
+                selectionMode={selectionMode}
+                isSelected={selectedChatIds.has(chat.id)}
+                onToggleSelect={() => setSelectedChatIds(prev => {
+                  const next = new Set(prev)
+                  next.has(chat.id) ? next.delete(chat.id) : next.add(chat.id)
+                  return next
+                })} />
             ))}
           </div>
+
+          {selectionMode && (
+            <div style={{ padding: '8px', borderTop: `1px solid ${BORDER2}`, display: 'flex', gap: 6 }}>
+              <button
+                onClick={() => setSelectedChatIds(selectedChatIds.size === chats.length ? new Set() : new Set(chats.map(c => c.id)))}
+                style={{ flex: 1, padding: '7px 8px', borderRadius: 6, background: CARD, border: `1px solid ${BORDER2}`, color: MUTED, fontSize: 11, fontFamily: 'monospace', cursor: 'pointer', letterSpacing: '0.04em' }}>
+                {t('selectAll')}
+              </button>
+              <button
+                onClick={() => { if (selectedChatIds.size > 0) setShowDeleteSelectedModal(true) }}
+                style={{ flex: 1, padding: '7px 8px', borderRadius: 6, background: selectedChatIds.size > 0 ? RED : CARD, border: `1px solid ${selectedChatIds.size > 0 ? RED : BORDER2}`, color: selectedChatIds.size > 0 ? '#fff' : MUTED, fontSize: 11, fontFamily: 'monospace', cursor: selectedChatIds.size > 0 ? 'pointer' : 'default', letterSpacing: '0.04em', transition: 'all 0.15s' }}>
+                {selectedChatIds.size > 0 ? t('deleteSelectedCount', { n: selectedChatIds.size }) : t('deleteSelected')}
+              </button>
+            </div>
+          )}
 
           <div style={{ padding: '12px 16px', borderTop: `1px solid ${BORDER2}` }}>
             <div style={{ marginTop: 0, marginBottom: 8, display: 'flex', gap: 8 }}>

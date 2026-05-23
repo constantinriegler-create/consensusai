@@ -118,6 +118,13 @@
 
   "deleteAllTitle": "ALLE CHATS LÖSCHEN",
   "deleteAllDesc": "Dies löscht dauerhaft alle deine Chats und den Nachrichtenverlauf. Halte den Button unten, um zu bestätigen.",
+  "selectChatsToDelete": "Chats auswählen zum Löschen",
+  "selectChatsHeader": "CHATS ZUM LÖSCHEN AUSWÄHLEN",
+  "selectAll": "Alle auswählen",
+  "deleteSelected": "Ausgewählte löschen",
+  "deleteSelectedCount": "Ausgewählte löschen ({{n}})",
+  "deleteNChatsTitle": "{{n}} CHATS LÖSCHEN",
+  "deleteNChatsBody": "Dies kann nicht rückgängig gemacht werden.",
 
   "highConfidence": "Hoch",
   "mediumConfidence": "Mittel",

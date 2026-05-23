@@ -118,6 +118,13 @@
 
   "deleteAllTitle": "DELETE ALL CHATS",
   "deleteAllDesc": "This will permanently delete all your chats and message history. Hold the button below to confirm.",
+  "selectChatsToDelete": "Select chats to delete",
+  "selectChatsHeader": "SELECT CHATS TO DELETE",
+  "selectAll": "Select All",
+  "deleteSelected": "Delete Selected",
+  "deleteSelectedCount": "Delete Selected ({{n}})",
+  "deleteNChatsTitle": "DELETE {{n}} CHATS",
+  "deleteNChatsBody": "This cannot be undone.",
 
   "highConfidence": "High",
   "mediumConfidence": "Medium",
