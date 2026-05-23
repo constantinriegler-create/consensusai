@@ -498,16 +498,16 @@ function UpdateAnnouncementModal({ onDismiss }) {
   const { t } = useTranslation()
   const isMobile = window.innerWidth <= 768
   const updates = [
-  { title: 'Mobile Layout Fixed', desc: 'Input bar and content now display correctly on all mobile browsers including iOS Safari' },
-  { title: 'Ambient Lighting', desc: 'Subtle animated purple glow in the background — dark mode only, disappears in light mode' },
-  { title: 'Language Support', desc: 'Choose between English and German in Settings → Language' },
-  { title: 'Info Page', desc: 'New Info button in the sidebar explaining Standard vs Premium, all 4 AI models, and how VELE AI works' },
-  { title: 'Web Search Toggle', desc: 'Enable live web search directly from the input bar for real-time answers' },
-  { title: 'Auto-focus Input', desc: 'Start typing immediately after opening a new chat — no extra click needed' },
-  { title: 'Theme Color', desc: 'Browser chrome now matches the app background in both light and dark mode' },
-  { title: 'Vote Results Fix', desc: 'Grok vote count and labels now clearly visible in light mode' },
-  { title: 'What\'s New Button', desc: 'Now fully visible on mobile with complete label shown' },
-]
+    { title: t('upd_mobileLayout_title'), desc: t('upd_mobileLayout_desc') },
+    { title: t('upd_ambientLighting_title'), desc: t('upd_ambientLighting_desc') },
+    { title: t('upd_languageSupport_title'), desc: t('upd_languageSupport_desc') },
+    { title: t('upd_infoPage_title'), desc: t('upd_infoPage_desc') },
+    { title: t('upd_webSearch_title'), desc: t('upd_webSearch_desc') },
+    { title: t('upd_autoFocus_title'), desc: t('upd_autoFocus_desc') },
+    { title: t('upd_themeColor_title'), desc: t('upd_themeColor_desc') },
+    { title: t('upd_voteResultsFix_title'), desc: t('upd_voteResultsFix_desc') },
+    { title: t('upd_whatsNewButton_title'), desc: t('upd_whatsNewButton_desc') },
+  ]
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.75)' }}>
       <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 20, width: '100%', maxWidth: 480, borderTop: `2px solid ${PURPLE}`, animation: 'msgSlideIn 300ms ease-out both', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
