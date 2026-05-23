@@ -198,9 +198,9 @@ function VoteTally({ votes, counts, resolution }) {
   const { t } = useTranslation()
   if (!votes || !counts) return null
   const badgeMeta = {
-    consensus: { label: t('voteResults_consensus') || 'CONSENSUS', color: GREEN },
-    majority: { label: t('voteResults_majority') || 'MAJORITY', color: YELLOW },
-    tie: { label: t('voteResults_tie') || 'TIEBREAKER', color: RED },
+    consensus: { label: t('voteResults_consensus'), color: GREEN },
+    majority: { label: t('voteResults_majority'), color: YELLOW },
+    tie: { label: t('voteResults_tie'), color: RED },
   }
   const badge = badgeMeta[resolution?.type] || badgeMeta.majority
   const winnerIdx = 'ABCD'.indexOf(resolution?.winner)
@@ -223,7 +223,7 @@ function VoteTally({ votes, counts, resolution }) {
           const count = counts[letter] || 0
           const isWinner = resolution?.winner === letter
           return (
-            <div key={m.key} style={{ background: isWinner ? `${m.color}15` : SURFACE, border: `1px solid ${isWinner ? m.color + '60' : BORDER2}`, borderRadius: 7, padding: '10px 12px', textAlign: 'center' }}>
+            <div key={m.key} style={{ background: SURFACE, border: `1px solid ${isWinner ? m.color + '80' : BORDER2}`, borderRadius: 7, padding: '10px 12px', textAlign: 'center' }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: m.color, marginBottom: 4 }}>{m.label.toUpperCase()}</div>
               <div style={{ fontSize: 22, fontWeight: 700, color: isWinner ? m.color : 'var(--c-secondary)' }}>{count}</div>
               <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>{count === 1 ? t('vote') : t('votes')}</div>
