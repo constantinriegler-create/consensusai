@@ -586,9 +586,26 @@ function UpdateAnnouncementModal({ onDismiss }) {
   )
 }
 
+const PACKS = {
+  standard: {
+    10:  { price: 1.99,   save: null },
+    50:  { price: 9.99,   save: null },
+    100: { price: 17.99,  save: 2    },
+    500: { price: 79.99,  save: 20   },
+  },
+  premium: {
+    10:  { price: 4.99,   save: null },
+    50:  { price: 24.99,  save: null },
+    100: { price: 44.99,  save: 5    },
+    500: { price: 199.99, save: 50   },
+  },
+}
+const QTY_OPTIONS = [10, 50, 100, 500]
+
 function BuyCreditsModal({ onClose, user, onPurchase }) {
   const { t } = useTranslation()
   const [loading, setLoading] = useState(null)
+  const [qty, setQty] = useState(10)
   const [promoCode, setPromoCode] = useState('')
   const [promoStatus, setPromoStatus] = useState(null)
   const [promoMessage, setPromoMessage] = useState('')
@@ -597,13 +614,14 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
 
   async function handleBuy(packType) {
     setLoading(packType)
+    const pack = PACKS[packType][qty]
     try {
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
       const res = await fetch('https://consensusai-production-0e01.up.railway.app/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ packType })
+        body: JSON.stringify({ packType, quantity: qty, priceInCents: Math.round(pack.price * 100) })
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url
@@ -649,30 +667,70 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
       <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? 20 : 36, width: isMobile ? 'calc(100vw - 32px)' : 480, borderTop: `2px solid ${AMBER}`, maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 12 }}>{t('buyCredits')}</div>
         <h3 style={{ fontSize: isMobile ? 17 : 20, fontWeight: 600, marginBottom: 6, color: TEXT }}>{t('getMoreQueries')}</h3>
-        <p style={{ color: MUTED, fontSize: 13, marginBottom: isMobile ? 16 : 28, lineHeight: 1.6 }}>{t('creditsNeverExpire')}</p>
+        <p style={{ color: MUTED, fontSize: 13, marginBottom: isMobile ? 12 : 20, lineHeight: 1.6 }}>{t('creditsNeverExpire')}</p>
+
+        {/* Quantity selector */}
+        <div style={{ marginBottom: isMobile ? 16 : 24 }}>
+          <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 10 }}>QUANTITY</div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {QTY_OPTIONS.map(q => {
+              const sel = qty === q
+              const stdSave = PACKS.standard[q].save
+              return (
+                <button key={q} onClick={() => setQty(q)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 20, border: `1px solid ${sel ? AMBER : BORDER}`, background: sel ? `${AMBER}20` : 'transparent', color: sel ? AMBER : MUTED, fontFamily: 'monospace', fontSize: 12, fontWeight: sel ? 600 : 400, cursor: 'pointer', transition: 'all 0.15s' }}>
+                  {q}
+                  {stdSave && (
+                    <span style={{ fontSize: 10, color: '#22c55e', background: '#22c55e18', borderRadius: 10, padding: '1px 6px', fontWeight: 600 }}>
+                      save ${stdSave}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12, marginBottom: 24 }}>
-          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 20 }}>
-            <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.1em', marginBottom: 8 }}>STANDARD</div>
-            <div style={{ fontSize: 28, fontWeight: 700, color: TEXT, marginBottom: 4 }}>$1.99</div>
-            <div style={{ fontSize: 12, color: MUTED, marginBottom: 16 }}>10 queries</div>
-            <div style={{ fontSize: 11, color: 'var(--c-secondary)', marginBottom: 16, lineHeight: 1.6 }}>4 AI models answer simultaneously. Claude synthesizes the result.</div>
-            <button onClick={() => handleBuy('standard')} disabled={!!loading}
-              style={{ width: '100%', padding: '10px', borderRadius: 8, background: AMBER, border: 'none', color: BG, fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading === 'premium' ? 0.5 : 1 }}>
-              {loading === 'standard' ? t('loadingDots') : t('buyStandard')}
-            </button>
-          </div>
+          {/* Standard card */}
+          {(() => {
+            const pack = PACKS.standard[qty]
+            return (
+              <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 20 }}>
+                <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.1em', marginBottom: 8 }}>STANDARD</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: TEXT }}>${pack.price}</div>
+                  {pack.save && <span style={{ fontSize: 11, color: '#22c55e', background: '#22c55e18', borderRadius: 8, padding: '2px 8px', fontWeight: 600 }}>save ${pack.save}</span>}
+                </div>
+                <div style={{ fontSize: 12, color: MUTED, marginBottom: 16 }}>{qty} {qty === 1 ? 'query' : 'queries'}</div>
+                <div style={{ fontSize: 11, color: 'var(--c-secondary)', marginBottom: 16, lineHeight: 1.6 }}>4 AI models answer simultaneously. Claude synthesizes the result.</div>
+                <button onClick={() => handleBuy('standard')} disabled={!!loading}
+                  style={{ width: '100%', padding: '10px', borderRadius: 8, background: AMBER, border: 'none', color: BG, fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading === 'premium' ? 0.5 : 1 }}>
+                  {loading === 'standard' ? t('loadingDots') : t('buyStandard')}
+                </button>
+              </div>
+            )
+          })()}
 
-          <div style={{ background: `${PURPLE}10`, border: `1px solid ${PURPLE}40`, borderRadius: 12, padding: 20 }}>
-            <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.1em', marginBottom: 8 }}>◆ PREMIUM</div>
-            <div style={{ fontSize: 28, fontWeight: 700, color: TEXT, marginBottom: 4 }}>$4.99</div>
-            <div style={{ fontSize: 12, color: MUTED, marginBottom: 16 }}>10 queries</div>
-            <div style={{ fontSize: 11, color: 'var(--c-secondary)', marginBottom: 16, lineHeight: 1.6 }}>4 models debate in 2 rounds, vote blindly on the best answer.</div>
-            <button onClick={() => handleBuy('premium')} disabled={!!loading}
-              style={{ width: '100%', padding: '10px', borderRadius: 8, background: PURPLE, border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading === 'standard' ? 0.5 : 1 }}>
-              {loading === 'premium' ? t('loadingDots') : t('buyPremium')}
-            </button>
-          </div>
+          {/* Premium card */}
+          {(() => {
+            const pack = PACKS.premium[qty]
+            return (
+              <div style={{ background: `${PURPLE}10`, border: `1px solid ${PURPLE}40`, borderRadius: 12, padding: 20 }}>
+                <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.1em', marginBottom: 8 }}>◆ PREMIUM</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: TEXT }}>${pack.price}</div>
+                  {pack.save && <span style={{ fontSize: 11, color: '#22c55e', background: '#22c55e18', borderRadius: 8, padding: '2px 8px', fontWeight: 600 }}>save ${pack.save}</span>}
+                </div>
+                <div style={{ fontSize: 12, color: MUTED, marginBottom: 16 }}>{qty} {qty === 1 ? 'query' : 'queries'}</div>
+                <div style={{ fontSize: 11, color: 'var(--c-secondary)', marginBottom: 16, lineHeight: 1.6 }}>4 models debate in 2 rounds, vote blindly on the best answer.</div>
+                <button onClick={() => handleBuy('premium')} disabled={!!loading}
+                  style={{ width: '100%', padding: '10px', borderRadius: 8, background: PURPLE, border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading === 'standard' ? 0.5 : 1 }}>
+                  {loading === 'premium' ? t('loadingDots') : t('buyPremium')}
+                </button>
+              </div>
+            )
+          })()}
         </div>
 
         {/* Promo code */}
