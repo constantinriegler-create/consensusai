@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
+import { useTranslation } from 'react-i18next'
 import supabase from './supabase.js'
 import InfoPage from './InfoPage.jsx'
+import './i18n/index.js'
 
 const AMBER = 'var(--c-amber)'
 const AMBER_DIM = 'var(--c-amber-dim)'
@@ -25,18 +27,12 @@ const MODEL_META = [
   { key: 'grok', label: 'Grok', color: '#e8e8e8' },
 ]
 
-const FEATURE_DETAILS = [
-  { label: 'Multi-model', desc: '4 models answer in parallel', detail: 'Your prompt is sent simultaneously to GPT-4o, Claude, DeepSeek, and Grok. Each answers independently before synthesis begins.' },
-  { label: 'Consensus', desc: 'Agreement and conflict mapped visually', detail: 'A synthesis pass analyzes where models agreed, partially overlapped, or conflicted. Color-coded: green for consensus, yellow for partial, red for conflict.' },
-  { label: 'Debate (Premium)', desc: '4 models debate and vote blindly', detail: 'In Premium mode, models go through 2 rounds of debate, then vote blindly on the best answer. Majority wins, ties broken by Claude.' },
-  { label: 'Transparency', desc: 'See every response and vote', detail: 'Every answer shows each model\'s individual output. Premium also shows the full debate history and how each model voted.' },
-]
 
-function getGreeting() {
+function getGreeting(t) {
   const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 18) return 'Good afternoon'
-  return 'Good evening'
+  if (h < 12) return t('goodMorning')
+  if (h < 18) return t('goodAfternoon')
+  return t('goodEvening')
 }
 
 function FormattedText({ text }) {
@@ -116,11 +112,12 @@ function calcAgreementScore(content, resolution) {
 }
 
 function ModelAgreementBar({ content, resolution, isPremium }) {
+  const { t } = useTranslation()
   const score = calcAgreementScore(content, resolution)
   const isHigh = score >= 80
   const isMed = score >= 50
   const color = isHigh ? GREEN : isMed ? YELLOW : RED
-  const label = isHigh ? 'High' : isMed ? 'Medium' : 'Low'
+  const label = isHigh ? t('highConfidence') : isMed ? t('mediumConfidence') : t('lowConfidence')
   const tooltip = isPremium
     ? resolution?.type === 'consensus' ? '3 or more models voted for the same answer'
       : resolution?.type === 'majority' ? 'A majority of models agreed on this answer'
@@ -130,13 +127,13 @@ function ModelAgreementBar({ content, resolution, isPremium }) {
   return (
     <div title={tooltip} style={{ marginBottom: 16, padding: '12px 16px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, cursor: 'default' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em' }}>MODEL AGREEMENT</div>
+        <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em' }}>{t('modelAgreement')}</div>
         <div style={{ fontSize: 11, fontFamily: 'monospace', color, fontWeight: 600 }}>{score}% · {label}</div>
       </div>
       <div style={{ height: 5, background: BORDER2, borderRadius: 3, overflow: 'hidden' }}>
         <div style={{ height: '100%', width: `${score}%`, background: `linear-gradient(90deg, ${color}99, ${color})`, borderRadius: 3, transition: 'width 0.8s cubic-bezier(0.4,0,0.2,1)' }} />
       </div>
-      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 6 }}>Based on 4 model responses · hover for details</div>
+      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 6 }}>{t('basedOn4Models')}</div>
     </div>
   )
 }
@@ -160,23 +157,25 @@ function ConfidenceBar({ color, points, label }) {
 }
 
 function CopyButton({ text }) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   return (
     <button onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
       style={{ background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: copied ? GREEN : MUTED, fontSize: 10, fontFamily: 'monospace', padding: '4px 10px', cursor: 'pointer', letterSpacing: '0.05em', transition: 'color 0.2s' }}>
-      {copied ? 'COPIED' : 'COPY'}
+      {copied ? t('copied') : t('copy')}
     </button>
   )
 }
 
 function IndividualAnswers({ individual }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   if (!individual) return null
   return (
     <div style={{ marginTop: 16 }}>
       <button onClick={() => setOpen(!open)}
         style={{ background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, fontSize: 11, fontFamily: 'monospace', padding: '5px 12px', cursor: 'pointer', letterSpacing: '0.05em' }}>
-        {open ? '[ hide sources ]' : '[ view source responses ]'}
+        {open ? t('hideSources') : t('viewSources')}
       </button>
       {open && (
         <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -196,11 +195,12 @@ function IndividualAnswers({ individual }) {
 }
 
 function VoteTally({ votes, counts, resolution }) {
+  const { t } = useTranslation()
   if (!votes || !counts) return null
   const badgeMeta = {
-    consensus: { label: 'CONSENSUS', color: GREEN },
-    majority: { label: 'MAJORITY', color: YELLOW },
-    tie: { label: 'TIEBREAKER', color: RED },
+    consensus: { label: t('voteResults_consensus') || 'CONSENSUS', color: GREEN },
+    majority: { label: t('voteResults_majority') || 'MAJORITY', color: YELLOW },
+    tie: { label: t('voteResults_tie') || 'TIEBREAKER', color: RED },
   }
   const badge = badgeMeta[resolution?.type] || badgeMeta.majority
   const winnerIdx = 'ABCD'.indexOf(resolution?.winner)
@@ -208,14 +208,14 @@ function VoteTally({ votes, counts, resolution }) {
   return (
     <div style={{ marginBottom: 16, padding: '20px 24px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.12em' }}>VOTE RESULTS</div>
+        <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.12em' }}>{t('voteResults')}</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: badge.color }}/>
           <span style={{ fontSize: 10, fontFamily: 'monospace', color: badge.color, letterSpacing: '0.12em', fontWeight: 600 }}>{badge.label}</span>
         </div>
       </div>
       {winnerModel && <div style={{ marginBottom: 16, fontSize: 12, color: 'var(--c-muted5)' }}>
-        Winner: <span style={{ color: winnerModel.color, fontWeight: 600 }}>{winnerModel.label}</span>
+        {t('winner')}: <span style={{ color: winnerModel.color, fontWeight: 600 }}>{winnerModel.label}</span>
       </div>}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>
         {MODEL_META.map((m, i) => {
@@ -226,7 +226,7 @@ function VoteTally({ votes, counts, resolution }) {
             <div key={m.key} style={{ background: isWinner ? `${m.color}15` : SURFACE, border: `1px solid ${isWinner ? m.color + '60' : BORDER2}`, borderRadius: 7, padding: '10px 12px', textAlign: 'center' }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: m.color, marginBottom: 4 }}>{m.label.toUpperCase()}</div>
               <div style={{ fontSize: 22, fontWeight: 700, color: isWinner ? m.color : 'var(--c-secondary)' }}>{count}</div>
-              <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>{count === 1 ? 'VOTE' : 'VOTES'}</div>
+              <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>{count === 1 ? t('vote') : t('votes')}</div>
             </div>
           )
         })}
@@ -251,20 +251,21 @@ function VoteTally({ votes, counts, resolution }) {
 }
 
 function DebateHistory({ rounds }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   if (!rounds) return null
   return (
     <div style={{ marginTop: 12 }}>
       <button onClick={() => setOpen(!open)}
         style={{ background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, fontSize: 11, fontFamily: 'monospace', padding: '5px 12px', cursor: 'pointer', letterSpacing: '0.05em' }}>
-        {open ? '[ hide debate history ]' : '[ view debate history ]'}
+        {open ? t('hideDebate') : t('viewDebate')}
       </button>
       {open && (
         <div style={{ marginTop: 12 }}>
           {Object.keys(rounds).sort().map(rk => (
             <div key={rk} style={{ marginBottom: 24 }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 12 }}>
-                ROUND {rk}{rk === '0' ? ' — INITIAL' : rk === '2' ? ' — FINAL' : ' — DEBATE'}
+                {rk === '0' ? t('roundInitial', { n: rk }) : rk === '2' ? t('roundFinal', { n: rk }) : t('roundDebate', { n: rk })}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 {MODEL_META.map((m, i) => (
@@ -301,6 +302,7 @@ function FeatureCard({ feature, isMobile }) {
 }
 
 function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
+  const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const [val, setVal] = useState(chat.title)
   function save() { if (val.trim()) onRename(val.trim()); setEditing(false) }
@@ -321,7 +323,7 @@ function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
       {active && (
         <span style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
           <button onClick={e => { e.stopPropagation(); setVal(chat.title); setEditing(true) }}
-            title="Rename"
+            title={t('rename')}
             style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', padding: '2px 3px', display: 'flex', alignItems: 'center', borderRadius: 4, transition: 'color 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.color = 'var(--c-text)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--c-muted)'}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
@@ -329,8 +331,8 @@ function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
               <line x1="3" y1="22" x2="21" y2="22"/>
             </svg>
           </button>
-          <button onClick={e => { e.stopPropagation(); if (window.confirm('Delete this chat? This cannot be undone.')) onDelete() }}
-            title="Delete"
+          <button onClick={e => { e.stopPropagation(); if (window.confirm(t('deleteConfirm'))) onDelete() }}
+            title={t('delete')}
             style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', padding: '2px 3px', display: 'flex', alignItems: 'center', borderRadius: 4, transition: 'color 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.color = '#ef4444'} onMouseLeave={e => e.currentTarget.style.color = 'var(--c-muted)'}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
@@ -356,27 +358,29 @@ function ModelRow({ label, color }) {
 }
 
 function ModeToggle({ mode, setMode, disabled }) {
+  const { t } = useTranslation()
   return (
     <div className="mode-toggle-wrap" style={{ display: 'inline-flex', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, padding: 2, fontSize: 11, fontFamily: 'monospace' }}>
       <button onClick={() => !disabled && setMode('standard')} disabled={disabled} className="mode-btn"
         style={{ padding: '5px 12px', borderRadius: 5, border: 'none', background: mode === 'standard' ? AMBER : 'transparent', color: mode === 'standard' ? BG : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'all 0.15s' }}>
-        STANDARD
+        {t('standard')}
       </button>
       <button onClick={() => !disabled && setMode('premium')} disabled={disabled} className="mode-btn"
         style={{ padding: '5px 12px', borderRadius: 5, border: 'none', background: mode === 'premium' ? PURPLE : 'transparent', color: mode === 'premium' ? '#fff' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 5 }}>
-        <span className="premium-diamond">◆ </span>PREMIUM
+        <span className="premium-diamond">◆ </span>{t('premium')}
       </button>
     </div>
   )
 }
 
 function PremiumProgress({ currentStatus, rounds }) {
+  const { t } = useTranslation()
   const stages = [
-    { key: 'round-0', label: 'Initial answers' },
-    { key: 'round-1', label: 'Round 1 of 2' },
-    { key: 'round-2', label: 'Round 2 of 2' },
-    { key: 'voting', label: 'Blind vote' },
-    { key: 'resolve', label: 'Resolving' },
+    { key: 'round-0', label: t('initialAnswers') },
+    { key: 'round-1', label: t('round1of2') },
+    { key: 'round-2', label: t('round2of2') },
+    { key: 'voting', label: t('blindVote') },
+    { key: 'resolve', label: t('resolving') },
   ]
   const status = (currentStatus || '').toLowerCase()
   let active = 0
@@ -390,9 +394,9 @@ function PremiumProgress({ currentStatus, rounds }) {
   return (
     <div style={{ padding: '20px 24px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, marginBottom: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-        <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em' }}>◆ PREMIUM DEBATE</div>
+        <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em' }}>{t('premiumDebate')}</div>
         <div style={{ flex: 1, height: 1, background: BORDER2 }}/>
-        <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2 }}>~30s</div>
+        <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2 }}>{t('approx30s')}</div>
       </div>
       <div style={{ display: 'flex', gap: 6 }}>
         {stages.map((s, i) => {
@@ -412,6 +416,7 @@ function PremiumProgress({ currentStatus, rounds }) {
 }
 
 function FeedbackModal({ onClose, user }) {
+  const { t } = useTranslation()
   const isMobile = window.innerWidth <= 768
   const [email, setEmail] = useState(user?.email || '')
   const [feedback, setFeedback] = useState('')
@@ -419,7 +424,7 @@ function FeedbackModal({ onClose, user }) {
   const [errorMsg, setErrorMsg] = useState('')
 
   async function handleSubmit() {
-    if (feedback.trim().length < 10) { setErrorMsg('Feedback must be at least 10 characters.'); return }
+    if (feedback.trim().length < 10) { setErrorMsg(t('feedbackMinLength')); return }
     setStatus('loading')
     setErrorMsg('')
     try {
@@ -434,7 +439,7 @@ function FeedbackModal({ onClose, user }) {
       if (!res.ok) { setErrorMsg(data.error || 'Something went wrong.'); setStatus('error'); return }
       setStatus('success')
     } catch {
-      setErrorMsg('Network error. Please try again.')
+      setErrorMsg(t('networkError'))
       setStatus('error')
     }
   }
@@ -445,24 +450,24 @@ function FeedbackModal({ onClose, user }) {
         {status === 'success' ? (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
             <div style={{ fontSize: 32, marginBottom: 16 }}>✓</div>
-            <div style={{ fontSize: 16, fontWeight: 600, color: TEXT, marginBottom: 8 }}>Feedback sent!</div>
-            <div style={{ fontSize: 13, color: MUTED, marginBottom: 28 }}>Thanks for helping improve VELE AI.</div>
-            <button onClick={onClose} style={{ padding: '10px 28px', borderRadius: 8, background: PURPLE, border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Close</button>
+            <div style={{ fontSize: 16, fontWeight: 600, color: TEXT, marginBottom: 8 }}>{t('feedbackSent')}</div>
+            <div style={{ fontSize: 13, color: MUTED, marginBottom: 28 }}>{t('feedbackThanks')}</div>
+            <button onClick={onClose} style={{ padding: '10px 28px', borderRadius: 8, background: PURPLE, border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>{t('close')}</button>
           </div>
         ) : (
           <>
-            <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 10 }}>FEEDBACK</div>
-            <h3 style={{ fontSize: 18, fontWeight: 600, color: TEXT, margin: '0 0 20px' }}>Send Feedback</h3>
+            <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 10 }}>{t('feedbackLabel2')}</div>
+            <h3 style={{ fontSize: 18, fontWeight: 600, color: TEXT, margin: '0 0 20px' }}>{t('sendFeedbackTitle')}</h3>
 
             <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 6 }}>EMAIL (OPTIONAL)</div>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 6 }}>{t('emailOptional')}</div>
               <input value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com"
                 style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: `1px solid ${BORDER}`, background: 'var(--c-input-bg)', color: TEXT, fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }} />
             </div>
 
             <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 6 }}>FEEDBACK <span style={{ color: RED }}>*</span></div>
-              <textarea value={feedback} onChange={e => { setFeedback(e.target.value); setErrorMsg('') }} placeholder="What's on your mind? Bug reports, feature ideas, general thoughts..."
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 6 }}>{t('feedbackField')} <span style={{ color: RED }}>*</span></div>
+              <textarea value={feedback} onChange={e => { setFeedback(e.target.value); setErrorMsg('') }} placeholder={t('feedbackPlaceholder')}
                 rows={5} style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: `1px solid ${errorMsg ? RED : BORDER}`, background: 'var(--c-input-bg)', color: TEXT, fontSize: 13, outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit', lineHeight: 1.6 }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
                 {errorMsg ? <span style={{ fontSize: 11, color: RED, fontFamily: 'monospace' }}>{errorMsg}</span> : <span />}
@@ -473,11 +478,11 @@ function FeedbackModal({ onClose, user }) {
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={onClose} disabled={status === 'loading'}
                 style={{ flex: 1, padding: '10px', borderRadius: 8, background: 'none', border: `1px solid ${BORDER}`, color: MUTED, fontSize: 13, cursor: 'pointer' }}>
-                Cancel
+                {t('cancel')}
               </button>
               <button onClick={handleSubmit} disabled={status === 'loading' || feedback.trim().length < 10}
                 style={{ flex: 2, padding: '10px', borderRadius: 8, background: feedback.trim().length >= 10 ? PURPLE : MUTED2, border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: feedback.trim().length >= 10 ? 'pointer' : 'default', transition: 'background 0.15s' }}>
-                {status === 'loading' ? 'Sending...' : 'Send Feedback'}
+                {status === 'loading' ? t('sending') : t('sendFeedback')}
               </button>
             </div>
           </>
@@ -488,6 +493,7 @@ function FeedbackModal({ onClose, user }) {
 }
 
 function UpdateAnnouncementModal({ onDismiss }) {
+  const { t } = useTranslation()
   const isMobile = window.innerWidth <= 768
   const updates = [
     { title: 'VELE AI Rebrand', desc: 'New name, logo, and branding throughout the app' },
@@ -505,7 +511,7 @@ function UpdateAnnouncementModal({ onDismiss }) {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 52, height: 52, borderRadius: 14, marginBottom: 16 }} />
             <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 8 }}>UPDATE</div>
-            <h2 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: TEXT, margin: 0, marginBottom: 4, textAlign: 'center' }}>What's New in VELE AI</h2>
+            <h2 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: TEXT, margin: 0, marginBottom: 4, textAlign: 'center' }}>{t('whatsNewTitle')}</h2>
             <p style={{ fontSize: 13, color: MUTED, margin: 0, marginBottom: 4, textAlign: 'center' }}>Version 1.0</p>
             <p style={{ fontSize: 10, color: MUTED2, margin: 0, fontFamily: 'monospace', letterSpacing: '0.06em', textAlign: 'center' }}>Latest update: 19. May 2026</p>
           </div>
@@ -529,7 +535,7 @@ function UpdateAnnouncementModal({ onDismiss }) {
           <button onClick={onDismiss}
             style={{ width: '100%', padding: '13px', borderRadius: 10, background: PURPLE, border: 'none', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', letterSpacing: '0.02em', transition: 'opacity 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.opacity = '0.85'} onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-            Got it!
+            {t('gotIt')}
           </button>
         </div>
       </div>
@@ -538,6 +544,7 @@ function UpdateAnnouncementModal({ onDismiss }) {
 }
 
 function BuyCreditsModal({ onClose, user, onPurchase }) {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(null)
   const [promoCode, setPromoCode] = useState('')
   const [promoStatus, setPromoStatus] = useState(null)
@@ -584,11 +591,11 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
         setTimeout(() => onClose(), 2000)
       } else {
         setPromoStatus('error')
-        setPromoMessage(data.error || 'Invalid promo code')
+        setPromoMessage(data.error || t('invalidPromo'))
       }
     } catch {
       setPromoStatus('error')
-      setPromoMessage('Network error — please try again')
+      setPromoMessage(t('networkErrorRetry'))
     } finally {
       setPromoLoading(false)
     }
@@ -597,9 +604,9 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? 20 : 36, width: isMobile ? 'calc(100vw - 32px)' : 480, borderTop: `2px solid ${AMBER}`, maxHeight: '90vh', overflowY: 'auto' }}>
-        <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 12 }}>BUY CREDITS</div>
-        <h3 style={{ fontSize: isMobile ? 17 : 20, fontWeight: 600, marginBottom: 6, color: TEXT }}>Get more queries</h3>
-        <p style={{ color: MUTED, fontSize: 13, marginBottom: isMobile ? 16 : 28, lineHeight: 1.6 }}>Credits never expire. Use them whenever you need.</p>
+        <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 12 }}>{t('buyCredits')}</div>
+        <h3 style={{ fontSize: isMobile ? 17 : 20, fontWeight: 600, marginBottom: 6, color: TEXT }}>{t('getMoreQueries')}</h3>
+        <p style={{ color: MUTED, fontSize: 13, marginBottom: isMobile ? 16 : 28, lineHeight: 1.6 }}>{t('creditsNeverExpire')}</p>
 
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12, marginBottom: 24 }}>
           <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 20 }}>
@@ -609,7 +616,7 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
             <div style={{ fontSize: 11, color: 'var(--c-secondary)', marginBottom: 16, lineHeight: 1.6 }}>4 AI models answer simultaneously. Claude synthesizes the result.</div>
             <button onClick={() => handleBuy('standard')} disabled={!!loading}
               style={{ width: '100%', padding: '10px', borderRadius: 8, background: AMBER, border: 'none', color: BG, fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading === 'premium' ? 0.5 : 1 }}>
-              {loading === 'standard' ? 'Loading...' : 'Buy Standard'}
+              {loading === 'standard' ? t('loadingDots') : t('buyStandard')}
             </button>
           </div>
 
@@ -620,17 +627,17 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
             <div style={{ fontSize: 11, color: 'var(--c-secondary)', marginBottom: 16, lineHeight: 1.6 }}>4 models debate in 2 rounds, vote blindly on the best answer.</div>
             <button onClick={() => handleBuy('premium')} disabled={!!loading}
               style={{ width: '100%', padding: '10px', borderRadius: 8, background: PURPLE, border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading === 'standard' ? 0.5 : 1 }}>
-              {loading === 'premium' ? 'Loading...' : 'Buy Premium'}
+              {loading === 'premium' ? t('loadingDots') : t('buyPremium')}
             </button>
           </div>
         </div>
 
         {/* Promo code */}
         <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 8 }}>PROMO CODE</div>
+          <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 8 }}>{t('promoCode')}</div>
           <div style={{ display: 'flex', gap: 8 }}>
             <input
-              placeholder="Enter code..."
+              placeholder={t('enterCode')}
               value={promoCode}
               onChange={e => { setPromoCode(e.target.value); setPromoStatus(null) }}
               onKeyDown={e => e.key === 'Enter' && handlePromo()}
@@ -639,7 +646,7 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
             <button onClick={handlePromo}
               disabled={promoLoading || promoStatus === 'success' || !promoCode.trim()}
               style={{ padding: '9px 16px', borderRadius: 8, background: promoStatus === 'success' ? GREEN + '20' : CARD, border: `1px solid ${promoStatus === 'success' ? GREEN : promoCode.trim() ? AMBER : BORDER}`, color: promoStatus === 'success' ? GREEN : promoCode.trim() ? AMBER : MUTED, fontSize: 12, cursor: promoLoading || !promoCode.trim() ? 'default' : 'pointer', fontFamily: 'monospace', fontWeight: 600, transition: 'all 0.15s', opacity: promoLoading ? 0.6 : 1 }}>
-              {promoLoading ? '...' : promoStatus === 'success' ? '✓' : 'APPLY'}
+              {promoLoading ? '...' : promoStatus === 'success' ? '✓' : t('apply')}
             </button>
           </div>
           {promoStatus && (
@@ -651,7 +658,7 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
 
         <button onClick={onClose}
           style={{ width: '100%', padding: '10px', borderRadius: 8, background: 'none', border: `1px solid ${BORDER}`, color: MUTED, fontSize: 13, cursor: 'pointer' }}>
-          Cancel
+          {t('cancel')}
         </button>
       </div>
     </div>
@@ -660,6 +667,7 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
     
 
 function LoginPage() {
+  const { t } = useTranslation()
   const [authMode, setAuthMode] = useState('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -715,12 +723,10 @@ function LoginPage() {
           <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 64, height: 64, borderRadius: 18, marginBottom: 16, boxShadow: `0 0 32px ${PURPLE}30` }} />
           <div style={{ fontSize: 11, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.2em', marginBottom: 14 }}>VELE AI</div>
           <h1 style={{ fontSize: isMobile ? 34 : 40, fontWeight: 800, color: TEXT, margin: 0, marginBottom: 12, letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-            {authMode === 'signup' ? 'Create account.' : 'The honest AI.'}
+            {authMode === 'signup' ? t('createAccount') : t('honestAI')}
           </h1>
           <p style={{ color: 'var(--c-readable)', fontSize: 15, lineHeight: 1.65, margin: '0 auto', maxWidth: 340 }}>
-            {authMode === 'signup'
-              ? 'Get 3 free standard queries. No credit card required.'
-              : '4 models answer simultaneously. One synthesized, honest answer.'}
+            {authMode === 'signup' ? t('signUpSubtitle') : t('signInSubtitle')}
           </p>
         </div>
 
@@ -735,7 +741,7 @@ function LoginPage() {
             ))}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: `${PURPLE}15`, border: `1px solid ${PURPLE}40` }}>
               <div style={{ width: 6, height: 6, borderRadius: '50%', background: PURPLE, flexShrink: 0 }} />
-              <span style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.04em' }}>Synthesis</span>
+              <span style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.04em' }}>{t('synthesis_label')}</span>
             </div>
           </div>
         )}
@@ -751,20 +757,20 @@ function LoginPage() {
 
           <form onSubmit={handleEmailSubmit}>
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.1em', marginBottom: 7 }}>EMAIL</div>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.1em', marginBottom: 7 }}>{t('emailLabel')}</div>
               <input
                 type="email" value={email} onChange={e => setEmail(e.target.value)}
                 onFocus={() => setFocused('email')} onBlur={() => setFocused(null)}
-                placeholder="you@example.com" autoComplete="email" disabled={!!loading}
+                placeholder={t('emailPlaceholder')} autoComplete="email" disabled={!!loading}
                 style={inputStyle('email')}
               />
             </div>
             <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.1em', marginBottom: 7 }}>PASSWORD</div>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.1em', marginBottom: 7 }}>{t('passwordLabel')}</div>
               <input
                 type="password" value={password} onChange={e => setPassword(e.target.value)}
                 onFocus={() => setFocused('password')} onBlur={() => setFocused(null)}
-                placeholder={authMode === 'signup' ? 'At least 6 characters' : 'Your password'}
+                placeholder={authMode === 'signup' ? t('passwordPlaceholderSignup') : t('passwordPlaceholderSignin')}
                 autoComplete={authMode === 'signup' ? 'new-password' : 'current-password'}
                 disabled={!!loading}
                 style={inputStyle('password')}
@@ -774,13 +780,13 @@ function LoginPage() {
               style={{ width: '100%', padding: '14px', borderRadius: 10, background: loading ? MUTED2 : PURPLE, border: 'none', color: '#fff', fontSize: 15, fontWeight: 600, cursor: loading ? 'default' : 'pointer', letterSpacing: '0.01em', transition: 'opacity 0.15s' }}
               onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = '0.85' }}
               onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-              {loading === 'email' ? (authMode === 'signup' ? 'Creating account...' : 'Signing in...') : (authMode === 'signup' ? 'Create account' : 'Sign in')}
+              {loading === 'email' ? (authMode === 'signup' ? t('creatingAccount') : t('signingIn')) : (authMode === 'signup' ? t('createAccountBtn') : t('signInBtn'))}
             </button>
           </form>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
             <div style={{ flex: 1, height: 1, background: BORDER }} />
-            <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.15em' }}>OR</div>
+            <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.15em' }}>{t('or')}</div>
             <div style={{ flex: 1, height: 1, background: BORDER }} />
           </div>
 
@@ -794,19 +800,19 @@ function LoginPage() {
               <path fill="#FBBC05" d="M10.3 28.3c-.5-1.5-.8-3-.8-4.6s.3-3.2.8-4.6v-6.2H2.1C.8 15.9 0 19.9 0 24s.8 8.1 2.1 11.1l8.2-6.8z"/>
               <path fill="#EA4335" d="M24 9.5c3.6 0 6.8 1.2 9.3 3.6l7-7C36.2 2.2 30.6 0 24 0 14.5 0 6.1 5.4 2.1 13.3l8.2 6.2C12.2 13.8 17.6 9.5 24 9.5z"/>
             </svg>
-            {loading === 'google' ? 'Redirecting...' : 'Continue with Google'}
+            {loading === 'google' ? t('redirecting') : t('continueWithGoogle')}
           </button>
         </div>
 
         {/* Sign up / sign in toggle — outside card */}
         <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--c-readable)', marginTop: 20, lineHeight: 1.6 }}>
-          {authMode === 'signup' ? 'Already have an account? ' : "Don't have an account? "}
+          {authMode === 'signup' ? t('alreadyHaveAccount') : t('noAccount')}{' '}
           <button
             onClick={() => { setAuthMode(authMode === 'signup' ? 'signin' : 'signup'); setError(null) }}
             style={{ background: 'none', border: 'none', color: PURPLE, cursor: 'pointer', padding: 0, fontSize: 13, fontWeight: 600, transition: 'opacity 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
             onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-            {authMode === 'signup' ? 'Sign in' : 'Sign up →'}
+            {authMode === 'signup' ? t('signInBtn') : t('signUpLink')}
           </button>
         </p>
       </div>
@@ -885,6 +891,15 @@ function HoldToDelete({ onConfirm }) {
 }
 
 export default function App() {
+  const { t, i18n } = useTranslation()
+
+  const FEATURE_DETAILS = [
+    { label: t('multiModel'), desc: t('multiModelDesc'), detail: t('multiModelDetail') },
+    { label: t('consensusFeature'), desc: t('consensusDesc'), detail: t('consensusDetail') },
+    { label: t('debate'), desc: t('debateDesc'), detail: t('debateDetail') },
+    { label: t('transparency'), desc: t('transparencyDesc'), detail: t('transparencyDetail') },
+  ]
+
   const [user, setUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [credits, setCredits] = useState({ standard_credits: 0, premium_credits: 0 })
@@ -942,6 +957,11 @@ useEffect(() => {
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
   }, [themeMode])
+
+  function changeLanguage(lang) {
+    i18n.changeLanguage(lang)
+    localStorage.setItem('language', lang)
+  }
 
   // Auth listener
   useEffect(() => {
@@ -1253,19 +1273,20 @@ useEffect(() => {
 
               {settingsView === 'menu' && (
                 <>
-                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 20 }}>SETTINGS</div>
-                  {menuRow('Account', '⊙', () => setSettingsView('account'))}
-                  {menuRow('Credits', '⬡', () => setSettingsView('credits'))}
-                  {menuRow('Appearance', '◑', () => setSettingsView('appearance'))}
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 20 }}>{t('settingsTitle')}</div>
+                  {menuRow(t('account'), '⊙', () => setSettingsView('account'))}
+                  {menuRow(t('credits'), '⬡', () => setSettingsView('credits'))}
+                  {menuRow(t('appearance'), '◑', () => setSettingsView('appearance'))}
+                  {menuRow(t('languageMenu'), '⊕', () => setSettingsView('language'))}
                   <div style={{ borderTop: `1px solid var(--c-danger-sep)`, paddingTop: 12, marginTop: 4 }}>
-                    <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--c-red-a99)', letterSpacing: '0.15em', marginBottom: 10 }}>DANGER ZONE</div>
-                    {menuRow('Delete All Chats', '⊘', () => setSettingsView('delete'), true)}
+                    <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--c-red-a99)', letterSpacing: '0.15em', marginBottom: 10 }}>{t('dangerZone')}</div>
+                    {menuRow(t('deleteAllChats'), '⊘', () => setSettingsView('delete'), true)}
                   </div>
 
                   <div style={{ borderTop: `1px solid ${BORDER2}`, paddingTop: 12, marginTop: 4 }}>
                     <button
                       onClick={async () => {
-                        if (!window.confirm('Sign out of VELE AI?')) return
+                        if (!window.confirm(t('signOutConfirm'))) return
                         closeSettings()
                         await supabase.auth.signOut()
                       }}
@@ -1273,7 +1294,7 @@ useEffect(() => {
                       onMouseEnter={e => { e.currentTarget.style.borderColor = RED; e.currentTarget.style.background = 'var(--c-red-bg)' }}
                       onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER2; e.currentTarget.style.background = 'none' }}
                     >
-                      <span style={{ flex: 1 }}>Sign Out</span>
+                      <span style={{ flex: 1 }}>{t('signOut')}</span>
                     </button>
                   </div>
 
@@ -1282,46 +1303,46 @@ useEffect(() => {
 
               {settingsView === 'account' && (
                 <>
-                  {backBtn('SETTINGS')}
-                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>ACCOUNT</div>
+                  {backBtn(t('settingsTitle'))}
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>{t('account').toUpperCase()}</div>
                   <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, padding: '14px 16px', marginBottom: 20 }}>
-                    <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.08em', marginBottom: 6 }}>SIGNED IN AS</div>
+                    <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.08em', marginBottom: 6 }}>{t('signedInAs')}</div>
                     <div style={{ fontSize: 14, color: TEXT, wordBreak: 'break-all' }}>{user.email}</div>
                   </div>
                   <button onClick={async () => { await supabase.auth.signOut(); closeSettings() }}
                     style={{ width: '100%', padding: '12px', borderRadius: 10, background: 'none', border: `1px solid ${BORDER}`, color: MUTED, fontSize: 13, cursor: 'pointer' }}>
-                    Sign Out
+                    {t('signOut')}
                   </button>
                 </>
               )}
 
               {settingsView === 'credits' && (
                 <>
-                  {backBtn('SETTINGS')}
-                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>CREDITS</div>
+                  {backBtn(t('settingsTitle'))}
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>{t('credits').toUpperCase()}</div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
                     <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, padding: '16px', textAlign: 'center' }}>
                       <div style={{ fontSize: 28, fontWeight: 700, color: AMBER }}>{credits.standard_credits}</div>
-                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 4 }}>STANDARD</div>
+                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 4 }}>{t('standard')}</div>
                     </div>
                     <div style={{ background: `${PURPLE}10`, border: `1px solid ${PURPLE}30`, borderRadius: 10, padding: '16px', textAlign: 'center' }}>
                       <div style={{ fontSize: 28, fontWeight: 700, color: PURPLE }}>{credits.premium_credits}</div>
-                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 4 }}>PREMIUM</div>
+                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 4 }}>{t('premium')}</div>
                     </div>
                   </div>
                   <button onClick={() => { closeSettings(); setShowBuyModal(true) }}
                     style={{ width: '100%', padding: '12px', borderRadius: 10, background: AMBER, border: 'none', color: BG, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                    Buy More Credits
+                    {t('buyMoreCredits')}
                   </button>
                 </>
               )}
 
               {settingsView === 'appearance' && (
                 <>
-                  {backBtn('SETTINGS')}
-                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>APPEARANCE</div>
+                  {backBtn(t('settingsTitle'))}
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>{t('appearanceTitle')}</div>
                   <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, overflow: 'hidden' }}>
-                    {[{ label: 'Default Dark', icon: '●', value: 'dark-plain' }, { label: 'Dark Ambient', icon: '◑', value: 'dark' }, { label: 'Light', icon: '○', value: 'light' }, { label: 'System', icon: '◎', value: 'system' }].map((opt, idx, arr) => (
+                    {[{ label: t('defaultDark'), icon: '●', value: 'dark-plain' }, { label: t('darkAmbient'), icon: '◑', value: 'dark' }, { label: t('light'), icon: '○', value: 'light' }, { label: t('system'), icon: '◎', value: 'system' }].map((opt, idx, arr) => (
                       <div key={opt.value} onClick={() => { setThemeMode(opt.value); supabase.auth.updateUser({ data: { appearance: opt.value } }) }}
                         style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderBottom: idx < arr.length - 1 ? `1px solid ${BORDER2}` : 'none', cursor: 'pointer', background: themeMode === opt.value ? `${PURPLE}10` : 'transparent', transition: 'background 0.15s' }}>
                         <span style={{ fontSize: 15 }}>{opt.icon}</span>
@@ -1333,11 +1354,28 @@ useEffect(() => {
                 </>
               )}
 
+              {settingsView === 'language' && (
+                <>
+                  {backBtn(t('settingsTitle'))}
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>{t('languageTitle')}</div>
+                  <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, overflow: 'hidden' }}>
+                    {[{ label: t('english'), icon: '🇬🇧', value: 'en' }, { label: t('german'), icon: '🇩🇪', value: 'de' }].map((opt, idx, arr) => (
+                      <div key={opt.value} onClick={() => changeLanguage(opt.value)}
+                        style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderBottom: idx < arr.length - 1 ? `1px solid ${BORDER2}` : 'none', cursor: 'pointer', background: i18n.language === opt.value ? `${PURPLE}10` : 'transparent', transition: 'background 0.15s' }}>
+                        <span style={{ fontSize: 15 }}>{opt.icon}</span>
+                        <span style={{ flex: 1, fontSize: 13, color: TEXT }}>{opt.label}</span>
+                        {i18n.language === opt.value && <div style={{ width: 18, height: 18, borderRadius: '50%', background: PURPLE, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }}/></div>}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
               {settingsView === 'delete' && (
                 <>
-                  {backBtn('SETTINGS')}
-                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: RED, letterSpacing: '0.15em', marginBottom: 16 }}>DELETE ALL CHATS</div>
-                  <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.6, marginBottom: 24 }}>This will permanently delete all your chats and message history. Hold the button below to confirm.</p>
+                  {backBtn(t('settingsTitle'))}
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: RED, letterSpacing: '0.15em', marginBottom: 16 }}>{t('deleteAllTitle')}</div>
+                  <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.6, marginBottom: 24 }}>{t('deleteAllDesc')}</p>
                   <HoldToDelete onConfirm={handleDeleteAllChats} />
                   {deleteAllError && <div style={{ marginTop: 10, fontSize: 11, color: RED, fontFamily: 'monospace' }}>{deleteAllError}</div>}
                 </>
@@ -1364,12 +1402,12 @@ useEffect(() => {
               <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 16, padding: 4, lineHeight: 1 }}>✕</button>
             </div>
             <button onClick={() => { newChat(); if (isMobile) setSidebarOpen(false) }} style={{ width: '100%', padding: '8px 12px', borderRadius: 7, background: AMBER_DIM, border: '1px solid var(--c-amber-a30)', color: AMBER, fontSize: 12, cursor: 'pointer', textAlign: 'left', fontWeight: 500 }}>
-              + New chat
+              {t('newChat')}
             </button>
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '12px 8px' }}>
-            <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.12em', padding: '0 8px', marginBottom: 6 }}>SESSIONS</div>
+            <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.12em', padding: '0 8px', marginBottom: 6 }}>{t('sessions')}</div>
             {chats.map(chat => (
               <ChatItem key={chat.id} chat={chat} active={chat.id === activeChatId}
                 onSelect={() => { switchChat(chat); if (isMobile) setSidebarOpen(false) }}
@@ -1382,11 +1420,11 @@ useEffect(() => {
             <div style={{ marginTop: 0, marginBottom: 8, display: 'flex', gap: 8 }}>
               <div style={{ flex: 1, background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: AMBER }}>{credits.standard_credits}</div>
-                <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>STD</div>
+                <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>{t('std')}</div>
               </div>
               <div style={{ flex: 1, background: `${PURPLE}10`, border: `1px solid ${PURPLE}30`, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: PURPLE, textShadow: mode === 'premium' ? `0 0 8px ${PURPLE}60` : 'none', transition: 'text-shadow 0.2s' }}>{credits.premium_credits}</div>
-                <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>PREMIUM</div>
+                <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>{t('premium')}</div>
               </div>
               <button onClick={() => setShowBuyModal(true)}
                 style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 6, padding: '6px 10px', color: MUTED, fontSize: 12, cursor: 'pointer' }}>
@@ -1401,7 +1439,7 @@ useEffect(() => {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                 </svg>
-                Settings
+                {t('settings')}
               </button>
 
               <button onClick={() => setShowFeedback(true)}
@@ -1411,7 +1449,7 @@ useEffect(() => {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
-                Send Feedback
+                {t('sendFeedback')}
               </button>
 
               <button onClick={() => setShowInfo(true)}
@@ -1421,12 +1459,12 @@ useEffect(() => {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
                 </svg>
-                Info
+                {t('info')}
               </button>
             </div>
 
             <div style={{ marginTop: 12, fontSize: 10, color: MUTED2, fontFamily: 'monospace', lineHeight: 1.8 }}>
-              by Constantin Riegler
+              {t('byAuthor')}
             </div>
           </div>
         </div>
@@ -1443,7 +1481,7 @@ useEffect(() => {
             style={{ position: 'relative', background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, cursor: 'pointer', fontSize: 11, fontFamily: 'monospace', padding: '4px 8px', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: 5, transition: 'all 0.15s' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = PURPLE; e.currentTarget.style.color = PURPLE }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED }}>
-            ✦ WHAT'S NEW
+            {t('whatsNew')}
             <span style={{ position: 'absolute', top: -4, right: -4, width: 7, height: 7, borderRadius: '50%', background: PURPLE, border: `1px solid ${BG}` }} />
           </button>
         </div>
@@ -1451,27 +1489,25 @@ useEffect(() => {
         <div style={{ flex: 1, overflowY: 'auto', padding: '48px 0', position: 'relative' }}>
           {messages.length === 0 && !loading && (
             <div style={{ maxWidth: 600, margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px', position: 'relative', zIndex: 1 }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>VELE AI / TERMINAL</div>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>{t('terminal')}</div>
               <div style={{ fontSize: isMobile ? 26 : 36, fontWeight: 700, color: TEXT, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 12 }}>
-                {getGreeting()}{name ? `, ${name}` : ''}.
+                {getGreeting(t)}{name ? `, ${name}` : ''}.
               </div>
               <div style={{ fontSize: 15, color: MUTED, marginBottom: mode === 'premium' ? 16 : 48, lineHeight: 1.7 }}>
-                <div>{mode === 'premium'
-                  ? 'Ask anything. 4 AI models debate your question in multiple rounds, then vote blindly on the best answer.'
-                  : 'Ask anything. Your question goes to 4 AI models simultaneously.'}</div>
-                {credits.standard_credits > 0 && <div style={{ color: GREEN }}>{credits.standard_credits} standard {credits.standard_credits === 1 ? 'query' : 'queries'} remaining.</div>}
-                {credits.premium_credits > 0 && <div style={{ color: PURPLE }}>{credits.premium_credits} premium {credits.premium_credits === 1 ? 'query' : 'queries'} remaining.</div>}
+                <div>{mode === 'premium' ? t('subtitlePremium') : t('subtitleStandard')}</div>
+                {credits.standard_credits > 0 && <div style={{ color: GREEN }}>{t('standardQueriesRemaining', { count: credits.standard_credits, unit: credits.standard_credits === 1 ? t('query') : t('queries') })}</div>}
+                {credits.premium_credits > 0 && <div style={{ color: PURPLE }}>{t('premiumQueriesRemaining', { count: credits.premium_credits, unit: credits.premium_credits === 1 ? t('query') : t('queries') })}</div>}
               </div>
               {mode === 'premium' && (
                 <div style={{ fontSize: 12, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.08em', marginBottom: 48, display: 'flex', alignItems: 'center', gap: 8, opacity: 0.85 }}>
                   <span>◆</span>
-                  <span>PREMIUM MODE — DEEPER REASONING · BLIND VOTING · HIGHEST QUALITY ANSWER</span>
+                  <span>{t('premiumModeBanner')}</span>
                 </div>
               )}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? 8 : 10, marginBottom: 24 }}>
                 {FEATURE_DETAILS.map((f, i) => <FeatureCard key={i} feature={f} isMobile={isMobile} />)}
               </div>
-              <div style={{ fontSize: 11, color: MUTED2, fontFamily: 'monospace', marginBottom: 32, letterSpacing: '0.06em' }}>CREATED BY CONSTANTIN RIEGLER</div>
+              <div style={{ fontSize: 11, color: MUTED2, fontFamily: 'monospace', marginBottom: 32, letterSpacing: '0.06em' }}>{t('createdBy')}</div>
             </div>
           )}
 
@@ -1480,7 +1516,7 @@ useEffect(() => {
               {msg.role === 'user' ? (
                 <div style={{ marginBottom: 8 }}>
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.1em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span>QUERY</span>
+                    <span>{t('queryLabel')}</span>
                     {msg.isPremium && <span style={{ color: PURPLE }}>◆ PREMIUM</span>}
                   </div>
                   <div style={{ fontSize: 22, fontWeight: 700, color: TEXT, lineHeight: 1.3, borderLeft: `3px solid ${msg.isPremium ? PURPLE : AMBER}`, paddingLeft: 16 }}>
@@ -1500,11 +1536,11 @@ useEffect(() => {
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
                     <div style={{ fontSize: 10, fontFamily: 'monospace', color: msg.isPremium ? PURPLE : AMBER, letterSpacing: '0.1em' }}>
-                      {msg.isPremium ? '◆ DEBATE WINNER' : 'SYNTHESIS'}
+                      {msg.isPremium ? t('debateWinner') : t('synthesis')}
                     </div>
                     <div style={{ flex: 1, height: '1px', background: BORDER2 }}/>
                     <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 4, padding: '2px 8px' }}>
-                      {msg.content.confidence?.toUpperCase()} CONFIDENCE
+                      {({'high': t('highConfidence'), 'medium': t('mediumConfidence'), 'low': t('lowConfidence')}[msg.content.confidence] ?? msg.content.confidence ?? '').toUpperCase()} {t('confidence')}
                     </div>
                   </div>
                   <div style={{ marginBottom: 24, padding: '24px 28px', background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 12, borderLeft: `3px solid ${msg.isPremium ? PURPLE : AMBER}` }}>
@@ -1512,7 +1548,7 @@ useEffect(() => {
                       <CopyButton text={msg.content.summary} />
                       <button onClick={() => exportPDF(msg, messages[i-1]?.content || '')}
                         style={{ background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, fontSize: 10, fontFamily: 'monospace', padding: '4px 10px', cursor: 'pointer', letterSpacing: '0.05em' }}>
-                        EXPORT
+                        {t('export')}
                       </button>
                     </div>
                     <FormattedText text={msg.content.summary} />
@@ -1524,16 +1560,16 @@ useEffect(() => {
 
                   {!msg.isPremium && (
                     <div style={{ marginBottom: 16, padding: isMobile ? '14px 16px' : '20px 24px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10 }}>
-                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.12em', marginBottom: 18 }}>SIGNAL ANALYSIS</div>
-                      <ConfidenceBar color={GREEN} points={msg.content.agreed} label="Consensus" />
-                      <ConfidenceBar color={YELLOW} points={msg.content.partial} label="Partial agreement" />
-                      <ConfidenceBar color={RED} points={msg.content.conflicted} label="Conflicting signals" />
+                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.12em', marginBottom: 18 }}>{t('signalAnalysis')}</div>
+                      <ConfidenceBar color={GREEN} points={msg.content.agreed} label={t('consensusSignal')} />
+                      <ConfidenceBar color={YELLOW} points={msg.content.partial} label={t('partialAgreement')} />
+                      <ConfidenceBar color={RED} points={msg.content.conflicted} label={t('conflictingSignals')} />
                     </div>
                   )}
 
                   {msg.sources?.length > 0 && (
                     <div style={{ marginBottom: 16, padding: isMobile ? '14px 16px' : '16px 20px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10 }}>
-                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.12em', marginBottom: 12 }}>SOURCES</div>
+                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.12em', marginBottom: 12 }}>{t('sources')}</div>
                       {msg.sources.map((src, idx) => (
                         <div key={idx} style={{ display: 'flex', gap: 10, marginBottom: 10, alignItems: 'flex-start' }}>
                           <span style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, flexShrink: 0, marginTop: 1 }}>[{idx + 1}]</span>
@@ -1569,7 +1605,7 @@ useEffect(() => {
               {streamingText ? (
                 <div style={{ padding: '24px 28px', background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 12, borderLeft: `3px solid ${mode === 'premium' ? PURPLE : AMBER}` }}>
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: mode === 'premium' ? PURPLE : AMBER, letterSpacing: '0.1em', marginBottom: 12 }}>
-                    {mode === 'premium' ? '◆ DEBATE WINNER — STREAMING' : 'SYNTHESIS — STREAMING'}
+                    {mode === 'premium' ? t('debateWinnerStreaming') : t('synthesisStreaming')}
                   </div>
                   <FormattedText text={streamingText} />
                   <span style={{ display: 'inline-block', width: 2, height: 16, background: mode === 'premium' ? PURPLE : AMBER, marginLeft: 2, verticalAlign: 'middle', animation: 'blink 1s infinite' }}/>
@@ -1630,17 +1666,17 @@ useEffect(() => {
                   <ModeToggle mode={mode} setMode={setMode} disabled={loading} />
                   {isMobile && (
                     <button onClick={() => setUseWebSearch(!useWebSearch)}
-                      title={useWebSearch ? 'Web search ON' : 'Web search OFF'}
-                      style={{ background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : 'var(--c-amber-a20)') : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 32, padding: '0 10px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'inline-flex', alignItems: 'center', transition: 'all 0.15s', flexShrink: 0 }}>WEB</button>
+                      title={t(useWebSearch ? 'webSearchOn' : 'webSearchOff')}
+                      style={{ background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : 'var(--c-amber-a20)') : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 32, padding: '0 10px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'inline-flex', alignItems: 'center', transition: 'all 0.15s', flexShrink: 0 }}>{t('web')}</button>
                   )}
                 </div>
                 <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, textAlign: 'right' }}>
                   {mode === 'standard'
-                    ? `${credits.standard_credits} standard ${credits.standard_credits === 1 ? 'query' : 'queries'} left`
-                    : `${credits.premium_credits} premium ${credits.premium_credits === 1 ? 'query' : 'queries'} left`}
+                    ? t('standardQueriesLeft', { count: credits.standard_credits, unit: credits.standard_credits === 1 ? t('query') : t('queries') })
+                    : t('premiumQueriesLeft', { count: credits.premium_credits, unit: credits.premium_credits === 1 ? t('query') : t('queries') })}
                   {(mode === 'standard' ? credits.standard_credits : credits.premium_credits) === 0 && (
                     <button onClick={() => setShowBuyModal(true)} style={{ marginLeft: 8, background: 'none', border: 'none', color: AMBER, fontSize: 10, fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}>
-                      buy more
+                      {t('buyMore')}
                     </button>
                   )}
                 </div>
@@ -1650,7 +1686,7 @@ useEffect(() => {
               <textarea
                 ref={inputRef}
                 autoFocus
-                placeholder={mode === 'premium' ? 'Ask anything — models will debate' : 'Ask anything...'}
+                placeholder={mode === 'premium' ? t('askAnythingDebate') : t('askAnything')}
                 value={prompt}
                 onChange={e => setPrompt(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -1660,8 +1696,8 @@ useEffect(() => {
               />
               {!isMobile && (
                 <button onClick={() => setUseWebSearch(!useWebSearch)}
-                  title={useWebSearch ? 'Web search ON' : 'Web search OFF'}
-                  style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : 'var(--c-amber-a20)') : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 36, padding: '0 12px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>WEB</button>
+                  title={t(useWebSearch ? 'webSearchOn' : 'webSearchOff')}
+                  style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : 'var(--c-amber-a20)') : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 36, padding: '0 12px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>{t('web')}</button>
               )}
               <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: 6 }}>
                 <button onClick={() => document.getElementById('file-input').click()}
@@ -1672,7 +1708,7 @@ useEffect(() => {
             </div>
           </div>
           <div style={{ textAlign: 'center', fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 8, letterSpacing: '0.05em' }}>
-            ENTER TO SEND · PASTE OR CLICK ⊕ TO ATTACH · WEB FOR LIVE SEARCH
+            {t('inputHint')}
           </div>
         </div>
       </div>
