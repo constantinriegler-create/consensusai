@@ -63,9 +63,12 @@ body {
   100% { transform: translate(0px, 0px); }
 }
 
-/* ── Ambient orb visibility ──────────────────────────────────── */
-.ambient-orbs { opacity: 0; }
-html[data-theme="dark"] .ambient-orbs { opacity: 1; }
+/* ── Light mode background override (root div is transparent, body must be light) */
+html[data-theme="light"],
+html[data-theme="light"] body {
+  background-color: #f8f8f8;
+  background: #f8f8f8;
+}
 
 html[data-theme="light"] {
   --c-bg: #f8f8f8; --c-surface: #ffffff; --c-surface-deep: #f0f0f0;
