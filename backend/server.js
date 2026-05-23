@@ -34,27 +34,28 @@ app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), async
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object
-    const { userId, packType } = session.metadata
-    const pack = PACKS[packType]
+    const { userId, packId } = session.metadata
+    const pack = PACKS[packId]
 
     if (!pack || !userId) {
       console.error('Missing metadata in webhook:', session.metadata)
       return res.status(400).json({ error: 'Invalid metadata' })
     }
 
-    await addCredits(userId, packType, pack.credits)
+    const creditType = packId.startsWith('premium') ? 'premium' : 'standard'
+    await addCredits(userId, creditType, pack.credits)
 
     await supabase
       .from('payments')
       .insert({
         user_id: userId,
         stripe_payment_id: session.payment_intent || session.id,
-        pack_type: packType,
+        pack_type: packId,
         credits_added: pack.credits,
         amount_cents: pack.amount_cents,
       })
 
-    console.log(`✅ Added ${pack.credits} ${packType} credits to user ${userId}`)
+    console.log(`✅ Added ${pack.credits} ${creditType} credits to user ${userId} (${packId})`)
   }
 
   res.json({ received: true })
@@ -210,9 +211,9 @@ app.delete('/api/chats/:id', requireAuth, async (req, res) => {
 
 // Create Stripe checkout session
 app.post('/api/checkout', requireAuth, async (req, res) => {
-  const { packType } = req.body
-  const pack = PACKS[packType]
-  if (!pack) return res.status(400).json({ error: 'Invalid pack type' })
+  const { packId } = req.body
+  const pack = PACKS[packId]
+  if (!pack) return res.status(400).json({ error: 'Invalid pack' })
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -226,17 +227,16 @@ app.post('/api/checkout', requireAuth, async (req, res) => {
         quantity: 1,
       }],
       mode: 'payment',
-     success_url: 'https://consensusai-three.vercel.app?payment=success',
-cancel_url: 'https://consensusai-three.vercel.app?payment=cancelled',
+      success_url: 'https://consensusai-three.vercel.app?payment=success',
+      cancel_url: 'https://consensusai-three.vercel.app?payment=cancelled',
       metadata: {
         userId: req.user.id,
-        packType,
+        packId,
       },
     })
     res.json({ url: session.url })
   } catch (err) {
     console.error('Stripe checkout error:', err)
-    
     res.status(500).json({ error: err.message })
   }
 })

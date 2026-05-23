@@ -614,14 +614,14 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
 
   async function handleBuy(packType) {
     setLoading(packType)
-    const pack = PACKS[packType][qty]
+    const packId = `${packType}_${qty}`
     try {
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
       const res = await fetch('https://consensusai-production-0e01.up.railway.app/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ packType, quantity: qty, priceInCents: Math.round(pack.price * 100) })
+        body: JSON.stringify({ packId })
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url
