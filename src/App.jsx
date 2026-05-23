@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import ReactMarkdown from 'react-markdown'
 import { useTranslation } from 'react-i18next'
 import supabase from './supabase.js'
@@ -306,9 +307,12 @@ function FeatureCard({ feature, isMobile }) {
 function DeleteChatModal({ onConfirm, onCancel }) {
   const { t } = useTranslation()
   const isLight = document.documentElement.getAttribute('data-theme') === 'light'
-  return (
-    <div onClick={onCancel} style={{ position: 'fixed', inset: 0, zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: isLight ? '#ffffff' : '#111111', border: `1px solid ${isLight ? '#e5e5e5' : '#2a2a2a'}`, borderRadius: 8, padding: 24, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', minWidth: 320, maxWidth: 400 }}>
+  return createPortal(
+    <>
+      {/* Backdrop z:999 */}
+      <div onClick={onCancel} style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} />
+      {/* Modal box z:1000 — explicit fixed positioning, not a flex child of the backdrop */}
+      <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000, background: isLight ? '#ffffff' : '#111111', border: `1px solid ${isLight ? '#e5e5e5' : '#2a2a2a'}`, borderRadius: 8, padding: 24, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', minWidth: 320, maxWidth: 400, width: 'calc(100vw - 48px)' }}>
         <div style={{ fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.15em', color: isLight ? '#888' : '#555', marginBottom: 12 }}>{t('deleteChatTitle')}</div>
         <p style={{ fontFamily: 'monospace', fontSize: 13, color: isLight ? '#1a1a1a' : '#e8e6e0', margin: '0 0 20px', lineHeight: 1.6 }}>{t('deleteConfirm')}</p>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
@@ -326,7 +330,8 @@ function DeleteChatModal({ onConfirm, onCancel }) {
           </button>
         </div>
       </div>
-    </div>
+    </>,
+    document.body
   )
 }
 
