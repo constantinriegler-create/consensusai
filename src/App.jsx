@@ -303,10 +303,38 @@ function FeatureCard({ feature, isMobile }) {
   )
 }
 
+function DeleteChatModal({ onConfirm, onCancel }) {
+  const { t } = useTranslation()
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light'
+  return (
+    <div onClick={onCancel} style={{ position: 'fixed', inset: 0, zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: isLight ? '#ffffff' : '#111111', border: `1px solid ${isLight ? '#e5e5e5' : '#2a2a2a'}`, borderRadius: 8, padding: 24, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', minWidth: 320, maxWidth: 400 }}>
+        <div style={{ fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.15em', color: isLight ? '#888' : '#555', marginBottom: 12 }}>{t('deleteChatTitle')}</div>
+        <p style={{ fontFamily: 'monospace', fontSize: 13, color: isLight ? '#1a1a1a' : '#e8e6e0', margin: '0 0 20px', lineHeight: 1.6 }}>{t('deleteConfirm')}</p>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button onClick={onCancel}
+            style={{ background: 'transparent', border: `1px solid ${isLight ? '#d8d8d8' : '#333'}`, borderRadius: 6, color: isLight ? '#1a1a1a' : '#e8e6e0', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'border-color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = isLight ? '#aaa' : '#555'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = isLight ? '#d8d8d8' : '#333'}>
+            {t('cancel')}
+          </button>
+          <button onClick={onConfirm}
+            style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid #ef4444', borderRadius: 6, color: '#ef4444', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'background 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.25)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.15)'}>
+            {t('delete')}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const [val, setVal] = useState(chat.title)
+  const [confirming, setConfirming] = useState(false)
   function save() { if (val.trim()) onRename(val.trim()); setEditing(false) }
   if (editing) return (
     <div style={{ padding: '4px 6px', marginBottom: 2 }}>
@@ -333,7 +361,7 @@ function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
               <line x1="3" y1="22" x2="21" y2="22"/>
             </svg>
           </button>
-          <button onClick={e => { e.stopPropagation(); if (window.confirm(t('deleteConfirm'))) onDelete() }}
+          <button onClick={e => { e.stopPropagation(); setConfirming(true) }}
             title={t('delete')}
             style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', padding: '2px 3px', display: 'flex', alignItems: 'center', borderRadius: 4, transition: 'color 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.color = '#ef4444'} onMouseLeave={e => e.currentTarget.style.color = 'var(--c-muted)'}>
@@ -345,6 +373,12 @@ function ChatItem({ chat, active, onSelect, onRename, onDelete }) {
             </svg>
           </button>
         </span>
+      )}
+      {confirming && (
+        <DeleteChatModal
+          onConfirm={() => { setConfirming(false); onDelete() }}
+          onCancel={() => setConfirming(false)}
+        />
       )}
     </div>
   )

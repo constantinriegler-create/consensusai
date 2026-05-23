@@ -160,6 +160,7 @@
   "invalidPromo": "Ungültiger Promo-Code",
   "networkErrorRetry": "Netzwerkfehler — bitte erneut versuchen",
 
+  "deleteChatTitle": "CHAT LÖSCHEN",
   "deleteConfirm": "Diesen Chat löschen? Dies kann nicht rückgängig gemacht werden.",
   "rename": "Umbenennen",
   "delete": "Löschen",

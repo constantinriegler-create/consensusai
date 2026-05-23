@@ -160,6 +160,7 @@
   "invalidPromo": "Invalid promo code",
   "networkErrorRetry": "Network error — please try again",
 
+  "deleteChatTitle": "DELETE CHAT",
   "deleteConfirm": "Delete this chat? This cannot be undone.",
   "rename": "Rename",
   "delete": "Delete",
