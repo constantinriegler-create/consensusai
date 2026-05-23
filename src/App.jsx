@@ -1225,9 +1225,15 @@ useEffect(() => {
 
       {/* Ambient orb layer — fixed, full viewport, hidden via CSS in light mode */}
       <div className="ambient-orbs" style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 2, pointerEvents: 'none', overflow: 'visible' }}>
-        <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '10%', left: '10%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb1 15s ease-in-out infinite', willChange: 'transform' }} />
-        <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '40%', left: '60%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb2 18s ease-in-out infinite', willChange: 'transform' }} />
-        <div style={{ position: 'absolute', width: 500, height: 500, background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)', top: '70%', left: '20%', filter: 'blur(80px)', borderRadius: '50%', animation: 'orb3 12s ease-in-out infinite', willChange: 'transform' }} />
+        {(() => {
+          const orbColor = mode === 'premium' ? 'rgba(167,139,250,0.30)' : 'rgba(232,232,232,0.18)'
+          const orbStyle = (top, left, anim) => ({ position: 'absolute', width: 500, height: 500, background: `radial-gradient(circle, ${orbColor} 0%, transparent 70%)`, top, left, filter: 'blur(80px)', borderRadius: '50%', animation: `${anim} ease-in-out infinite`, willChange: 'transform', transition: 'background 1s ease' })
+          return (<>
+            <div style={orbStyle('10%', '10%', 'orb1 15s')} />
+            <div style={orbStyle('40%', '60%', 'orb2 18s')} />
+            <div style={orbStyle('70%', '20%', 'orb3 12s')} />
+          </>)
+        })()}
       </div>
 
       {showWhatsNew && <UpdateAnnouncementModal onDismiss={() => setShowWhatsNew(false)} />}
