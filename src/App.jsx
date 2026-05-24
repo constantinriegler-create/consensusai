@@ -1075,6 +1075,7 @@ export default function App() {
   const [selectedChatIds, setSelectedChatIds] = useState(new Set())
   const [showDeleteSelectedModal, setShowDeleteSelectedModal] = useState(false)
   const [shareToast, setShareToast] = useState(false)
+  const [shareError, setShareError] = useState('')
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
   const [useWebSearch, setUseWebSearch] = useState(() => {
@@ -1376,21 +1377,42 @@ useEffect(() => {
   }
 
   async function handleShare() {
+    console.log('[share] clicked, activeChatId:', activeChatId)
     if (!activeChatId) return
     const token = await getAuthHeader()
+    console.log('[share] token ok, fetching...')
     try {
       const res = await fetch(`https://consensusai-production-0e01.up.railway.app/api/chats/${activeChatId}/share`, {
         method: 'POST',
-        headers: { 'Authorization': token },
+        headers: { 'Authorization': token, 'Content-Type': 'application/json' },
       })
-      const data = await res.json()
-      if (data.shareUrl) {
-        await navigator.clipboard.writeText(data.shareUrl)
-        setShareToast(true)
-        setTimeout(() => setShareToast(false), 3000)
+      console.log('[share] response status:', res.status)
+      if (!res.ok) {
+        const text = await res.text()
+        console.error('[share] server error:', text)
+        setShareError(`Share failed (${res.status})`)
+        setTimeout(() => setShareError(''), 3000)
+        return
       }
+      const data = await res.json()
+      console.log('[share] data:', data)
+      if (!data.shareUrl) {
+        setShareError('No share URL returned')
+        setTimeout(() => setShareError(''), 3000)
+        return
+      }
+      try {
+        await navigator.clipboard.writeText(data.shareUrl)
+      } catch (clipErr) {
+        console.warn('[share] clipboard failed, prompting:', clipErr)
+        window.prompt('Copy share link:', data.shareUrl)
+      }
+      setShareToast(true)
+      setTimeout(() => setShareToast(false), 3000)
     } catch (e) {
-      console.error('Share failed:', e)
+      console.error('[share] fetch error:', e)
+      setShareError('Network error — check console')
+      setTimeout(() => setShareError(''), 3000)
     }
   }
 
@@ -1458,6 +1480,21 @@ useEffect(() => {
         }}>
           <span style={{ color: GREEN, fontSize: 14 }}>✓</span>
           <span style={{ fontSize: 12, fontFamily: 'monospace', color: TEXT, letterSpacing: '0.04em' }}>{t('shareLinkCopied')}</span>
+        </div>
+      )}
+
+      {shareError && (
+        <div style={{
+          position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 9999, background: SURFACE, border: `1px solid ${RED}`,
+          borderRadius: 9, padding: '11px 20px',
+          display: 'flex', alignItems: 'center', gap: 10,
+          boxShadow: `0 4px 20px rgba(0,0,0,0.25)`,
+          animation: 'msgSlideIn 200ms ease-out both',
+          whiteSpace: 'nowrap',
+        }}>
+          <span style={{ color: RED, fontSize: 14 }}>✕</span>
+          <span style={{ fontSize: 12, fontFamily: 'monospace', color: TEXT, letterSpacing: '0.04em' }}>{shareError}</span>
         </div>
       )}
 
