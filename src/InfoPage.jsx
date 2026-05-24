@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const PURPLE = '#a855f7'
 const BG = 'var(--c-bg)'
@@ -84,7 +85,7 @@ function BulletList({ items, color }) {
   )
 }
 
-function CostBadge({ label, price, color }) {
+function CostBadge({ label, price, perLabel, color }) {
   return (
     <div style={{
       display: 'inline-flex', alignItems: 'center', gap: 10,
@@ -96,7 +97,7 @@ function CostBadge({ label, price, color }) {
       <span style={{ fontSize: 11, fontFamily: 'monospace', color, letterSpacing: '0.06em' }}>{label}</span>
       <div style={{ width: 1, height: 14, background: `${color}30` }} />
       <span style={{ fontSize: 14, fontWeight: 700, color: TEXT }}>{price}</span>
-      <span style={{ fontSize: 11, color: MUTED }}>per 10 queries</span>
+      <span style={{ fontSize: 11, color: MUTED }}>{perLabel}</span>
     </div>
   )
 }
@@ -128,6 +129,7 @@ function InfoSection({ label, children, id }) {
 }
 
 export default function InfoPage({ onClose }) {
+  const { t } = useTranslation()
   const scrollRef = useRef(null)
 
   useEffect(() => {
@@ -157,7 +159,7 @@ export default function InfoPage({ onClose }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 24, height: 24, borderRadius: 6 }} />
           <span style={{ fontSize: 11, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.18em', fontWeight: 700 }}>
-            VELE AI — INFO
+            {t('info_nav_label')}
           </span>
         </div>
         <button
@@ -172,7 +174,7 @@ export default function InfoPage({ onClose }) {
           onMouseEnter={e => { e.currentTarget.style.color = TEXT; e.currentTarget.style.borderColor = BORDER }}
           onMouseLeave={e => { e.currentTarget.style.color = MUTED; e.currentTarget.style.borderColor = BORDER2 }}
         >
-          ESC
+          {t('info_esc')}
         </button>
       </div>
 
@@ -182,28 +184,24 @@ export default function InfoPage({ onClose }) {
         {/* ── ABOUT ─────────────────────────────────────────── */}
         <div style={{ marginBottom: 56 }}>
           <div style={{ fontSize: 11, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.18em', marginBottom: 20 }}>
-            ABOUT VELE AI
+            {t('info_title')}
           </div>
           <h1 style={{
             fontSize: 36, fontWeight: 800, color: TEXT,
             margin: '0 0 20px', letterSpacing: '-0.03em', lineHeight: 1.1,
           }}>
-            Multi-model<br />intelligence.
+            {t('info_heading')}
           </h1>
           <p style={{ fontSize: 16, color: 'var(--c-readable)', lineHeight: 1.75, margin: '0 0 20px', maxWidth: 580 }}>
-            VELE AI is a multi-model synthesis platform that queries multiple leading AI models
-            simultaneously and synthesizes their responses into a single, high-quality answer.
-            Instead of choosing one AI, you get the combined intelligence of many.
+            {t('info_description')}
           </p>
-          <div style={{
-            display: 'flex', gap: 8, flexWrap: 'wrap',
-          }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {[
               { dot: '#10a37f', label: 'GPT-4o' },
               { dot: '#cc785c', label: 'Claude' },
               { dot: '#4d6bfe', label: 'DeepSeek' },
               { dot: '#e8e8e8', label: 'Grok' },
-              { dot: PURPLE, label: 'Synthesis' },
+              { dot: PURPLE, label: t('synthesis_label') },
             ].map(m => (
               <div key={m.label} style={{
                 display: 'flex', alignItems: 'center', gap: 7,
@@ -220,18 +218,14 @@ export default function InfoPage({ onClose }) {
         <Divider />
 
         {/* ── STANDARD MODE ─────────────────────────────────── */}
-        <InfoSection label="STANDARD MODE">
-          <SectionTitle>Fast, parallel synthesis</SectionTitle>
-          <BodyText>
-            All four AI models answer your question independently and simultaneously. VELE then
-            synthesizes their responses into one cohesive, confident answer — with a score
-            showing how much the models agreed.
-          </BodyText>
+        <InfoSection label={t('info_standard_label')}>
+          <SectionTitle>{t('info_standard_heading')}</SectionTitle>
+          <BodyText>{t('info_standard_desc')}</BodyText>
 
           <div style={{ margin: '28px 0', borderRadius: 12, overflow: 'hidden', border: `1px solid ${BORDER2}`, background: SURFACE }}>
             <img
               src="/info-standard.svg"
-              alt="Standard mode diagram: query fans out to 4 models plus optional web search, then synthesized into one answer"
+              alt="Standard mode diagram"
               style={{ width: '100%', display: 'block', padding: '8px 0' }}
             />
           </div>
@@ -239,47 +233,43 @@ export default function InfoPage({ onClose }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
             <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: '20px 20px 16px' }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.14em', marginBottom: 14 }}>
-                HOW IT WORKS
+                {t('info_how_it_works')}
               </div>
               <StepList steps={[
-                'You ask a question',
-                'All 4 models answer simultaneously and independently',
-                'VELE synthesizes their responses into one cohesive answer',
-                'You see a confidence score showing how much the models agreed',
+                t('info_std_step1'),
+                t('info_std_step2'),
+                t('info_std_step3'),
+                t('info_std_step4'),
               ]} />
             </div>
 
             <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: '20px 20px 16px' }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.14em', marginBottom: 14 }}>
-                BEST FOR
+                {t('info_best_for')}
               </div>
               <BulletList items={[
-                'Quick research and general questions',
-                'When you need one solid answer fast',
-                'Everyday tasks and lookups',
-                'Budget-conscious users',
+                t('info_std_bullet1'),
+                t('info_std_bullet2'),
+                t('info_std_bullet3'),
+                t('info_std_bullet4'),
               ]} />
             </div>
           </div>
 
-          <CostBadge label="STANDARD" price="$1.99" color="var(--c-amber)" />
+          <CostBadge label={t('info_pricing_standard')} price="$1.99" perLabel={t('info_per_queries')} color="var(--c-amber)" />
         </InfoSection>
 
         <Divider />
 
         {/* ── PREMIUM MODE ──────────────────────────────────── */}
-        <InfoSection label="PREMIUM MODE">
-          <SectionTitle>3-round debate with blind vote</SectionTitle>
-          <BodyText>
-            Premium takes multi-model AI to the next level. Models don't just answer — they
-            debate. After seeing each other's reasoning, they vote blindly on the best response.
-            You get the full debate transcript plus the winner.
-          </BodyText>
+        <InfoSection label={t('info_premium_label')}>
+          <SectionTitle>{t('info_premium_heading')}</SectionTitle>
+          <BodyText>{t('info_premium_desc')}</BodyText>
 
           <div style={{ margin: '28px 0', borderRadius: 12, overflow: 'hidden', border: `1px solid ${BORDER2}`, background: SURFACE }}>
             <img
               src="/info-premium.svg"
-              alt="Premium mode diagram: 3-round debate — initial answers, opposition, then blind voting before synthesis"
+              alt="Premium mode diagram"
               style={{ width: '100%', display: 'block', padding: '8px 0' }}
             />
           </div>
@@ -287,90 +277,63 @@ export default function InfoPage({ onClose }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
             <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: '20px 20px 16px', borderTop: `2px solid ${PURPLE}` }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.14em', marginBottom: 14 }}>
-                HOW IT WORKS
+                {t('info_how_it_works')}
               </div>
               <StepList steps={[
-                'You ask a question',
-                'Round 1: All 4 models give their initial response',
-                'Round 2: Models see each other\'s answers and refine their thinking',
-                'Round 3: Models vote blindly on the best answer',
-                'You see the full debate, all perspectives, and the winner',
+                t('info_std_step1'),
+                t('info_pre_step2'),
+                t('info_pre_step3'),
+                t('info_pre_step4'),
+                t('info_pre_step5'),
               ]} />
             </div>
 
             <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: '20px 20px 16px', borderTop: `2px solid ${PURPLE}` }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.14em', marginBottom: 14 }}>
-                BEST FOR
+                {t('info_best_for')}
               </div>
               <BulletList items={[
-                'Important decisions that need multiple expert perspectives',
-                'Complex topics where disagreement reveals insight',
-                'Research and deep analysis',
-                'Finding and catching errors (models debate each other)',
-                'Understanding the reasoning behind answers',
+                t('info_pre_bullet1'),
+                t('info_pre_bullet2'),
+                t('info_pre_bullet3'),
+                t('info_pre_bullet4'),
+                t('info_pre_bullet5'),
               ]} color={PURPLE} />
             </div>
           </div>
 
-          <CostBadge label="◆ PREMIUM" price="$4.99" color={PURPLE} />
+          <CostBadge label={t('info_pricing_premium')} price="$4.99" perLabel={t('info_per_queries')} color={PURPLE} />
         </InfoSection>
 
         <Divider />
 
         {/* ── MODELS ────────────────────────────────────────── */}
-        <InfoSection label="MODELS">
-          <SectionTitle>Curated frontier models</SectionTitle>
-          <BodyText>
-            VELE queries a hand-picked set of leading AI models. The synthesis engine weighs
-            and merges their outputs to reduce individual model blind spots and hallucinations.
-          </BodyText>
+        <InfoSection label={t('info_models_label')}>
+          <SectionTitle>{t('info_models_heading')}</SectionTitle>
+          <BodyText>{t('info_models_desc')}</BodyText>
 
           <div style={{ margin: '28px 0', borderRadius: 12, overflow: 'hidden', border: `1px solid ${BORDER2}`, background: SURFACE, padding: '4px 0' }}>
             <img
               src="/info-models.svg"
-              alt="The four VELE AI models: GPT-4o, Claude, DeepSeek, and Grok"
+              alt="The four VELE AI models"
               style={{ width: '100%', display: 'block' }}
             />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
-            <ModelCard
-              name="GPT-4o"
-              provider="OpenAI"
-              color="#10a37f"
-              description="Best for creative writing, coding, and general intelligence tasks."
-            />
-            <ModelCard
-              name="Claude 3.5 Sonnet"
-              provider="Anthropic"
-              color="#cc785c"
-              description="Best for reasoning, nuance, careful analysis, and long-form understanding."
-            />
-            <ModelCard
-              name="DeepSeek"
-              provider="DeepSeek"
-              color="#4d6bfe"
-              description="Best for technical depth, math, and research-oriented queries."
-            />
-            <ModelCard
-              name="Grok"
-              provider="xAI"
-              color="#9ca3af"
-              description="Best for current events, unconventional thinking, and real-time context."
-            />
+            <ModelCard name="GPT-4o" provider="OpenAI" color="#10a37f" description={t('info_gpt_desc')} />
+            <ModelCard name="Claude" provider="Anthropic" color="#cc785c" description={t('info_claude_desc')} />
+            <ModelCard name="DeepSeek" provider="DeepSeek" color="#4d6bfe" description={t('info_deepseek_desc')} />
+            <ModelCard name="Grok" provider="xAI" color="#9ca3af" description={t('info_grok_desc')} />
           </div>
         </InfoSection>
 
         <Divider />
 
         {/* ── WHY MULTI-MODEL ───────────────────────────────── */}
-        <InfoSection label="WHY MULTI-MODEL?">
-          <SectionTitle>No single model is always right</SectionTitle>
-          <BodyText style={{ marginBottom: 20 }}>
-            Each AI model has unique strengths, training data, and failure modes. By running your
-            query across multiple models and synthesizing the results, VELE delivers more balanced,
-            accurate, and comprehensive answers than any single model alone.
-          </BodyText>
+        <InfoSection label={t('info_why_label')}>
+          <SectionTitle>{t('info_why_heading')}</SectionTitle>
+          <BodyText style={{ marginBottom: 20 }}>{t('info_why_desc')}</BodyText>
 
           <div style={{
             background: CARD, border: `1px solid ${BORDER}`,
@@ -378,14 +341,14 @@ export default function InfoPage({ onClose }) {
             borderLeft: `2px solid ${PURPLE}`,
           }}>
             <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.14em', marginBottom: 16 }}>
-              MULTI-MODEL SYNTHESIS CATCHES WHAT SINGLE MODELS MISS
+              {t('info_why_catch_label')}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
               {[
-                { icon: '⊘', title: 'Factual errors', desc: 'Models disagree = red flag' },
-                { icon: '◐', title: 'Biased perspectives', desc: 'See multiple viewpoints' },
-                { icon: '◈', title: 'Incomplete analysis', desc: 'Combine different expertise' },
-                { icon: '◎', title: 'Hallucinations', desc: 'Models fact-check each other' },
+                { icon: '⊘', title: t('info_why_item1_title'), desc: t('info_why_item1_desc') },
+                { icon: '◐', title: t('info_why_item2_title'), desc: t('info_why_item2_desc') },
+                { icon: '◈', title: t('info_why_item3_title'), desc: t('info_why_item3_desc') },
+                { icon: '◎', title: t('info_why_item4_title'), desc: t('info_why_item4_desc') },
               ].map(item => (
                 <div key={item.title} style={{
                   background: SURFACE, border: `1px solid ${BORDER2}`,
@@ -406,20 +369,17 @@ export default function InfoPage({ onClose }) {
         <Divider />
 
         {/* ── WEB SEARCH ────────────────────────────────────── */}
-        <InfoSection label="WEB SEARCH">
-          <SectionTitle>Real-time information</SectionTitle>
-          <BodyText style={{ marginBottom: 24 }}>
-            Web search powered by Tavily is available in both Standard and Premium modes.
-            Toggle it on to give models access to live information before they answer.
-          </BodyText>
+        <InfoSection label={t('info_web_label')}>
+          <SectionTitle>{t('info_web_heading')}</SectionTitle>
+          <BodyText style={{ marginBottom: 24 }}>{t('info_web_desc')}</BodyText>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
             {[
-              { label: 'Real-time information', sub: 'Up-to-the-minute data' },
-              { label: 'Current prices', sub: 'Prices and availability' },
-              { label: 'Recent news', sub: 'Developments and events' },
-              { label: 'Research papers', sub: 'Academic sources' },
-              { label: 'Verified sources', sub: 'Citations included' },
+              { label: t('info_web_item1_label'), sub: t('info_web_item1_sub') },
+              { label: t('info_web_item2_label'), sub: t('info_web_item2_sub') },
+              { label: t('info_web_item3_label'), sub: t('info_web_item3_sub') },
+              { label: t('info_web_item4_label'), sub: t('info_web_item4_sub') },
+              { label: t('info_web_item5_label'), sub: t('info_web_item5_sub') },
             ].map(item => (
               <div key={item.label} style={{
                 background: '#0d1624', border: '1px solid #185fa520',
@@ -442,7 +402,7 @@ export default function InfoPage({ onClose }) {
           }}>
             <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#60a5fa' }} />
             <span style={{ fontSize: 12, color: MUTED, fontFamily: 'monospace', letterSpacing: '0.04em' }}>
-              Powered by Tavily · available in Standard and Premium modes
+              {t('info_web_powered')}
             </span>
           </div>
         </InfoSection>
@@ -456,7 +416,7 @@ export default function InfoPage({ onClose }) {
         }}>
           <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 20, height: 20, borderRadius: 5, opacity: 0.5 }} />
           <span style={{ fontSize: 11, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.1em' }}>
-            VELE AI — MULTI-MODEL SYNTHESIS
+            {t('info_footer')}
           </span>
         </div>
       </div>
