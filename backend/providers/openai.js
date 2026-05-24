@@ -1,4 +1,4 @@
-export async function callOpenAI(prompt, attachment) {
+export async function callOpenAI(prompt, attachment, history = []) {
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY
   let content
 
@@ -18,6 +18,8 @@ export async function callOpenAI(prompt, attachment) {
     content = prompt
   }
 
+  const historyMessages = history.map(m => ({ role: m.role, content: m.content }))
+
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -26,7 +28,7 @@ export async function callOpenAI(prompt, attachment) {
     },
     body: JSON.stringify({
       model: 'gpt-4o',
-      messages: [{ role: 'user', content }]
+      messages: [...historyMessages, { role: 'user', content }]
     })
   })
   const data = await response.json()

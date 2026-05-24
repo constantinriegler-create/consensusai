@@ -1,4 +1,4 @@
-export async function callAnthropic(prompt, attachment) {
+export async function callAnthropic(prompt, attachment, history = []) {
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
   let content
 
@@ -20,6 +20,8 @@ export async function callAnthropic(prompt, attachment) {
     content = prompt
   }
 
+  const historyMessages = history.map(m => ({ role: m.role, content: m.content }))
+
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -30,7 +32,7 @@ export async function callAnthropic(prompt, attachment) {
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
-      messages: [{ role: 'user', content }]
+      messages: [...historyMessages, { role: 'user', content }]
     })
   })
   const data = await response.json()

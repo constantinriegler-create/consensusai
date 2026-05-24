@@ -1,4 +1,4 @@
-export async function callDeepSeek(prompt, attachment) {
+export async function callDeepSeek(prompt, attachment, history = []) {
   const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY
 
   let content
@@ -11,6 +11,8 @@ export async function callDeepSeek(prompt, attachment) {
     content = prompt
   }
 
+  const historyMessages = history.map(m => ({ role: m.role, content: m.content }))
+
   const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -19,7 +21,7 @@ export async function callDeepSeek(prompt, attachment) {
     },
     body: JSON.stringify({
       model: 'deepseek-chat',
-      messages: [{ role: 'user', content }]
+      messages: [...historyMessages, { role: 'user', content }]
     })
   })
   const data = await response.json()

@@ -5,7 +5,7 @@ import { callGrok } from '../providers/grok.js'
 import { synthesize } from '../synthesizer/synthesize.js'
 import { searchWeb, formatSearchContext } from '../tavily.js'
 
-export async function router(prompt, attachment, onChunk, useWebSearch = false) {
+export async function router(prompt, attachment, onChunk, useWebSearch = false, history = []) {
   // Step 1: optionally fetch web context first
   let augmentedPrompt = prompt
   let sources = []
@@ -20,15 +20,15 @@ export async function router(prompt, attachment, onChunk, useWebSearch = false) 
   onChunk('Querying GPT-4o, Claude, DeepSeek, and Grok in parallel...')
 
   const results = await Promise.all([
-    callOpenAI(augmentedPrompt, attachment).catch(e => `OpenAI error: ${e.message}`),
-    callAnthropic(augmentedPrompt, attachment).catch(e => `Anthropic error: ${e.message}`),
-    callDeepSeek(augmentedPrompt, attachment).catch(e => `DeepSeek error: ${e.message}`),
-    callGrok(augmentedPrompt, attachment).catch(e => `Grok error: ${e.message}`),
+    callOpenAI(augmentedPrompt, attachment, history).catch(e => `OpenAI error: ${e.message}`),
+    callAnthropic(augmentedPrompt, attachment, history).catch(e => `Anthropic error: ${e.message}`),
+    callDeepSeek(augmentedPrompt, attachment, history).catch(e => `DeepSeek error: ${e.message}`),
+    callGrok(augmentedPrompt, attachment, history).catch(e => `Grok error: ${e.message}`),
   ])
 
   onChunk('All models responded. Synthesizing...')
 
-  const combined = await synthesize(prompt, results, onChunk)
+  const combined = await synthesize(prompt, results, onChunk, history)
   if (sources.length) combined.sources = sources
   return {
     synthesis: combined,

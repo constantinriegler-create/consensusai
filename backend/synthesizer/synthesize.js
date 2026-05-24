@@ -1,15 +1,19 @@
 import fs from 'fs'
 import path from 'path'
 
-export async function synthesize(prompt, responses, onChunk) {
+export async function synthesize(prompt, responses, onChunk, history = []) {
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
 
   const systemPrompt = fs.readFileSync(
     path.join(process.cwd(), 'prompts/synthesis.md'), 'utf8'
   )
 
+  const historyContext = history.length > 0
+    ? `Conversation so far:\n${history.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n')}\n\n`
+    : ''
+
   const userMessage = `
-Original question: ${prompt}
+${historyContext}Original question: ${prompt}
 
 GPT-4o: ${responses[0]}
 

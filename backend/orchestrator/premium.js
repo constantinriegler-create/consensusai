@@ -8,10 +8,10 @@ import { searchWeb, formatSearchContext } from '../tavily.js'
 
 const CALLERS = [callOpenAI, callAnthropic, callDeepSeek, callGrok]
 
-async function callAll(prompts, attachment) {
+async function callAll(prompts, attachment, history = []) {
   return Promise.all(
     CALLERS.map((caller, i) =>
-      caller(prompts[i], attachment).catch(e => `[${MODEL_NAMES[i]} error: ${e.message}]`)
+      caller(prompts[i], attachment, history).catch(e => `[${MODEL_NAMES[i]} error: ${e.message}]`)
     )
   )
 }
@@ -68,7 +68,7 @@ function resolveWinner(counts) {
   return { type: 'tie', counts }
 }
 
-export async function premiumRouter(prompt, attachment, onEvent, useWebSearch = false) {
+export async function premiumRouter(prompt, attachment, onEvent, useWebSearch = false, history = []) {
   // Optional: fetch web context first, inject into all debate rounds
   let augmentedPrompt = prompt
   let sources = []
@@ -80,9 +80,9 @@ export async function premiumRouter(prompt, attachment, onEvent, useWebSearch = 
     augmentedPrompt = webContext ? `${prompt}${webContext}` : prompt
   }
 
-  // Round 0: initial answers
+  // Round 0: initial answers (history passed so models have conversation context)
   onEvent({ type: 'status', message: 'Round 0: Getting initial answers from all 4 models...' })
-  const round0 = await callAll(Array(4).fill(augmentedPrompt), attachment)
+  const round0 = await callAll(Array(4).fill(augmentedPrompt), attachment, history)
   onEvent({ type: 'round', round: 0, answers: round0 })
 
   // Round 1: debate

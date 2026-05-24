@@ -1209,10 +1209,20 @@ useEffect(() => {
     const token = await getAuthHeader()
     const endpoint = isPremium ? '/api/query/premium' : '/api/query'
 
+    const conversationHistory = messages
+      .filter(m => m.role === 'user' || m.role === 'assistant')
+      .map(m => ({
+        role: m.role,
+        content: m.role === 'assistant'
+          ? (typeof m.content === 'object' ? (m.content?.summary || '') : String(m.content))
+          : String(m.content),
+      }))
+      .slice(-20)
+
     const res = await fetch(`https://consensusai-production-0e01.up.railway.app${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': token },
-     body: JSON.stringify({ prompt: userMessage, attachment, useWebSearch })
+      body: JSON.stringify({ prompt: userMessage, attachment, useWebSearch, conversationHistory })
     })
 
     // Handle insufficient credits (402)

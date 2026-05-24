@@ -243,7 +243,8 @@ app.post('/api/checkout', requireAuth, async (req, res) => {
 
 // Standard query
 app.post('/api/query', requireAuth, async (req, res) => {
- const { prompt, attachment, useWebSearch } = req.body
+ const { prompt, attachment, useWebSearch, conversationHistory = [] } = req.body
+ const history = conversationHistory.slice(-20)
 
   try {
     await deductCredit(req.user.id, 'standard')
@@ -262,7 +263,7 @@ app.post('/api/query', requireAuth, async (req, res) => {
 
    const result = await router(prompt, attachment, (chunk) => {
   res.write(`data: ${JSON.stringify({ type: 'chunk', text: chunk })}\n\n`)
-}, useWebSearch)
+}, useWebSearch, history)
 
     // Save to DB in background
     saveChat(req.user.id, prompt.slice(0, 40), 'standard')
@@ -280,7 +281,8 @@ app.post('/api/query', requireAuth, async (req, res) => {
 
 // Premium query
 app.post('/api/query/premium', requireAuth, async (req, res) => {
-  const { prompt, attachment, useWebSearch } = req.body
+  const { prompt, attachment, useWebSearch, conversationHistory = [] } = req.body
+  const history = conversationHistory.slice(-20)
 
   try {
     await deductCredit(req.user.id, 'premium')
@@ -298,7 +300,7 @@ app.post('/api/query/premium', requireAuth, async (req, res) => {
 
     const result = await premiumRouter(prompt, attachment, (event) => {
   res.write(`data: ${JSON.stringify(event)}\n\n`)
-}, useWebSearch)
+}, useWebSearch, history)
 
     // Save to DB in background
     saveChat(req.user.id, prompt.slice(0, 40), 'premium')
