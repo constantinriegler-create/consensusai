@@ -537,15 +537,26 @@ function ModelRow({ label, color }) {
 
 function ModeToggle({ mode, setMode, disabled }) {
   const { t } = useTranslation()
+  const isPremium = mode === 'premium'
   return (
-    <div className="mode-toggle-wrap" style={{ display: 'inline-flex', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, padding: 2, fontSize: 11, fontFamily: 'monospace' }}>
-      <button onClick={() => !disabled && setMode('standard')} disabled={disabled} className="mode-btn"
-        style={{ padding: '5px 12px', borderRadius: 5, border: 'none', background: mode === 'standard' ? AMBER : 'transparent', color: mode === 'standard' ? BG : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'all 0.15s' }}>
+    <div style={{ position: 'relative', display: 'inline-flex', border: `1px solid ${BORDER}`, borderRadius: 999, padding: 3, fontSize: 11, fontFamily: 'monospace' }}>
+      {/* Sliding pill */}
+      <div style={{
+        position: 'absolute', top: 3, bottom: 3, left: 3,
+        width: 'calc((100% - 6px) / 2)',
+        borderRadius: 999,
+        background: isPremium ? PURPLE : AMBER,
+        transform: isPremium ? 'translateX(100%)' : 'translateX(0)',
+        transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+        pointerEvents: 'none',
+      }} />
+      <button onClick={() => !disabled && setMode('standard')} disabled={disabled}
+        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: !isPremium ? '#fff' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
         {t('standard')}
       </button>
-      <button onClick={() => !disabled && setMode('premium')} disabled={disabled} className="mode-btn"
-        style={{ padding: '5px 12px', borderRadius: 5, border: 'none', background: mode === 'premium' ? PURPLE : 'transparent', color: mode === 'premium' ? '#fff' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 5 }}>
-        <span className="premium-diamond">◆ </span>{t('premium')}
+      <button onClick={() => !disabled && setMode('premium')} disabled={disabled}
+        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: isPremium ? '#fff' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, whiteSpace: 'nowrap', borderRadius: 999 }}>
+        <span>◆</span>{t('premium')}
       </button>
     </div>
   )
