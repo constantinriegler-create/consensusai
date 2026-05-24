@@ -49,6 +49,7 @@
   "credits": "Credits",
   "appearance": "Appearance",
   "dangerZone": "DANGER ZONE",
+  "deleteChatsMenu": "Delete all/selected Chats",
   "deleteAllChats": "Delete All Chats",
   "signOut": "Sign Out",
   "signOutConfirm": "Sign out of VELE AI?",

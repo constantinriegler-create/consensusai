@@ -1448,8 +1448,8 @@ useEffect(() => {
             {!danger && <span style={{ color: MUTED, fontSize: 12 }}>›</span>}
           </button>
         )
-        const backBtn = (label) => (
-          <button onClick={() => setSettingsView('menu')}
+        const backBtn = (label, dest = 'menu') => (
+          <button onClick={() => setSettingsView(dest)}
             style={{ background: 'none', border: 'none', color: MUTED, fontSize: 12, fontFamily: 'monospace', cursor: 'pointer', padding: '0 0 16px', display: 'flex', alignItems: 'center', gap: 6, letterSpacing: '0.05em' }}>
             ‹ {label}
           </button>
@@ -1468,8 +1468,7 @@ useEffect(() => {
                   {menuRow(t('languageMenu'), '◉', () => setSettingsView('language'))}
                   <div style={{ borderTop: `1px solid var(--c-danger-sep)`, paddingTop: 12, marginTop: 4 }}>
                     <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--c-red-a99)', letterSpacing: '0.15em', marginBottom: 10 }}>{t('dangerZone')}</div>
-                    {menuRow(t('deleteAllChats'), '⊘', () => setSettingsView('delete'), true)}
-                    {menuRow(t('selectChatsToDelete'), '⊟', () => { setSelectionMode(true); setSelectedChatIds(new Set()); setShowSettings(false); setSettingsView('menu') })}
+                    {menuRow(t('deleteChatsMenu'), '⊘', () => setSettingsView('deleteChats'), true)}
                   </div>
 
                   <div style={{ borderTop: `1px solid ${BORDER2}`, paddingTop: 12, marginTop: 4 }}>
@@ -1560,9 +1559,44 @@ useEffect(() => {
                 </>
               )}
 
-              {settingsView === 'delete' && (
+              {settingsView === 'deleteChats' && (
                 <>
                   {backBtn(t('settingsTitle'))}
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: RED, letterSpacing: '0.15em', marginBottom: 16 }}>{t('dangerZone')}</div>
+                  <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 8, overflow: 'hidden' }}>
+                    <button
+                      onClick={() => setSettingsView('delete')}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', borderBottom: `1px solid ${BORDER2}`, color: RED, fontSize: 12, fontFamily: 'monospace', letterSpacing: '0.1em', cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--c-red-bg)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                    >
+                      <span style={{ fontSize: 14, flexShrink: 0 }}>⊘</span>
+                      <span>{t('deleteAllChats').toUpperCase()}</span>
+                    </button>
+                    <button
+                      onClick={() => { setSelectionMode(true); setSelectedChatIds(new Set()); setShowSettings(false); setSettingsView('menu') }}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', color: TEXT, fontSize: 12, fontFamily: 'monospace', letterSpacing: '0.1em', cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = SURFACE}
+                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                    >
+                      <span style={{ fontSize: 14, flexShrink: 0 }}>⊟</span>
+                      <span>{t('selectChatsToDelete').toUpperCase()}</span>
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setSettingsView('menu')}
+                    style={{ width: '100%', marginTop: 10, padding: '11px', borderRadius: 8, background: 'none', border: `1px solid ${BORDER2}`, color: MUTED, fontSize: 11, fontFamily: 'monospace', cursor: 'pointer', letterSpacing: '0.06em', transition: 'border-color 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = BORDER}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = BORDER2}
+                  >
+                    {t('cancel').toUpperCase()}
+                  </button>
+                </>
+              )}
+
+              {settingsView === 'delete' && (
+                <>
+                  {backBtn(t('deleteChatsMenu'), 'deleteChats')}
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: RED, letterSpacing: '0.15em', marginBottom: 16 }}>{t('deleteAllTitle')}</div>
                   <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.6, marginBottom: 24 }}>{t('deleteAllDesc')}</p>
                   <HoldToDelete onConfirm={handleDeleteAllChats} />
