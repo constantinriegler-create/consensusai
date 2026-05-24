@@ -273,5 +273,11 @@
   "info_pricing_premium": "◆ PREMIUM",
   "info_per_queries": "pro 10 Anfragen",
 
-  "info_footer": "VELE AI — MULTI-MODELL-SYNTHESE"
+  "info_footer": "VELE AI — MULTI-MODELL-SYNTHESE",
+
+  "share": "TEILEN",
+  "shareLinkCopied": "Link in Zwischenablage kopiert",
+  "sharedConversation": "GETEILTES GESPRÄCH",
+  "tryVeleAI": "VELE AI ausprobieren",
+  "shareNotAvailable": "Dieses Gespräch ist nicht verfügbar."
 }

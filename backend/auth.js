@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto'
 import supabase from './supabase.js'
 
 export async function requireAuth(req, res, next) {
@@ -141,6 +142,44 @@ export async function deleteAllChats(userId) {
     .eq('user_id', userId)
 
   if (chatError) throw new Error('Could not delete chats')
+}
+
+export async function shareChat(userId, chatId) {
+  const { data, error } = await supabase
+    .from('chats')
+    .select('id, share_id')
+    .eq('id', chatId)
+    .eq('user_id', userId)
+    .single()
+
+  if (error || !data) throw new Error('Chat not found or access denied')
+
+  if (data.share_id) return data.share_id
+
+  const shareId = randomBytes(8).toString('base64url').slice(0, 10)
+
+  const { error: updateError } = await supabase
+    .from('chats')
+    .update({ is_shared: true, share_id: shareId })
+    .eq('id', chatId)
+
+  if (updateError) throw new Error('Could not share chat')
+  return shareId
+}
+
+export async function getSharedChat(shareId) {
+  const { data, error } = await supabase
+    .from('chats')
+    .select(`
+      id, title, mode, created_at,
+      messages (id, role, content, individual, rounds, votes, resolution, created_at)
+    `)
+    .eq('share_id', shareId)
+    .eq('is_shared', true)
+    .single()
+
+  if (error || !data) return null
+  return data
 }
 
 export async function getUserChats(userId) {

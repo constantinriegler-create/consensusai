@@ -1074,6 +1074,7 @@ export default function App() {
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedChatIds, setSelectedChatIds] = useState(new Set())
   const [showDeleteSelectedModal, setShowDeleteSelectedModal] = useState(false)
+  const [shareToast, setShareToast] = useState(false)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
   const [useWebSearch, setUseWebSearch] = useState(() => {
@@ -1374,6 +1375,25 @@ useEffect(() => {
     setShowDeleteSelectedModal(false)
   }
 
+  async function handleShare() {
+    if (!activeChatId) return
+    const token = await getAuthHeader()
+    try {
+      const res = await fetch(`https://consensusai-production-0e01.up.railway.app/api/chats/${activeChatId}/share`, {
+        method: 'POST',
+        headers: { 'Authorization': token },
+      })
+      const data = await res.json()
+      if (data.shareUrl) {
+        await navigator.clipboard.writeText(data.shareUrl)
+        setShareToast(true)
+        setTimeout(() => setShareToast(false), 3000)
+      }
+    } catch (e) {
+      console.error('Share failed:', e)
+    }
+  }
+
   function handleKeyDown(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit() }
   }
@@ -1425,6 +1445,21 @@ useEffect(() => {
       {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} user={user} onPurchase={() => loadUserData(user)} />}
 
       {showDeleteSelectedModal && <DeleteSelectedModal count={selectedChatIds.size} onConfirm={handleDeleteSelected} onCancel={() => setShowDeleteSelectedModal(false)} />}
+
+      {shareToast && (
+        <div style={{
+          position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 9999, background: SURFACE, border: `1px solid ${GREEN}`,
+          borderRadius: 9, padding: '11px 20px',
+          display: 'flex', alignItems: 'center', gap: 10,
+          boxShadow: `0 4px 20px rgba(0,0,0,0.25)`,
+          animation: 'msgSlideIn 200ms ease-out both',
+          whiteSpace: 'nowrap',
+        }}>
+          <span style={{ color: GREEN, fontSize: 14 }}>✓</span>
+          <span style={{ fontSize: 12, fontFamily: 'monospace', color: TEXT, letterSpacing: '0.04em' }}>{t('shareLinkCopied')}</span>
+        </div>
+      )}
 
       {paymentSuccess && (
         <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 200, background: SURFACE, border: `1px solid ${GREEN}`, borderRadius: 10, padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: `0 0 24px ${GREEN}20`, animation: 'msgSlideIn 300ms ease-out both' }}>
@@ -1729,6 +1764,18 @@ useEffect(() => {
           )}
           <div style={{ flex: 1 }}/>
           <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.08em' }}>{timeStr}</div>
+          {activeChatId && messages.length > 0 && (
+            <button onClick={handleShare}
+              style={{ background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, fontSize: 10, fontFamily: 'monospace', padding: '4px 10px', cursor: 'pointer', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 5, transition: 'all 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = PURPLE; e.currentTarget.style.color = PURPLE }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
+              {t('share')}
+            </button>
+          )}
           <button onClick={() => setShowWhatsNew(true)}
             style={{ position: 'relative', background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, cursor: 'pointer', fontSize: 11, fontFamily: 'monospace', padding: '4px 8px', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: 5, transition: 'all 0.15s' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = PURPLE; e.currentTarget.style.color = PURPLE }}

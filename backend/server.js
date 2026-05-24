@@ -4,7 +4,7 @@ import cors from 'cors'
 import { Resend } from 'resend'
 import { router } from './orchestrator/router.js'
 import { premiumRouter } from './orchestrator/premium.js'
-import { requireAuth, getCredits, addCredits, deductCredit, saveChat, saveMessages, getUserChats, deleteChat, deleteAllChats } from './auth.js'
+import { requireAuth, getCredits, addCredits, deductCredit, saveChat, saveMessages, getUserChats, deleteChat, deleteAllChats, shareChat, getSharedChat } from './auth.js'
 import { stripe, PACKS } from './stripe.js'
 import supabase from './supabase.js'
 
@@ -237,6 +237,27 @@ app.post('/api/checkout', requireAuth, async (req, res) => {
     res.json({ url: session.url })
   } catch (err) {
     console.error('Stripe checkout error:', err)
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// Share a chat (generates share_id, returns URL)
+app.post('/api/chats/:chatId/share', requireAuth, async (req, res) => {
+  try {
+    const shareId = await shareChat(req.user.id, req.params.chatId)
+    res.json({ shareUrl: `https://consensusai-three.vercel.app/share/${shareId}` })
+  } catch (err) {
+    res.status(err.message === 'Chat not found or access denied' ? 403 : 500).json({ error: err.message })
+  }
+})
+
+// Get shared chat (public — no auth)
+app.get('/api/share/:shareId', async (req, res) => {
+  try {
+    const chat = await getSharedChat(req.params.shareId)
+    if (!chat) return res.status(404).json({ error: 'Not found' })
+    res.json(chat)
+  } catch (err) {
     res.status(500).json({ error: err.message })
   }
 })
