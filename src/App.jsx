@@ -545,18 +545,18 @@ function ModeToggle({ mode, setMode, disabled }) {
         position: 'absolute', top: 3, bottom: 3, left: 3,
         width: 'calc((100% - 6px) / 2)',
         borderRadius: 999,
-        background: isPremium ? PURPLE : AMBER,
+        background: isPremium ? PURPLE : '#ffffff',
         transform: isPremium ? 'translateX(100%)' : 'translateX(0)',
         transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
         pointerEvents: 'none',
       }} />
       <button onClick={() => !disabled && setMode('standard')} disabled={disabled}
-        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: !isPremium ? '#fff' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
+        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: !isPremium ? '#000000' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
         {t('standard')}
       </button>
       <button onClick={() => !disabled && setMode('premium')} disabled={disabled}
-        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: isPremium ? '#fff' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, whiteSpace: 'nowrap', borderRadius: 999 }}>
-        <span>◆</span>{t('premium')}
+        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: isPremium ? '#ffffff' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
+        {t('premium')}
       </button>
     </div>
   )
@@ -705,7 +705,7 @@ function UpdateAnnouncementModal({ onDismiss }) {
             <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 8 }}>UPDATE</div>
             <h2 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: TEXT, margin: 0, marginBottom: 4, textAlign: 'center' }}>{t('whatsNewTitle')}</h2>
             <p style={{ fontSize: 13, color: MUTED, margin: 0, marginBottom: 4, textAlign: 'center' }}>Version 1.0</p>
-            <p style={{ fontSize: 10, color: MUTED2, margin: 0, fontFamily: 'monospace', letterSpacing: '0.06em', textAlign: 'center' }}>Latest update: 19. May 2026</p>
+            <p style={{ fontSize: 10, color: MUTED2, margin: 0, fontFamily: 'monospace', letterSpacing: '0.06em', textAlign: 'center' }}>Latest update: 24. May 2026</p>
           </div>
         </div>
 
