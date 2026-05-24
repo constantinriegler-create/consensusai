@@ -134,6 +134,10 @@
   "whatsNewTitle": "Was ist neu in VELE AI",
   "gotIt": "Verstanden!",
 
+  "upd_starterCredits_title": "Kostenlose Starter-Credits",
+  "upd_starterCredits_desc": "2 kostenlose Standard-Anfragen für jedes neue Konto.",
+  "welcomeToast": "Willkommen bei VELE AI — du hast 2 kostenlose Anfragen.",
+
   "upd_mobileLayout_title": "Mobile-Layout behoben",
   "upd_mobileLayout_desc": "Eingabefeld und Inhalte werden jetzt auf allen mobilen Browsern einschließlich iOS Safari korrekt angezeigt",
   "upd_ambientLighting_title": "Ambiente-Beleuchtung",

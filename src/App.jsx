@@ -640,6 +640,7 @@ function UpdateAnnouncementModal({ onDismiss }) {
   const { t } = useTranslation()
   const isMobile = window.innerWidth <= 768
   const updates = [
+    { title: t('upd_starterCredits_title'), desc: t('upd_starterCredits_desc') },
     { title: t('upd_mobileLayout_title'), desc: t('upd_mobileLayout_desc') },
     { title: t('upd_ambientLighting_title'), desc: t('upd_ambientLighting_desc') },
     { title: t('upd_languageSupport_title'), desc: t('upd_languageSupport_desc') },
@@ -903,9 +904,16 @@ function LoginPage() {
     if (password.length < 6) { setError(t('authErrShortPassword')); return }
     setLoading('email')
     setError(null)
-    const { error } = authMode === 'signup'
+    const { data, error } = authMode === 'signup'
       ? await supabase.auth.signUp({ email: email.trim(), password })
       : await supabase.auth.signInWithPassword({ email: email.trim(), password })
+    if (!error && authMode === 'signup' && data?.session?.access_token) {
+      sessionStorage.setItem('justSignedUp', '1')
+      fetch(`${API}/api/me/init`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${data.session.access_token}` },
+      }).catch(() => {})
+    }
     if (error) {
       const msg = error.message.toLowerCase()
       if (msg.includes('invalid login')) setError(t('authErrInvalidLogin'))
@@ -1173,6 +1181,7 @@ export default function App() {
   const [shareToast, setShareToast] = useState(false)
   const [shareError, setShareError] = useState('')
   const [shareModalUrl, setShareModalUrl] = useState(null)
+  const [welcomeToast, setWelcomeToast] = useState(false)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
   const [useWebSearch, setUseWebSearch] = useState(() => {
@@ -1218,6 +1227,11 @@ useEffect(() => {
         loadUserData(session.user)
         const savedAppearance = session.user.user_metadata?.appearance
         if (savedAppearance) setThemeMode(savedAppearance)
+        if (sessionStorage.getItem('justSignedUp')) {
+          sessionStorage.removeItem('justSignedUp')
+          setWelcomeToast(true)
+          setTimeout(() => setWelcomeToast(false), 6000)
+        }
       }
     })
     return () => subscription.unsubscribe()
@@ -1576,6 +1590,21 @@ useEffect(() => {
             setTimeout(() => setShareToast(false), 3000)
           }}
         />
+      )}
+
+      {welcomeToast && (
+        <div style={{
+          position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 9999, background: SURFACE, border: `1px solid ${PURPLE}`,
+          borderRadius: 9, padding: '11px 20px',
+          display: 'flex', alignItems: 'center', gap: 10,
+          boxShadow: `0 4px 20px rgba(0,0,0,0.25)`,
+          animation: 'msgSlideIn 200ms ease-out both',
+          whiteSpace: 'nowrap',
+        }}>
+          <span style={{ color: PURPLE, fontSize: 14 }}>✦</span>
+          <span style={{ fontSize: 12, fontFamily: 'monospace', color: TEXT, letterSpacing: '0.04em' }}>{t('welcomeToast')}</span>
+        </div>
       )}
 
       {shareToast && (

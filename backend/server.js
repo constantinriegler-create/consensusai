@@ -114,6 +114,18 @@ app.post('/api/promo', async (req, res) => {
 
  
 })
+// Initialize credits row for a brand-new signup (ignoreDuplicates keeps existing users untouched)
+app.post('/api/me/init', requireAuth, async (req, res) => {
+  const { error } = await supabase
+    .from('credits')
+    .upsert(
+      { user_id: req.user.id, standard_credits: 2, premium_credits: 0 },
+      { onConflict: 'user_id', ignoreDuplicates: true }
+    )
+  if (error) return res.status(500).json({ error: 'Failed to initialize account' })
+  res.json({ success: true })
+})
+
 // Get user credits + chats
 app.get('/api/me', requireAuth, async (req, res) => {
   try {

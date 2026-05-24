@@ -134,6 +134,10 @@
   "whatsNewTitle": "What's New in VELE AI",
   "gotIt": "Got it!",
 
+  "upd_starterCredits_title": "Free Starter Credits",
+  "upd_starterCredits_desc": "2 free standard queries for every new account.",
+  "welcomeToast": "Welcome to VELE AI — you have 2 free queries to get started.",
+
   "upd_mobileLayout_title": "Mobile Layout Fixed",
   "upd_mobileLayout_desc": "Input bar and content now display correctly on all mobile browsers including iOS Safari",
   "upd_ambientLighting_title": "Ambient Lighting",
