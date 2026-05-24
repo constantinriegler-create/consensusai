@@ -243,7 +243,7 @@ app.post('/api/checkout', requireAuth, async (req, res) => {
 
 // Standard query
 app.post('/api/query', requireAuth, async (req, res) => {
- const { prompt, attachment, useWebSearch, conversationHistory = [] } = req.body
+ const { prompt, attachment, useWebSearch, conversationHistory = [], chatId = null } = req.body
  const history = conversationHistory.slice(-20)
 
   try {
@@ -265,12 +265,14 @@ app.post('/api/query', requireAuth, async (req, res) => {
   res.write(`data: ${JSON.stringify({ type: 'chunk', text: chunk })}\n\n`)
 }, useWebSearch, history)
 
-    // Save to DB in background
-    saveChat(req.user.id, prompt.slice(0, 40), 'standard')
-      .then(chatId => saveMessages(chatId, prompt, result, 'standard'))
-      .catch(e => console.error('Save error:', e))
+    // Create new chat row only on first message; follow-ups reuse existing chatId
+    let finalChatId = chatId
+    if (!finalChatId) {
+      finalChatId = await saveChat(req.user.id, prompt.slice(0, 40), 'standard')
+    }
+    saveMessages(finalChatId, prompt, result, 'standard').catch(e => console.error('Save error:', e))
 
-    res.write(`data: ${JSON.stringify({ type: 'done', answer: result.synthesis, individual: result.individual, sources: result.sources || [] })}\n\n`)
+    res.write(`data: ${JSON.stringify({ type: 'done', chatId: finalChatId, answer: result.synthesis, individual: result.individual, sources: result.sources || [] })}\n\n`)
     res.end()
   } catch (err) {
     console.error('FULL ERROR:', err)
@@ -281,7 +283,7 @@ app.post('/api/query', requireAuth, async (req, res) => {
 
 // Premium query
 app.post('/api/query/premium', requireAuth, async (req, res) => {
-  const { prompt, attachment, useWebSearch, conversationHistory = [] } = req.body
+  const { prompt, attachment, useWebSearch, conversationHistory = [], chatId = null } = req.body
   const history = conversationHistory.slice(-20)
 
   try {
@@ -302,13 +304,16 @@ app.post('/api/query/premium', requireAuth, async (req, res) => {
   res.write(`data: ${JSON.stringify(event)}\n\n`)
 }, useWebSearch, history)
 
-    // Save to DB in background
-    saveChat(req.user.id, prompt.slice(0, 40), 'premium')
-      .then(chatId => saveMessages(chatId, prompt, result, 'premium'))
-      .catch(e => console.error('Save error:', e))
+    // Create new chat row only on first message; follow-ups reuse existing chatId
+    let finalChatId = chatId
+    if (!finalChatId) {
+      finalChatId = await saveChat(req.user.id, prompt.slice(0, 40), 'premium')
+    }
+    saveMessages(finalChatId, prompt, result, 'premium').catch(e => console.error('Save error:', e))
 
     res.write(`data: ${JSON.stringify({
       type: 'done',
+      chatId: finalChatId,
       answer: result.synthesis,
       individual: result.individual,
       rounds: result.rounds,

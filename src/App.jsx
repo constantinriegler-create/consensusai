@@ -1192,6 +1192,9 @@ useEffect(() => {
       return
     }
 
+    // Capture before any async state changes
+    const currentChatId = activeChatId
+
     const userMessage = prompt
     setPrompt('')
     const newMessages = [...messages, {
@@ -1222,7 +1225,7 @@ useEffect(() => {
     const res = await fetch(`https://consensusai-production-0e01.up.railway.app${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': token },
-      body: JSON.stringify({ prompt: userMessage, attachment, useWebSearch, conversationHistory })
+      body: JSON.stringify({ prompt: userMessage, attachment, useWebSearch, conversationHistory, chatId: currentChatId })
     })
 
     // Handle insufficient credits (402)
@@ -1275,15 +1278,20 @@ useEffect(() => {
             }
             const finalMessages = [...newMessages, assistantMsg]
             setMessages(finalMessages)
-            // Add new chat to sidebar
-            const newChat = {
-              id: Date.now(),
-              title: userMessage.slice(0, 28) + (userMessage.length > 28 ? '...' : ''),
-              mode: isPremium ? 'premium' : 'standard',
-              messages: finalMessages,
+            const realChatId = parsed.chatId
+            if (currentChatId) {
+              // Follow-up in existing chat — update messages, keep sidebar entry
+              setChats(prev => prev.map(c => c.id === currentChatId ? { ...c, messages: finalMessages } : c))
+            } else {
+              // First message — register new sidebar entry with real DB id
+              setChats(prev => [{
+                id: realChatId,
+                title: userMessage.slice(0, 28) + (userMessage.length > 28 ? '...' : ''),
+                mode: isPremium ? 'premium' : 'standard',
+                messages: finalMessages,
+              }, ...prev])
+              setActiveChatId(realChatId)
             }
-            setChats(prev => [newChat, ...prev])
-            setActiveChatId(newChat.id)
             setStreamingText('')
             setStatusText('')
             setLiveRounds(null)
