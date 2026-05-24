@@ -29,6 +29,20 @@ export default function SharePage({ shareId }) {
       .catch(() => setNotFound(true))
   }, [shareId])
 
+  // Allow body to scroll — the main app sets overflow:hidden globally
+  useEffect(() => {
+    document.body.style.overflow = 'auto'
+    document.body.style.height = 'auto'
+    document.documentElement.style.overflow = 'auto'
+    document.documentElement.style.height = 'auto'
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.height = ''
+      document.documentElement.style.overflow = ''
+      document.documentElement.style.height = ''
+    }
+  }, [])
+
   // Apply theme from localStorage so the share page respects user's last preference
   useEffect(() => {
     const saved = localStorage.getItem('themeMode') || 'dark'
