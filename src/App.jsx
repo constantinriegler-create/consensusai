@@ -547,15 +547,15 @@ function ModeToggle({ mode, setMode, disabled }) {
         borderRadius: 999,
         background: isPremium ? PURPLE : '#ffffff',
         transform: isPremium ? 'translateX(100%)' : 'translateX(0)',
-        transition: 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+        transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
         pointerEvents: 'none',
       }} />
       <button onClick={() => !disabled && setMode('standard')} disabled={disabled}
-        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: !isPremium ? '#000000' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.15s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
+        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: !isPremium ? '#000000' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
         {t('standard')}
       </button>
       <button onClick={() => !disabled && setMode('premium')} disabled={disabled}
-        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: isPremium ? '#ffffff' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.15s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
+        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: isPremium ? '#ffffff' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
         {t('premium')}
       </button>
     </div>
