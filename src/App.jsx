@@ -871,14 +871,21 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
     
 
 function LoginPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [authMode, setAuthMode] = useState('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [focused, setFocused] = useState(null)
+  const [lang, setLang] = useState(i18n.language.startsWith('de') ? 'de' : 'en')
   const isMobile = window.innerWidth <= 768
+
+  function changeLang(l) {
+    setLang(l)
+    i18n.changeLanguage(l)
+    localStorage.setItem('language', l)
+  }
 
   async function handleGoogleLogin() {
     setLoading('google')
@@ -892,8 +899,8 @@ function LoginPage() {
 
   async function handleEmailSubmit(e) {
     e.preventDefault()
-    if (!email.trim() || !password.trim()) { setError('Email and password are required'); return }
-    if (password.length < 6) { setError('Password must be at least 6 characters'); return }
+    if (!email.trim() || !password.trim()) { setError(t('authErrRequired')); return }
+    if (password.length < 6) { setError(t('authErrShortPassword')); return }
     setLoading('email')
     setError(null)
     const { error } = authMode === 'signup'
@@ -901,9 +908,9 @@ function LoginPage() {
       : await supabase.auth.signInWithPassword({ email: email.trim(), password })
     if (error) {
       const msg = error.message.toLowerCase()
-      if (msg.includes('invalid login')) setError('Incorrect email or password')
-      else if (msg.includes('already registered') || msg.includes('already exists')) setError('An account with this email already exists. Try signing in instead.')
-      else if (msg.includes('invalid email')) setError('Please enter a valid email address')
+      if (msg.includes('invalid login')) setError(t('authErrInvalidLogin'))
+      else if (msg.includes('already registered') || msg.includes('already exists')) setError(t('authErrAlreadyRegistered'))
+      else if (msg.includes('invalid email')) setError(t('authErrInvalidEmail'))
       else setError(error.message)
       setLoading(false)
     }
@@ -919,7 +926,30 @@ function LoginPage() {
   })
 
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', padding: '20px 20px 40px' }}>
+    <div style={{ minHeight: '100dvh', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', padding: '20px 20px 40px' }}>
+
+      {/* Language picker */}
+      <div style={{ position: 'absolute', top: 20, right: 20, display: 'flex', gap: 6 }}>
+        {['en', 'de'].map(l => (
+          <button key={l} onClick={() => changeLang(l)} style={{
+            background: lang === l ? TEXT : 'transparent',
+            border: `1px solid ${lang === l ? TEXT : BORDER}`,
+            borderRadius: 20,
+            color: lang === l ? BG : MUTED,
+            fontFamily: 'monospace',
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: '0.1em',
+            padding: '5px 12px',
+            cursor: 'pointer',
+            textTransform: 'uppercase',
+            transition: 'all 0.15s',
+          }}>
+            {l.toUpperCase()}
+          </button>
+        ))}
+      </div>
+
       <div style={{ width: '100%', maxWidth: 420 }}>
 
         {/* Hero header — outside the card */}
