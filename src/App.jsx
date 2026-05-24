@@ -367,20 +367,25 @@ function DeleteSelectedModal({ count, onConfirm, onCancel }) {
 function SignOutModal({ onConfirm, onCancel }) {
   const { t } = useTranslation()
   const isLight = document.documentElement.getAttribute('data-theme') === 'light'
+  // Block clicks for one frame so a residual mouseup from opening the modal
+  // can never accidentally land on the confirm button.
+  const [ready, setReady] = useState(false)
+  useEffect(() => { const id = requestAnimationFrame(() => setReady(true)); return () => cancelAnimationFrame(id) }, [])
+
   return createPortal(
     <>
-      <div onClick={onCancel} style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} />
-      <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000, background: isLight ? '#ffffff' : '#111111', border: `1px solid ${isLight ? '#e5e5e5' : '#2a2a2a'}`, borderRadius: 8, padding: 24, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', width: 380, maxWidth: 'calc(100vw - 48px)' }}>
+      <div onClick={e => { e.stopPropagation(); onCancel() }} style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} />
+      <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000, background: isLight ? '#ffffff' : '#111111', border: `1px solid ${isLight ? '#e5e5e5' : '#2a2a2a'}`, borderRadius: 8, padding: 24, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', width: 380, maxWidth: 'calc(100vw - 48px)', pointerEvents: ready ? 'auto' : 'none' }}>
         <div style={{ fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.15em', color: isLight ? '#888' : '#555', marginBottom: 16, textTransform: 'uppercase' }}>{t('signOut')}</div>
         <p style={{ margin: '0 0 24px', fontFamily: 'monospace', fontSize: 13, color: isLight ? '#1a1a1a' : '#e8e6e0', lineHeight: 1.6 }}>{t('signOutConfirm')}</p>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button onClick={onCancel}
+          <button onClick={e => { e.stopPropagation(); onCancel() }}
             style={{ background: 'transparent', border: `1px solid ${isLight ? '#d8d8d8' : '#333'}`, borderRadius: 6, color: isLight ? '#1a1a1a' : '#e8e6e0', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'border-color 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.borderColor = isLight ? '#aaa' : '#555'}
             onMouseLeave={e => e.currentTarget.style.borderColor = isLight ? '#d8d8d8' : '#333'}>
             {t('cancel')}
           </button>
-          <button onClick={onConfirm}
+          <button onClick={e => { e.stopPropagation(); onConfirm() }}
             style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid #ef4444', borderRadius: 6, color: '#ef4444', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'opacity 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
             onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
@@ -1607,7 +1612,7 @@ useEffect(() => {
 
       {showSignOutModal && (
         <SignOutModal
-          onConfirm={async () => { setShowSignOutModal(false); closeSettings(); await supabase.auth.signOut() }}
+          onConfirm={async () => { setShowSignOutModal(false); await supabase.auth.signOut() }}
           onCancel={() => setShowSignOutModal(false)}
         />
       )}
