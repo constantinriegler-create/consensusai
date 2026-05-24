@@ -64,6 +64,8 @@
   "languageTitle": "SPRACHE",
   "english": "English",
   "german": "Deutsch",
+  "korean": "한국어",
+  "spanish": "Español",
 
   "queryLabel": "ANFRAGE",
   "synthesis": "SYNTHESE",
@@ -143,7 +145,7 @@
   "upd_ambientLighting_title": "Ambiente-Beleuchtung",
   "upd_ambientLighting_desc": "Subtiles animiertes lila Leuchten im Hintergrund — nur im Dunkelmodus, verschwindet im Hellmodus",
   "upd_languageSupport_title": "Sprachunterstützung",
-  "upd_languageSupport_desc": "Wähle zwischen Englisch und Deutsch unter Einstellungen → Sprache",
+  "upd_languageSupport_desc": "Wähle zwischen Englisch, Deutsch, Koreanisch und Spanisch unter Einstellungen → Sprache",
   "upd_infoPage_title": "Info-Seite",
   "upd_infoPage_desc": "Neuer Info-Button in der Seitenleiste erklärt Standard vs. Premium, alle 4 KI-Modelle und wie VELE AI funktioniert",
   "upd_webSearch_title": "Web-Suche ein/ausschalten",

@@ -979,7 +979,7 @@ function LoginPage() {
 
       {/* Language picker */}
       <div style={{ position: 'absolute', top: 20, right: 20, display: 'flex', gap: 6 }}>
-        {['en', 'de'].map(l => (
+        {['en', 'de', 'ko', 'es'].map(l => (
           <button key={l} onClick={() => changeLang(l)} style={{
             background: lang === l ? TEXT : 'transparent',
             border: `1px solid ${lang === l ? TEXT : BORDER}`,
@@ -1803,7 +1803,12 @@ useEffect(() => {
                   {backBtn(t('settingsTitle'))}
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>{t('languageTitle')}</div>
                   <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, overflow: 'hidden' }}>
-                    {[{ label: t('english'), icon: '🇬🇧', value: 'en' }, { label: t('german'), icon: '🇩🇪', value: 'de' }].map((opt, idx, arr) => (
+                    {[
+                      { label: t('english'), icon: '🇬🇧', value: 'en' },
+                      { label: t('german'),  icon: '🇩🇪', value: 'de' },
+                      { label: t('korean'),  icon: '🇰🇷', value: 'ko' },
+                      { label: t('spanish'), icon: '🇪🇸', value: 'es' },
+                    ].map((opt, idx, arr) => (
                       <div key={opt.value} onClick={() => changeLanguage(opt.value)}
                         style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderBottom: idx < arr.length - 1 ? `1px solid ${BORDER2}` : 'none', cursor: 'pointer', background: i18n.language === opt.value ? `${PURPLE}10` : 'transparent', transition: 'background 0.15s' }}>
                         <span style={{ fontSize: 15 }}>{opt.icon}</span>

@@ -64,6 +64,8 @@
   "languageTitle": "LANGUAGE",
   "english": "English",
   "german": "Deutsch",
+  "korean": "한국어",
+  "spanish": "Español",
 
   "queryLabel": "QUERY",
   "synthesis": "SYNTHESIS",
@@ -143,7 +145,7 @@
   "upd_ambientLighting_title": "Ambient Lighting",
   "upd_ambientLighting_desc": "Subtle animated purple glow in the background — dark mode only, disappears in light mode",
   "upd_languageSupport_title": "Language Support",
-  "upd_languageSupport_desc": "Choose between English and German in Settings → Language",
+  "upd_languageSupport_desc": "Choose between English, German, Korean, and Spanish in Settings → Language",
   "upd_infoPage_title": "Info Page",
   "upd_infoPage_desc": "New Info button in the sidebar explaining Standard vs Premium, all 4 AI models, and how VELE AI works",
   "upd_webSearch_title": "Web Search Toggle",
