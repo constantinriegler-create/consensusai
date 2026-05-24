@@ -43,13 +43,17 @@ export default function SharePage({ shareId }) {
     }
   }, [])
 
-  // Apply theme from localStorage so the share page respects user's last preference
   useEffect(() => {
-    const saved = localStorage.getItem('themeMode') || 'dark'
-    const resolvedTheme = saved === 'system'
-      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-      : saved
-    const htmlTheme = resolvedTheme === 'dark-plain' ? 'dark-plain' : resolvedTheme === 'dark' ? 'dark' : resolvedTheme === 'light' ? 'light' : 'dark'
+    const saved = localStorage.getItem('themeMode')
+    let htmlTheme
+    if (!saved) {
+      htmlTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    } else {
+      const resolvedTheme = saved === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : saved
+      htmlTheme = resolvedTheme === 'dark-plain' ? 'dark-plain' : resolvedTheme === 'dark' ? 'dark' : 'light'
+    }
     document.documentElement.setAttribute('data-theme', htmlTheme)
   }, [])
 
@@ -77,6 +81,8 @@ export default function SharePage({ shareId }) {
         </div>
         <a
           href="https://consensusai-three.vercel.app"
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
             background: PURPLE, color: '#fff', fontSize: 12,
             fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.06em',
