@@ -52,7 +52,7 @@
   "deleteChatsMenu": "Delete all/selected Chats",
   "deleteAllChats": "Delete All Chats",
   "signOut": "Sign Out",
-  "signOutConfirm": "Sign out of VELE AI?",
+  "signOutConfirm": "Are you sure you want to sign out of VELE AI?",
   "signedInAs": "SIGNED IN AS",
   "buyMoreCredits": "Buy More Credits",
   "appearanceTitle": "APPEARANCE",
@@ -181,7 +181,7 @@
   "createAccount": "Create account.",
   "honestAI": "The honest AI.",
   "signInSubtitle": "4 models answer simultaneously. One synthesized, honest answer.",
-  "signUpSubtitle": "Get 3 free standard queries. No credit card required.",
+  "signUpSubtitle": "Get 2 free standard queries. No credit card required.",
   "synthesis_label": "Synthesis",
 
   "emailLabel": "EMAIL",

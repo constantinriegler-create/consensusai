@@ -364,6 +364,35 @@ function DeleteSelectedModal({ count, onConfirm, onCancel }) {
   )
 }
 
+function SignOutModal({ onConfirm, onCancel }) {
+  const { t } = useTranslation()
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light'
+  return createPortal(
+    <>
+      <div onClick={onCancel} style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} />
+      <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000, background: isLight ? '#ffffff' : '#111111', border: `1px solid ${isLight ? '#e5e5e5' : '#2a2a2a'}`, borderRadius: 8, padding: 24, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', width: 380, maxWidth: 'calc(100vw - 48px)' }}>
+        <div style={{ fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.15em', color: isLight ? '#888' : '#555', marginBottom: 16, textTransform: 'uppercase' }}>{t('signOut')}</div>
+        <p style={{ margin: '0 0 24px', fontFamily: 'monospace', fontSize: 13, color: isLight ? '#1a1a1a' : '#e8e6e0', lineHeight: 1.6 }}>{t('signOutConfirm')}</p>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button onClick={onCancel}
+            style={{ background: 'transparent', border: `1px solid ${isLight ? '#d8d8d8' : '#333'}`, borderRadius: 6, color: isLight ? '#1a1a1a' : '#e8e6e0', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'border-color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = isLight ? '#aaa' : '#555'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = isLight ? '#d8d8d8' : '#333'}>
+            {t('cancel')}
+          </button>
+          <button onClick={onConfirm}
+            style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid #ef4444', borderRadius: 6, color: '#ef4444', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'opacity 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+            {t('signOut')}
+          </button>
+        </div>
+      </div>
+    </>,
+    document.body
+  )
+}
+
 function ShareLinkModal({ url, onCopy, onCancel }) {
   const { t } = useTranslation()
   const isLight = document.documentElement.getAttribute('data-theme') === 'light'
@@ -907,12 +936,8 @@ function LoginPage() {
     const { data, error } = authMode === 'signup'
       ? await supabase.auth.signUp({ email: email.trim(), password })
       : await supabase.auth.signInWithPassword({ email: email.trim(), password })
-    if (!error && authMode === 'signup' && data?.session?.access_token) {
+    if (!error && authMode === 'signup') {
       sessionStorage.setItem('justSignedUp', '1')
-      fetch(`${API}/api/me/init`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${data.session.access_token}` },
-      }).catch(() => {})
     }
     if (error) {
       const msg = error.message.toLowerCase()
@@ -1182,6 +1207,7 @@ export default function App() {
   const [shareError, setShareError] = useState('')
   const [shareModalUrl, setShareModalUrl] = useState(null)
   const [welcomeToast, setWelcomeToast] = useState(false)
+  const [showSignOutModal, setShowSignOutModal] = useState(false)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
   const [useWebSearch, setUseWebSearch] = useState(() => {
@@ -1579,6 +1605,13 @@ useEffect(() => {
 
       {showDeleteSelectedModal && <DeleteSelectedModal count={selectedChatIds.size} onConfirm={handleDeleteSelected} onCancel={() => setShowDeleteSelectedModal(false)} />}
 
+      {showSignOutModal && (
+        <SignOutModal
+          onConfirm={async () => { setShowSignOutModal(false); closeSettings(); await supabase.auth.signOut() }}
+          onCancel={() => setShowSignOutModal(false)}
+        />
+      )}
+
       {shareModalUrl && (
         <ShareLinkModal
           url={shareModalUrl}
@@ -1684,11 +1717,7 @@ useEffect(() => {
 
                   <div style={{ borderTop: `1px solid ${BORDER2}`, paddingTop: 12, marginTop: 4 }}>
                     <button
-                      onClick={async () => {
-                        if (!window.confirm(t('signOutConfirm'))) return
-                        closeSettings()
-                        await supabase.auth.signOut()
-                      }}
+                      onClick={() => setShowSignOutModal(true)}
                       style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '13px 14px', borderRadius: 10, background: 'none', border: `1px solid ${BORDER2}`, color: RED, fontSize: 13, cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s' }}
                       onMouseEnter={e => { e.currentTarget.style.borderColor = RED; e.currentTarget.style.background = 'var(--c-red-bg)' }}
                       onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER2; e.currentTarget.style.background = 'none' }}
@@ -1708,7 +1737,7 @@ useEffect(() => {
                     <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.08em', marginBottom: 6 }}>{t('signedInAs')}</div>
                     <div style={{ fontSize: 14, color: TEXT, wordBreak: 'break-all' }}>{user.email}</div>
                   </div>
-                  <button onClick={async () => { await supabase.auth.signOut(); closeSettings() }}
+                  <button onClick={() => setShowSignOutModal(true)}
                     style={{ width: '100%', padding: '12px', borderRadius: 10, background: 'none', border: `1px solid ${BORDER}`, color: MUTED, fontSize: 13, cursor: 'pointer' }}>
                     {t('signOut')}
                   </button>
