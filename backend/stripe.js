@@ -15,7 +15,7 @@ export const PACKS = {
   standard_100: {
     name: 'Standard Pack - 100 Queries',
     credits: 100,
-    amount_cents: 1799,
+    amount_cents: 1499,
   },
   standard_500: {
     name: 'Standard Pack - 500 Queries',
@@ -35,7 +35,7 @@ export const PACKS = {
   premium_100: {
     name: 'Premium Pack - 100 Queries',
     credits: 100,
-    amount_cents: 4499,
+    amount_cents: 3999,
   },
   premium_500: {
     name: 'Premium Pack - 500 Queries',

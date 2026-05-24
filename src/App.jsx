@@ -693,13 +693,13 @@ const PACKS = {
   standard: {
     10:  { price: 1.99,   save: null },
     50:  { price: 9.99,   save: null },
-    100: { price: 17.99,  save: 2    },
+    100: { price: 14.99,  save: 5    },
     500: { price: 79.99,  save: 20   },
   },
   premium: {
     10:  { price: 4.99,   save: null },
     50:  { price: 24.99,  save: null },
-    100: { price: 44.99,  save: 5    },
+    100: { price: 39.99,  save: 10   },
     500: { price: 199.99, save: 50   },
   },
 }
