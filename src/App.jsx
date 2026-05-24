@@ -369,6 +369,22 @@ function ShareLinkModal({ url, onCopy, onCancel }) {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light'
   const inputRef = useRef(null)
   useEffect(() => { inputRef.current?.select() }, [])
+
+  const canNativeShare = typeof navigator !== 'undefined' && !!navigator.share &&
+    (!navigator.canShare || navigator.canShare({ url }))
+
+  async function handleNativeShare() {
+    try {
+      await navigator.share({
+        title: 'VELE AI — Shared Conversation',
+        text: 'Check out this AI-synthesized answer on VELE AI:',
+        url,
+      })
+    } catch {
+      // user cancelled — do nothing
+    }
+  }
+
   return createPortal(
     <>
       <div onClick={onCancel} style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} />
@@ -388,6 +404,15 @@ function ShareLinkModal({ url, onCopy, onCancel }) {
             onMouseLeave={e => e.currentTarget.style.borderColor = isLight ? '#d8d8d8' : '#333'}>
             {t('cancel')}
           </button>
+          {canNativeShare && (
+            <button onClick={handleNativeShare}
+              style={{ background: 'transparent', border: '1px solid #a855f7', borderRadius: 6, color: '#a855f7', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'opacity 0.15s', display: 'flex', alignItems: 'center', gap: 6 }}
+              onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+              onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+              <span style={{ fontSize: 13, lineHeight: 1 }}>↑</span>
+              {t('shareVia')}
+            </button>
+          )}
           <button onClick={onCopy}
             style={{ background: '#a855f7', border: '1px solid #a855f7', borderRadius: 6, color: '#ffffff', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'opacity 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}

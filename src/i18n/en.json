@@ -277,6 +277,7 @@
 
   "share": "SHARE",
   "shareConversation": "SHARE CONVERSATION",
+  "shareVia": "SHARE VIA...",
   "copyLink": "COPY LINK",
   "shareLinkCopied": "Link copied to clipboard",
   "sharedConversation": "SHARED CONVERSATION",
