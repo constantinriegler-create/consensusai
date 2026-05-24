@@ -276,6 +276,8 @@
   "info_footer": "VELE AI — MULTI-MODEL SYNTHESIS",
 
   "share": "SHARE",
+  "shareConversation": "SHARE CONVERSATION",
+  "copyLink": "COPY LINK",
   "shareLinkCopied": "Link copied to clipboard",
   "sharedConversation": "SHARED CONVERSATION",
   "tryVeleAI": "Try VELE AI",

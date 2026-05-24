@@ -364,6 +364,43 @@ function DeleteSelectedModal({ count, onConfirm, onCancel }) {
   )
 }
 
+function ShareLinkModal({ url, onCopy, onCancel }) {
+  const { t } = useTranslation()
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light'
+  const inputRef = useRef(null)
+  useEffect(() => { inputRef.current?.select() }, [])
+  return createPortal(
+    <>
+      <div onClick={onCancel} style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} />
+      <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000, background: isLight ? '#ffffff' : '#111111', border: `1px solid ${isLight ? '#e5e5e5' : '#2a2a2a'}`, borderRadius: 8, padding: 24, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', width: 480, maxWidth: 'calc(100vw - 48px)' }}>
+        <div style={{ fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.15em', color: isLight ? '#888' : '#555', marginBottom: 16 }}>{t('shareConversation')}</div>
+        <input
+          ref={inputRef}
+          readOnly
+          value={url}
+          style={{ width: '100%', boxSizing: 'border-box', background: isLight ? '#f5f5f5' : '#1a1a1a', border: `1px solid ${isLight ? '#e0e0e0' : '#2a2a2a'}`, borderRadius: 6, padding: '10px 12px', fontFamily: 'monospace', fontSize: 12, color: isLight ? '#1a1a1a' : '#e8e6e0', outline: 'none', marginBottom: 20, letterSpacing: '0.02em' }}
+          onFocus={e => e.target.select()}
+        />
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button onClick={onCancel}
+            style={{ background: 'transparent', border: `1px solid ${isLight ? '#d8d8d8' : '#333'}`, borderRadius: 6, color: isLight ? '#1a1a1a' : '#e8e6e0', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'border-color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = isLight ? '#aaa' : '#555'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = isLight ? '#d8d8d8' : '#333'}>
+            {t('cancel')}
+          </button>
+          <button onClick={onCopy}
+            style={{ background: '#a855f7', border: '1px solid #a855f7', borderRadius: 6, color: '#ffffff', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'opacity 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+            {t('copyLink')}
+          </button>
+        </div>
+      </div>
+    </>,
+    document.body
+  )
+}
+
 function ChatItem({ chat, active, onSelect, onRename, onDelete, selectionMode = false, isSelected = false, onToggleSelect }) {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
@@ -1076,6 +1113,7 @@ export default function App() {
   const [showDeleteSelectedModal, setShowDeleteSelectedModal] = useState(false)
   const [shareToast, setShareToast] = useState(false)
   const [shareError, setShareError] = useState('')
+  const [shareModalUrl, setShareModalUrl] = useState(null)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
   const [useWebSearch, setUseWebSearch] = useState(() => {
@@ -1403,12 +1441,12 @@ useEffect(() => {
       }
       try {
         await navigator.clipboard.writeText(data.shareUrl)
+        setShareToast(true)
+        setTimeout(() => setShareToast(false), 3000)
       } catch (clipErr) {
-        console.warn('[share] clipboard failed, prompting:', clipErr)
-        window.prompt('Copy share link:', data.shareUrl)
+        console.warn('[share] clipboard blocked, showing modal:', clipErr)
+        setShareModalUrl(data.shareUrl)
       }
-      setShareToast(true)
-      setTimeout(() => setShareToast(false), 3000)
     } catch (e) {
       console.error('[share] fetch error:', e)
       setShareError('Network error — check console')
@@ -1467,6 +1505,19 @@ useEffect(() => {
       {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} user={user} onPurchase={() => loadUserData(user)} />}
 
       {showDeleteSelectedModal && <DeleteSelectedModal count={selectedChatIds.size} onConfirm={handleDeleteSelected} onCancel={() => setShowDeleteSelectedModal(false)} />}
+
+      {shareModalUrl && (
+        <ShareLinkModal
+          url={shareModalUrl}
+          onCancel={() => setShareModalUrl(null)}
+          onCopy={async () => {
+            try { await navigator.clipboard.writeText(shareModalUrl) } catch (_) {}
+            setShareModalUrl(null)
+            setShareToast(true)
+            setTimeout(() => setShareToast(false), 3000)
+          }}
+        />
+      )}
 
       {shareToast && (
         <div style={{
