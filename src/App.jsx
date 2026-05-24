@@ -409,7 +409,11 @@ function ShareLinkModal({ url, onCopy, onCancel }) {
               style={{ background: 'transparent', border: '1px solid #a855f7', borderRadius: 6, color: '#a855f7', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'opacity 0.15s', display: 'flex', alignItems: 'center', gap: 6 }}
               onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
               onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-              <span style={{ fontSize: 13, lineHeight: 1 }}>↑</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                <polyline points="16 6 12 2 8 6"/>
+                <line x1="12" y1="2" x2="12" y2="15"/>
+              </svg>
               {t('shareVia')}
             </button>
           )}
