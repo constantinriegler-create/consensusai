@@ -1724,7 +1724,7 @@ useEffect(() => {
                 <>
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 20 }}>{t('settingsTitle')}</div>
                   {menuRow(t('account'),     <User    size={18} color={MUTED} />,   () => setSettingsView('account'))}
-                  {menuRow(t('credits'),     <Diamond size={18} color={PURPLE} />, () => setSettingsView('credits'))}
+                  {menuRow(t('credits'),     <Diamond size={18} color={MUTED} />,  () => setSettingsView('credits'))}
                   {menuRow(t('appearance'),  <Sun     size={18} color={MUTED} />,   () => setSettingsView('appearance'))}
                   {menuRow(t('languageMenu'),<Globe   size={18} color={MUTED} />,   () => setSettingsView('language'))}
                   <div style={{ borderTop: `1px solid var(--c-danger-sep)`, paddingTop: 12, marginTop: 4 }}>
