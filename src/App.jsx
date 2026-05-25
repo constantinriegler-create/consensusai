@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import ReactMarkdown from 'react-markdown'
 import { useTranslation } from 'react-i18next'
+import { User, Diamond, Sun, Globe, Trash2, LogOut } from 'lucide-react'
 import supabase from './supabase.js'
 import InfoPage from './InfoPage.jsx'
 import './i18n/index.js'
@@ -1703,7 +1704,7 @@ useEffect(() => {
             style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '13px 14px', borderRadius: 10, background: 'none', border: `1px solid ${BORDER2}`, color: danger ? RED : TEXT, fontSize: 13, cursor: 'pointer', marginBottom: 8, textAlign: 'left', transition: 'all 0.15s' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = danger ? RED : BORDER; e.currentTarget.style.background = danger ? 'var(--c-red-bg)' : CARD }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER2; e.currentTarget.style.background = 'none' }}>
-            <span style={{ fontSize: 16, flexShrink: 0 }}>{icon}</span>
+            <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>{icon}</span>
             <span style={{ flex: 1 }}>{label}</span>
             {!danger && <span style={{ color: MUTED, fontSize: 12 }}>›</span>}
           </button>
@@ -1722,13 +1723,13 @@ useEffect(() => {
               {settingsView === 'menu' && (
                 <>
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 20 }}>{t('settingsTitle')}</div>
-                  {menuRow(t('account'), '⊙', () => setSettingsView('account'))}
-                  {menuRow(t('credits'), '⬡', () => setSettingsView('credits'))}
-                  {menuRow(t('appearance'), '◑', () => setSettingsView('appearance'))}
-                  {menuRow(t('languageMenu'), '◉', () => setSettingsView('language'))}
+                  {menuRow(t('account'),     <User    size={18} color={MUTED} />,   () => setSettingsView('account'))}
+                  {menuRow(t('credits'),     <Diamond size={18} color={PURPLE} />, () => setSettingsView('credits'))}
+                  {menuRow(t('appearance'),  <Sun     size={18} color={MUTED} />,   () => setSettingsView('appearance'))}
+                  {menuRow(t('languageMenu'),<Globe   size={18} color={MUTED} />,   () => setSettingsView('language'))}
                   <div style={{ borderTop: `1px solid var(--c-danger-sep)`, paddingTop: 12, marginTop: 4 }}>
                     <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--c-red-a99)', letterSpacing: '0.15em', marginBottom: 10 }}>{t('dangerZone')}</div>
-                    {menuRow(t('deleteChatsMenu'), '⊘', () => setSettingsView('deleteChats'), true)}
+                    {menuRow(t('deleteChatsMenu'), <Trash2 size={18} color={RED} />, () => setSettingsView('deleteChats'), true)}
                   </div>
 
                   <div style={{ borderTop: `1px solid ${BORDER2}`, paddingTop: 12, marginTop: 4 }}>
@@ -1738,6 +1739,7 @@ useEffect(() => {
                       onMouseEnter={e => { e.currentTarget.style.borderColor = RED; e.currentTarget.style.background = 'var(--c-red-bg)' }}
                       onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER2; e.currentTarget.style.background = 'none' }}
                     >
+                      <LogOut size={18} color={RED} style={{ flexShrink: 0 }} />
                       <span style={{ flex: 1 }}>{t('signOut')}</span>
                     </button>
                   </div>
