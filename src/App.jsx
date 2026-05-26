@@ -1219,6 +1219,7 @@ export default function App() {
   const [noCreditsError, setNoCreditsError] = useState(false)
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedChatIds, setSelectedChatIds] = useState(new Set())
+  const [chatSearch, setChatSearch] = useState('')
   const [showDeleteSelectedModal, setShowDeleteSelectedModal] = useState(false)
   const [shareToast, setShareToast] = useState(false)
   const [shareError, setShareError] = useState('')
@@ -1901,19 +1902,46 @@ useEffect(() => {
             ) : (
               <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.12em', padding: '0 8px', marginBottom: 6 }}>{t('sessions')}</div>
             )}
-            {chats.map(chat => (
-              <ChatItem key={chat.id} chat={chat} active={chat.id === activeChatId}
-                onSelect={() => { switchChat(chat); if (isMobile) setSidebarOpen(false) }}
-                onRename={newTitle => setChats(prev => prev.map(c => c.id === chat.id ? { ...c, title: newTitle } : c))}
-                onDelete={() => handleDeleteChat(chat.id)}
-                selectionMode={selectionMode}
-                isSelected={selectedChatIds.has(chat.id)}
-                onToggleSelect={() => setSelectedChatIds(prev => {
-                  const next = new Set(prev)
-                  next.has(chat.id) ? next.delete(chat.id) : next.add(chat.id)
-                  return next
-                })} />
-            ))}
+
+            {/* Search bar */}
+            {!selectionMode && chats.length > 0 && (
+              <div style={{ position: 'relative', marginBottom: 8, padding: '0 2px' }}>
+                <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: MUTED2, pointerEvents: 'none', lineHeight: 1 }}>⌕</span>
+                <input
+                  value={chatSearch}
+                  onChange={e => setChatSearch(e.target.value)}
+                  placeholder={t('searchChats')}
+                  style={{ width: '100%', boxSizing: 'border-box', paddingLeft: 26, paddingRight: chatSearch ? 28 : 10, paddingTop: 6, paddingBottom: 6, background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 6, fontFamily: 'monospace', fontSize: 11, color: TEXT, outline: 'none', transition: 'border-color 0.15s' }}
+                  onFocus={e => e.target.style.borderColor = BORDER}
+                  onBlur={e => e.target.style.borderColor = BORDER2}
+                />
+                {chatSearch && (
+                  <button onClick={() => setChatSearch('')} style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: 13, padding: 2, lineHeight: 1 }}>✕</button>
+                )}
+              </div>
+            )}
+
+            {(() => {
+              const filtered = chatSearch
+                ? chats.filter(c => c.title.toLowerCase().includes(chatSearch.toLowerCase()))
+                : chats
+              if (chatSearch && filtered.length === 0) return (
+                <div style={{ padding: '12px 8px', textAlign: 'center', fontFamily: 'monospace', fontSize: 11, color: MUTED2, letterSpacing: '0.05em' }}>{t('noChatsFound')}</div>
+              )
+              return filtered.map(chat => (
+                <ChatItem key={chat.id} chat={chat} active={chat.id === activeChatId}
+                  onSelect={() => { switchChat(chat); if (isMobile) setSidebarOpen(false) }}
+                  onRename={newTitle => setChats(prev => prev.map(c => c.id === chat.id ? { ...c, title: newTitle } : c))}
+                  onDelete={() => handleDeleteChat(chat.id)}
+                  selectionMode={selectionMode}
+                  isSelected={selectedChatIds.has(chat.id)}
+                  onToggleSelect={() => setSelectedChatIds(prev => {
+                    const next = new Set(prev)
+                    next.has(chat.id) ? next.delete(chat.id) : next.add(chat.id)
+                    return next
+                  })} />
+              ))
+            })()}
           </div>
 
           {selectionMode && (

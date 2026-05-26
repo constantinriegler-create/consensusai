@@ -1,5 +1,7 @@
 {
   "newChat": "+ Neuer Chat",
+  "searchChats": "Chats durchsuchen...",
+  "noChatsFound": "Keine Chats gefunden",
   "sessions": "SITZUNGEN",
   "settings": "Einstellungen",
   "sendFeedback": "Feedback senden",

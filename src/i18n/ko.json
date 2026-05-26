@@ -1,5 +1,7 @@
 {
   "newChat": "+ 새 채팅",
+  "searchChats": "채팅 검색...",
+  "noChatsFound": "채팅을 찾을 수 없습니다",
   "sessions": "세션",
   "settings": "설정",
   "sendFeedback": "피드백 보내기",
