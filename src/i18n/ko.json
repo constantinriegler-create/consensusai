@@ -295,5 +295,16 @@
   "shareLinkCopied": "링크가 클립보드에 복사되었습니다",
   "sharedConversation": "공유된 대화",
   "tryVeleAI": "VELE AI 사용해보기",
-  "shareNotAvailable": "이 대화를 사용할 수 없습니다."
+  "shareNotAvailable": "이 대화를 사용할 수 없습니다.",
+
+  "promptSugg0": "지금 암호화폐는 좋은 투자처인가요?",
+  "promptSugg1": "원격 근무의 장단점은 무엇인가요?",
+  "promptSugg2": "양자 컴퓨팅을 쉽게 설명해 주세요.",
+  "promptSugg3": "새로운 언어를 배우는 가장 좋은 방법은 무엇인가요?",
+  "promptSugg4": "AI는 향후 10년간 취업 시장을 어떻게 바꿀까요?",
+  "promptSugg5": "기후 변화에 대응하는 가장 효과적인 방법은 무엇인가요?",
+  "promptSugg6": "소셜 미디어는 득보다 실이 많은가요?",
+  "promptSugg7": "훌륭한 리더의 조건은 무엇인가요?",
+  "promptSugg8": "모든 사람이 코딩을 배워야 할까요?",
+  "promptSugg9": "50년 후 세상은 어떤 모습일까요?"
 }

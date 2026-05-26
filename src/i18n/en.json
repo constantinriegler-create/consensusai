@@ -295,5 +295,16 @@
   "shareLinkCopied": "Link copied to clipboard",
   "sharedConversation": "SHARED CONVERSATION",
   "tryVeleAI": "Try VELE AI",
-  "shareNotAvailable": "This conversation is not available."
+  "shareNotAvailable": "This conversation is not available.",
+
+  "promptSugg0": "Is cryptocurrency a good investment right now?",
+  "promptSugg1": "What are the pros and cons of remote work?",
+  "promptSugg2": "Explain quantum computing in simple terms.",
+  "promptSugg3": "What's the best way to learn a new language?",
+  "promptSugg4": "How will AI change the job market in the next decade?",
+  "promptSugg5": "What are the most effective ways to fight climate change?",
+  "promptSugg6": "Is social media doing more harm than good?",
+  "promptSugg7": "What makes a great leader?",
+  "promptSugg8": "Should everyone learn to code?",
+  "promptSugg9": "What will the world look like in 50 years?"
 }

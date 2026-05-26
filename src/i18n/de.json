@@ -295,5 +295,16 @@
   "shareLinkCopied": "Link in Zwischenablage kopiert",
   "sharedConversation": "GETEILTES GESPRÄCH",
   "tryVeleAI": "VELE AI ausprobieren",
-  "shareNotAvailable": "Dieses Gespräch ist nicht verfügbar."
+  "shareNotAvailable": "Dieses Gespräch ist nicht verfügbar.",
+
+  "promptSugg0": "Ist Kryptowährung gerade eine gute Investition?",
+  "promptSugg1": "Was sind die Vor- und Nachteile von Remote-Arbeit?",
+  "promptSugg2": "Erkläre Quantencomputing in einfachen Worten.",
+  "promptSugg3": "Was ist der beste Weg, eine neue Sprache zu lernen?",
+  "promptSugg4": "Wie wird KI den Arbeitsmarkt im nächsten Jahrzehnt verändern?",
+  "promptSugg5": "Was sind die wirksamsten Maßnahmen gegen den Klimawandel?",
+  "promptSugg6": "Schadet Social Media mehr als es nützt?",
+  "promptSugg7": "Was macht eine großartige Führungspersönlichkeit aus?",
+  "promptSugg8": "Sollte jeder programmieren lernen?",
+  "promptSugg9": "Wie wird die Welt in 50 Jahren aussehen?"
 }
