@@ -1174,17 +1174,6 @@ function HoldToDelete({ onConfirm }) {
   )
 }
 
-const PROMPT_KEYS = ['promptSugg0','promptSugg1','promptSugg2','promptSugg3','promptSugg4','promptSugg5','promptSugg6','promptSugg7','promptSugg8','promptSugg9']
-function pickSuggestions() {
-  const pool = [...PROMPT_KEYS]
-  const picks = []
-  while (picks.length < 4) {
-    const idx = Math.floor(Math.random() * pool.length)
-    picks.push(pool.splice(idx, 1)[0])
-  }
-  return picks
-}
-
 export default function App() {
   const { t, i18n } = useTranslation()
 
@@ -1199,8 +1188,7 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(true)
   const [credits, setCredits] = useState({ standard_credits: 0, premium_credits: 0 })
   const [prompt, setPrompt] = useState('')
-  const [promptSuggestions, setPromptSuggestions] = useState(pickSuggestions)
-  const [messages, setMessages] = useState([])
+const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
   const [streamingText, setStreamingText] = useState('')
   const [statusText, setStatusText] = useState('')
@@ -1481,7 +1469,6 @@ useEffect(() => {
     setStreamingText('')
     setStatusText('')
     setLiveRounds(null)
-    setPromptSuggestions(pickSuggestions())
     setTimeout(() => inputRef.current?.focus(), 0)
   }
 
@@ -2074,18 +2061,6 @@ useEffect(() => {
               )}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? 8 : 10, marginBottom: 24 }}>
                 {FEATURE_DETAILS.map((f, i) => <FeatureCard key={i} feature={f} isMobile={isMobile} />)}
-              </div>
-
-              {/* Prompt suggestions */}
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 8, marginBottom: 32 }}>
-                {promptSuggestions.map(key => (
-                  <button key={key} onClick={() => { setPrompt(t(key)); setTimeout(() => inputRef.current?.focus(), 0) }}
-                    style={{ padding: '10px 14px', background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 8, color: MUTED, fontFamily: 'monospace', fontSize: 12, textAlign: 'left', cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', transition: 'all 0.15s', lineHeight: 1.4 }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = BORDER2 }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = BORDER }}>
-                    {t(key)}
-                  </button>
-                ))}
               </div>
 
               <div style={{ fontSize: 11, color: MUTED2, fontFamily: 'monospace', marginBottom: 32, letterSpacing: '0.06em' }}>{t('createdBy')}</div>
