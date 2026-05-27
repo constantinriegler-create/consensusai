@@ -14,13 +14,38 @@ function PolicyShell({ title, lastUpdated, children }) {
     document.title = `${title} — VELE AI`
   }, [title])
 
+  // index.css locks body + #root to overflow:hidden for the main app.
+  // Policy pages live outside that context — unlock scrolling here.
+  useEffect(() => {
+    const root = document.getElementById('root')
+    const prev = {
+      bodyOverflow:  document.body.style.overflow,
+      bodyHeight:    document.body.style.height,
+      htmlOverflow:  document.documentElement.style.overflow,
+      htmlHeight:    document.documentElement.style.height,
+      rootOverflow:  root ? root.style.overflow : '',
+      rootHeight:    root ? root.style.height   : '',
+    }
+    document.body.style.overflow           = 'auto'
+    document.body.style.height             = 'auto'
+    document.documentElement.style.overflow = 'auto'
+    document.documentElement.style.height   = 'auto'
+    if (root) { root.style.overflow = 'auto'; root.style.height = 'auto' }
+    return () => {
+      document.body.style.overflow           = prev.bodyOverflow
+      document.body.style.height             = prev.bodyHeight
+      document.documentElement.style.overflow = prev.htmlOverflow
+      document.documentElement.style.height   = prev.htmlHeight
+      if (root) { root.style.overflow = prev.rootOverflow; root.style.height = prev.rootHeight }
+    }
+  }, [])
+
   return (
     <div style={{
       minHeight: '100vh',
       background: BG,
       color: TEXT,
       fontFamily: 'system-ui, -apple-system, sans-serif',
-      overflowY: 'auto',
     }}>
       {/* top bar */}
       <div style={{
