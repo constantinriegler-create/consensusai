@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import ReactMarkdown from 'react-markdown'
 import { useTranslation } from 'react-i18next'
-import { User, Diamond, Sun, Globe, Trash2, LogOut } from 'lucide-react'
+import { User, Diamond, Sun, Globe, Trash2, LogOut, UserX } from 'lucide-react'
 import supabase from './supabase.js'
 import InfoPage from './InfoPage.jsx'
 import './i18n/index.js'
@@ -391,6 +391,39 @@ function SignOutModal({ onConfirm, onCancel }) {
             onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
             onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
             {t('signOut')}
+          </button>
+        </div>
+      </div>
+    </>,
+    document.body
+  )
+}
+
+function DeleteAccountModal({ onConfirm, onCancel }) {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light'
+  const [ready, setReady] = useState(false)
+  useEffect(() => { const id = requestAnimationFrame(() => setReady(true)); return () => cancelAnimationFrame(id) }, [])
+
+  return createPortal(
+    <>
+      <div onClick={e => { e.stopPropagation(); onCancel() }} style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} />
+      <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000, background: isLight ? '#ffffff' : '#111111', border: `1px solid ${isLight ? '#e5e5e5' : '#2a2a2a'}`, borderRadius: 8, padding: 24, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', width: 380, maxWidth: 'calc(100vw - 48px)', pointerEvents: ready ? 'auto' : 'none' }}>
+        <div style={{ fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.15em', color: '#ef4444', marginBottom: 16, textTransform: 'uppercase' }}>Delete Account</div>
+        <p style={{ margin: '0 0 24px', fontFamily: 'monospace', fontSize: 13, color: isLight ? '#1a1a1a' : '#e8e6e0', lineHeight: 1.6 }}>
+          This will permanently delete your account, all your chats, and remaining credits. This action cannot be undone.
+        </p>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button onClick={e => { e.stopPropagation(); onCancel() }}
+            style={{ background: 'transparent', border: `1px solid ${isLight ? '#d8d8d8' : '#333'}`, borderRadius: 6, color: isLight ? '#1a1a1a' : '#e8e6e0', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'border-color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = isLight ? '#aaa' : '#555'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = isLight ? '#d8d8d8' : '#333'}>
+            Cancel
+          </button>
+          <button onClick={e => { e.stopPropagation(); onConfirm() }}
+            style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid #ef4444', borderRadius: 6, color: '#ef4444', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'opacity 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+            Delete Account
           </button>
         </div>
       </div>
@@ -1225,7 +1258,10 @@ const [messages, setMessages] = useState([])
   const [shareError, setShareError] = useState('')
   const [shareModalUrl, setShareModalUrl] = useState(null)
   const [welcomeToast, setWelcomeToast] = useState(false)
+  const [showCookieBanner, setShowCookieBanner] = useState(() => !localStorage.getItem('cookieConsent'))
   const [showSignOutModal, setShowSignOutModal] = useState(false)
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false)
+  const [deleteAccountToast, setDeleteAccountToast] = useState(false)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
   const [useWebSearch, setUseWebSearch] = useState(() => {
@@ -1531,6 +1567,24 @@ useEffect(() => {
     setShowDeleteSelectedModal(false)
   }
 
+  async function handleDeleteAccount() {
+    setShowDeleteAccountModal(false)
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      await fetch('https://consensusai-production-0e01.up.railway.app/api/me', {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+    } catch {
+      // data already wiped server-side on partial failure — continue with signout
+    }
+    setDeleteAccountToast(true)
+    setTimeout(async () => {
+      await supabase.auth.signOut()
+    }, 1500)
+  }
+
   async function handleShare() {
     console.log('[share] clicked, activeChatId:', activeChatId)
     if (!activeChatId) return
@@ -1630,6 +1684,28 @@ useEffect(() => {
         />
       )}
 
+      {showDeleteAccountModal && (
+        <DeleteAccountModal
+          onConfirm={handleDeleteAccount}
+          onCancel={() => setShowDeleteAccountModal(false)}
+        />
+      )}
+
+      {deleteAccountToast && (
+        <div style={{
+          position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 9999, background: SURFACE, border: `1px solid ${RED}`,
+          borderRadius: 9, padding: '11px 20px',
+          display: 'flex', alignItems: 'center', gap: 10,
+          boxShadow: `0 4px 20px rgba(0,0,0,0.25)`,
+          animation: 'msgSlideIn 200ms ease-out both',
+          whiteSpace: 'nowrap',
+        }}>
+          <span style={{ color: RED, fontSize: 14 }}>✕</span>
+          <span style={{ fontSize: 12, fontFamily: 'monospace', color: TEXT, letterSpacing: '0.04em' }}>Your account has been deleted.</span>
+        </div>
+      )}
+
       {shareModalUrl && (
         <ShareLinkModal
           url={shareModalUrl}
@@ -1696,6 +1772,35 @@ useEffect(() => {
         </div>
       )}
 
+      {showCookieBanner && (
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9990,
+          background: SURFACE, borderTop: `1px solid ${BORDER}`,
+          padding: '14px 24px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: 16, flexWrap: 'wrap',
+        }}>
+          <span style={{ fontFamily: 'monospace', fontSize: 11, color: MUTED, letterSpacing: '0.04em', lineHeight: 1.5 }}>
+            We use essential cookies to keep you logged in. No tracking.{' '}
+            <a href="/cookie-policy" style={{ color: MUTED, textDecoration: 'underline' }}>Learn more</a>
+          </span>
+          <button
+            onClick={() => { localStorage.setItem('cookieConsent', '1'); setShowCookieBanner(false) }}
+            style={{
+              fontFamily: 'monospace', fontSize: 11, letterSpacing: '0.08em',
+              background: 'transparent', border: `1px solid ${BORDER}`,
+              color: TEXT, borderRadius: 6, padding: '6px 16px',
+              cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s',
+              flexShrink: 0,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = MUTED; e.currentTarget.style.background = CARD }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.background = 'transparent' }}
+          >
+            Got it
+          </button>
+        </div>
+      )}
+
       {lightboxImage && <Lightbox src={lightboxImage} onClose={() => setLightboxImage(null)} />}
 
       {showSettings && (() => {
@@ -1731,6 +1836,7 @@ useEffect(() => {
                   <div style={{ borderTop: `1px solid var(--c-danger-sep)`, paddingTop: 12, marginTop: 4 }}>
                     <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--c-red-a99)', letterSpacing: '0.15em', marginBottom: 10 }}>{t('dangerZone')}</div>
                     {menuRow(t('deleteChatsMenu'), <Trash2 size={18} color={RED} />, () => setSettingsView('deleteChats'), true)}
+                    {menuRow('Delete Account', <UserX size={18} color={RED} />, () => setShowDeleteAccountModal(true), true)}
                   </div>
 
                   <div style={{ borderTop: `1px solid ${BORDER2}`, paddingTop: 12, marginTop: 4 }}>

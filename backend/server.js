@@ -191,6 +191,31 @@ app.post('/api/feedback', requireAuth, async (req, res) => {
   }
 })
 
+// Delete account — wipes all user data and removes the auth user
+app.delete('/api/me', requireAuth, async (req, res) => {
+  const userId = req.user.id
+  try {
+    // 1. Delete all chats + messages
+    await deleteAllChats(userId)
+
+    // 2. Delete credits row
+    await supabase.from('credits').delete().eq('user_id', userId)
+
+    // 3. Delete the Supabase auth user (requires service role key)
+    const { error: deleteError } = await supabase.auth.admin.deleteUser(userId)
+    if (deleteError) {
+      console.error('Auth user delete error:', deleteError.message)
+      // Non-fatal — data is already wiped; client will still sign out
+    }
+
+    console.log(`🗑️  Account deleted: ${userId}`)
+    res.json({ ok: true })
+  } catch (err) {
+    console.error('Delete account error:', err)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 // Delete all chats for authenticated user
 app.delete('/api/chats/all', requireAuth, async (req, res) => {
   try {

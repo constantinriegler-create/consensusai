@@ -451,16 +451,52 @@ export function RefundPolicy() {
 
 
 /* ═══════════════════════════════════════════════════════════════════════
-   COOKIE POLICY (placeholder)
+   COOKIE POLICY
 ═══════════════════════════════════════════════════════════════════════ */
 export function CookiePolicy() {
   return (
     <PolicyShell title="Cookie Policy" lastUpdated="Last updated May 27, 2026">
       <P>
-        This page is being updated.
+        We use cookies to operate VELE AI. This page explains exactly what we use and why.
+      </P>
+
+      <H2>ESSENTIAL COOKIES</H2>
+      <P>
+        These cookies are always active and cannot be declined. Without them, the Services cannot function.
+      </P>
+      <Ul>
+        <Li><strong>Authentication cookies:</strong> keep you logged in across sessions (managed by Supabase). These store your session token so you do not have to sign in on every visit.</Li>
+        <Li><strong>Security cookies:</strong> protect against fraud and unauthorized access. Used to verify that requests come from a legitimate authenticated session.</Li>
+      </Ul>
+      <P>
+        We also use <strong>localStorage</strong> (not technically a cookie, but similar) to store your UI preferences locally — your chosen theme (dark/light), language, and whether you have dismissed certain banners. This data never leaves your device.
+      </P>
+
+      <H2>WHAT WE DO NOT USE</H2>
+      <Ul>
+        <Li>Advertising or tracking cookies</Li>
+        <Li>Analytics cookies or third-party analytics scripts</Li>
+        <Li>Third-party marketing or retargeting cookies</Li>
+        <Li>Social media pixels</Li>
+      </Ul>
+
+      <H2>MANAGING COOKIES</H2>
+      <P>
+        You can delete or block cookies at any time through your browser settings. Note that blocking essential cookies will prevent you from staying logged in to VELE AI.
       </P>
       <P>
-        For questions about our cookie practices, please contact us at <Link href="mailto:support@veleai.com">support@veleai.com</Link>.
+        For instructions on managing cookies in your browser:
+      </P>
+      <Ul>
+        <Li><Link href="https://support.google.com/chrome/answer/95647">Chrome</Link></Li>
+        <Li><Link href="https://support.mozilla.org/en-US/kb/clear-cookies-and-site-data-firefox">Firefox</Link></Li>
+        <Li><Link href="https://support.apple.com/guide/safari/manage-cookies-sfri11471/mac">Safari</Link></Li>
+        <Li><Link href="https://support.microsoft.com/en-us/microsoft-edge/delete-cookies-in-microsoft-edge-63947406-40ac-c3b8-57b9-2a946a29ae09">Edge</Link></Li>
+      </Ul>
+
+      <H2>CONTACT</H2>
+      <P>
+        Questions about our cookie practices? Email us at <Link href="mailto:support@veleai.com">support@veleai.com</Link>.
       </P>
     </PolicyShell>
   )
