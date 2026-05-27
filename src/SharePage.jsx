@@ -80,7 +80,7 @@ export default function SharePage({ shareId }) {
           </div>
         </div>
         <a
-          href="https://consensusai-three.vercel.app"
+          href="https://veleai.com"
           target="_blank"
           rel="noopener noreferrer"
           style={{

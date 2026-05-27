@@ -65,7 +65,7 @@ app.use(cors({
   origin: [
     'http://localhost:5173',
     'http://localhost:5174',
-    'https://consensusai-three.vercel.app'
+    'https://veleai.com'
   ]
 }))
 app.use(express.json({ limit: '100mb' }))
@@ -227,8 +227,8 @@ app.post('/api/checkout', requireAuth, async (req, res) => {
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: 'https://consensusai-three.vercel.app?payment=success',
-      cancel_url: 'https://consensusai-three.vercel.app?payment=cancelled',
+      success_url: 'https://veleai.com?payment=success',
+      cancel_url: 'https://veleai.com?payment=cancelled',
       metadata: {
         userId: req.user.id,
         packId,
@@ -245,7 +245,7 @@ app.post('/api/checkout', requireAuth, async (req, res) => {
 app.post('/api/chats/:chatId/share', requireAuth, async (req, res) => {
   try {
     const shareId = await shareChat(req.user.id, req.params.chatId)
-    res.json({ shareUrl: `https://consensusai-three.vercel.app/share/${shareId}` })
+    res.json({ shareUrl: `https://veleai.com/share/${shareId}` })
   } catch (err) {
     res.status(err.message === 'Chat not found or access denied' ? 403 : 500).json({ error: err.message })
   }
