@@ -65,7 +65,9 @@ app.use(cors({
   origin: [
     'http://localhost:5173',
     'http://localhost:5174',
-    'https://veleai.com'
+    'https://veleai.com',
+    'https://www.veleai.com',
+    'https://consensusai-three.vercel.app'
   ]
 }))
 app.use(express.json({ limit: '100mb' }))
