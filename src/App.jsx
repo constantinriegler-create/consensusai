@@ -2063,7 +2063,23 @@ useEffect(() => {
                 {FEATURE_DETAILS.map((f, i) => <FeatureCard key={i} feature={f} isMobile={isMobile} />)}
               </div>
 
-              <div style={{ fontSize: 11, color: MUTED2, fontFamily: 'monospace', marginBottom: 32, letterSpacing: '0.06em' }}>{t('createdBy')}</div>
+              <div style={{ fontSize: 11, color: MUTED2, fontFamily: 'monospace', marginBottom: 16, letterSpacing: '0.06em' }}>{t('createdBy')}</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 0', fontFamily: 'monospace', fontSize: 10, color: MUTED2, letterSpacing: '0.06em', marginBottom: 32 }}>
+                {[
+                  ['Privacy Policy', '/privacy-policy'],
+                  ['Terms',          '/terms'],
+                  ['Refund Policy',  '/refund-policy'],
+                  ['Cookie Policy',  '/cookie-policy'],
+                ].map(([label, href], i, arr) => (
+                  <span key={href} style={{ display: 'flex', alignItems: 'center' }}>
+                    <a href={href} style={{ color: MUTED2, textDecoration: 'none' }}
+                      onMouseEnter={e => e.currentTarget.style.color = MUTED}
+                      onMouseLeave={e => e.currentTarget.style.color = MUTED2}
+                    >{label}</a>
+                    {i < arr.length - 1 && <span style={{ margin: '0 8px', opacity: 0.4 }}>·</span>}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
 
