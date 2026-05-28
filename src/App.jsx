@@ -399,18 +399,82 @@ function SignOutModal({ onConfirm, onCancel }) {
   )
 }
 
-function DeleteAccountModal({ onConfirm, onCancel }) {
+function SelectChatsModal({ chats, onConfirm, onCancel }) {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light'
+  const [selected, setSelected] = useState(new Set())
+
+  function toggle(id) {
+    setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }
+  const allSelected = chats.length > 0 && selected.size === chats.length
+
+  const cardBg   = isLight ? '#ffffff' : '#111111'
+  const cardBdr  = isLight ? '#e5e5e5' : '#2a2a2a'
+  const rowBdr   = isLight ? '#f0f0f0' : '#1e1e1e'
+  const textCol  = isLight ? '#1a1a1a' : '#e8e6e0'
+  const mutedCol = isLight ? '#888' : '#555'
+
+  return createPortal(
+    <>
+      <div onClick={onCancel} style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} />
+      <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 1000, background: cardBg, border: `1px solid ${cardBdr}`, borderRadius: 8, padding: 24, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', width: 440, maxWidth: 'calc(100vw - 48px)', display: 'flex', flexDirection: 'column', maxHeight: '80vh' }}>
+        <div style={{ fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.15em', color: mutedCol, marginBottom: 16, textTransform: 'uppercase', flexShrink: 0 }}>Select Chats to Delete</div>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, flexShrink: 0 }}>
+          <span style={{ fontSize: 12, fontFamily: 'monospace', color: mutedCol }}>{selected.size} selected</span>
+          <button onClick={() => setSelected(allSelected ? new Set() : new Set(chats.map(c => c.id)))}
+            style={{ background: 'transparent', border: 'none', fontFamily: 'monospace', fontSize: 11, color: '#a855f7', cursor: 'pointer', padding: '2px 0', letterSpacing: '0.06em' }}>
+            {allSelected ? 'Deselect All' : 'Select All'}
+          </button>
+        </div>
+
+        <div style={{ flex: 1, overflowY: 'auto', border: `1px solid ${cardBdr}`, borderRadius: 6, marginBottom: 20 }}>
+          {chats.length === 0
+            ? <div style={{ padding: '24px', textAlign: 'center', fontFamily: 'monospace', fontSize: 12, color: mutedCol }}>No chats</div>
+            : chats.map((chat, idx) => (
+              <div key={chat.id} onClick={() => toggle(chat.id)}
+                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', cursor: 'pointer', borderBottom: idx < chats.length - 1 ? `1px solid ${rowBdr}` : 'none', background: selected.has(chat.id) ? 'rgba(239,68,68,0.06)' : 'transparent', transition: 'background 0.1s', userSelect: 'none' }}>
+                <div style={{ width: 16, height: 16, borderRadius: 3, border: `1.5px solid ${selected.has(chat.id) ? '#ef4444' : (isLight ? '#ccc' : '#444')}`, background: selected.has(chat.id) ? '#ef4444' : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.1s' }}>
+                  {selected.has(chat.id) && <span style={{ color: '#fff', fontSize: 10, lineHeight: 1 }}>✓</span>}
+                </div>
+                <span style={{ fontSize: 13, color: textCol, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{chat.title || 'Untitled'}</span>
+              </div>
+            ))
+          }
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexShrink: 0 }}>
+          <button onClick={onCancel}
+            style={{ background: 'transparent', border: `1px solid ${isLight ? '#d8d8d8' : '#333'}`, borderRadius: 6, color: textCol, fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'border-color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = isLight ? '#aaa' : '#555'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = isLight ? '#d8d8d8' : '#333'}>
+            Cancel
+          </button>
+          <button onClick={() => selected.size > 0 && onConfirm(selected)}
+            style={{ background: selected.size > 0 ? 'rgba(239,68,68,0.15)' : 'transparent', border: `1px solid ${selected.size > 0 ? '#ef4444' : (isLight ? '#d8d8d8' : '#333')}`, borderRadius: 6, color: selected.size > 0 ? '#ef4444' : mutedCol, fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: selected.size > 0 ? 'pointer' : 'default', textTransform: 'uppercase', transition: 'all 0.15s', opacity: selected.size > 0 ? 1 : 0.4 }}
+            onMouseEnter={e => { if (selected.size > 0) e.currentTarget.style.background = 'rgba(239,68,68,0.25)' }}
+            onMouseLeave={e => { if (selected.size > 0) e.currentTarget.style.background = 'rgba(239,68,68,0.15)' }}>
+            Delete{selected.size > 0 ? ` (${selected.size})` : ''}
+          </button>
+        </div>
+      </div>
+    </>,
+    document.body
+  )
+}
+
+function DeleteAccountConfirmModal({ onConfirm, onCancel }) {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light'
   const [ready, setReady] = useState(false)
   useEffect(() => { const id = requestAnimationFrame(() => setReady(true)); return () => cancelAnimationFrame(id) }, [])
 
   return createPortal(
     <>
-      <div onClick={e => { e.stopPropagation(); onCancel() }} style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} />
-      <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000, background: isLight ? '#ffffff' : '#111111', border: `1px solid ${isLight ? '#e5e5e5' : '#2a2a2a'}`, borderRadius: 8, padding: 24, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', width: 380, maxWidth: 'calc(100vw - 48px)', pointerEvents: ready ? 'auto' : 'none' }}>
-        <div style={{ fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.15em', color: '#ef4444', marginBottom: 16, textTransform: 'uppercase' }}>Delete Account</div>
-        <p style={{ margin: '0 0 24px', fontFamily: 'monospace', fontSize: 13, color: isLight ? '#1a1a1a' : '#e8e6e0', lineHeight: 1.6 }}>
-          This will permanently delete your account, all your chats, and remaining credits. This action cannot be undone.
+      <div onClick={e => { e.stopPropagation(); onCancel() }} style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} />
+      <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 1000, background: isLight ? '#ffffff' : '#111111', border: '1px solid #ef4444', borderRadius: 8, padding: 24, boxShadow: '0 4px 32px rgba(239,68,68,0.2)', width: 400, maxWidth: 'calc(100vw - 48px)', pointerEvents: ready ? 'auto' : 'none' }}>
+        <div style={{ fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.15em', color: '#ef4444', marginBottom: 16, textTransform: 'uppercase' }}>Are you absolutely sure?</div>
+        <p style={{ margin: '0 0 24px', fontFamily: 'monospace', fontSize: 13, color: isLight ? '#1a1a1a' : '#e8e6e0', lineHeight: 1.7 }}>
+          This will permanently delete your account, all chats, and all remaining credits. This cannot be undone.
         </p>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button onClick={e => { e.stopPropagation(); onCancel() }}
@@ -420,10 +484,10 @@ function DeleteAccountModal({ onConfirm, onCancel }) {
             Cancel
           </button>
           <button onClick={e => { e.stopPropagation(); onConfirm() }}
-            style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid #ef4444', borderRadius: 6, color: '#ef4444', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'opacity 0.15s' }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+            style={{ background: '#ef4444', border: '1px solid #ef4444', borderRadius: 6, color: '#fff', fontFamily: 'monospace', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', transition: 'opacity 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
             onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-            Delete Account
+            Yes, delete my account
           </button>
         </div>
       </div>
@@ -1151,7 +1215,7 @@ function Lightbox({ src, onClose }) {
   )
 }
 
-function HoldToDelete({ onConfirm }) {
+function HoldToDelete({ onConfirm, label = 'Hold to delete all chats', accent = false }) {
   const HOLD_MS = 5000
   const [holding, setHolding] = useState(false)
   const [fill, setFill] = useState(0)
@@ -1193,16 +1257,16 @@ function HoldToDelete({ onConfirm }) {
 
   useEffect(() => () => cleanup(), [])
 
-  const label = holding ? (countdown <= 4 ? `Keep holding... ${countdown}s` : 'Keep holding...') : 'Hold to delete all chats'
+  const displayLabel = holding ? (countdown <= 4 ? `Keep holding... ${countdown}s` : 'Keep holding...') : label
 
   return (
     <button
       onPointerDown={start}
       onPointerUp={cancel}
       onPointerLeave={cancel}
-      style={{ position: 'relative', overflow: 'hidden', width: '100%', padding: '11px', borderRadius: 8, background: 'transparent', border: `1px solid ${RED}`, color: RED, fontSize: 13, cursor: 'pointer', fontFamily: 'monospace', letterSpacing: '0.04em', textAlign: 'center', userSelect: 'none' }}>
+      style={{ position: 'relative', overflow: 'hidden', width: '100%', padding: accent ? '13px' : '11px', borderRadius: 8, background: accent ? 'rgba(239,68,68,0.08)' : 'transparent', border: `1px solid ${RED}`, color: RED, fontSize: accent ? 13 : 12, fontWeight: accent ? 600 : 400, cursor: 'pointer', fontFamily: 'monospace', letterSpacing: '0.04em', textAlign: 'center', userSelect: 'none' }}>
       <div style={{ position: 'absolute', inset: 0, background: RED, width: `${fill}%`, transition: holding ? 'none' : 'width 0.15s', zIndex: 0 }} />
-      <span style={{ position: 'relative', zIndex: 1, color: holding ? '#fff' : RED, transition: 'color 0.1s' }}>{label}</span>
+      <span style={{ position: 'relative', zIndex: 1, color: holding ? '#fff' : RED, transition: 'color 0.1s' }}>{displayLabel}</span>
     </button>
   )
 }
@@ -1260,7 +1324,8 @@ const [messages, setMessages] = useState([])
   const [welcomeToast, setWelcomeToast] = useState(false)
   const [showCookieBanner, setShowCookieBanner] = useState(() => !localStorage.getItem('cookieConsent'))
   const [showSignOutModal, setShowSignOutModal] = useState(false)
-  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false)
+  const [showSelectChatsModal, setShowSelectChatsModal] = useState(false)
+  const [showDeleteAccountConfirmModal, setShowDeleteAccountConfirmModal] = useState(false)
   const [deleteAccountToast, setDeleteAccountToast] = useState(false)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
@@ -1567,8 +1632,23 @@ useEffect(() => {
     setShowDeleteSelectedModal(false)
   }
 
+  async function handleDeleteChatsById(chatIdSet) {
+    const idArr = [...chatIdSet]
+    const session = await supabase.auth.getSession()
+    const token = session.data.session?.access_token
+    await Promise.all(idArr.map(id =>
+      fetch(`https://consensusai-production-0e01.up.railway.app/api/chats/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+    ))
+    setChats(prev => prev.filter(c => !chatIdSet.has(c.id)))
+    if (chatIdSet.has(activeChatId)) { setActiveChatId(null); setMessages([]) }
+    setShowSelectChatsModal(false)
+  }
+
   async function handleDeleteAccount() {
-    setShowDeleteAccountModal(false)
+    setShowDeleteAccountConfirmModal(false)
     try {
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
@@ -1580,9 +1660,7 @@ useEffect(() => {
       // data already wiped server-side on partial failure — continue with signout
     }
     setDeleteAccountToast(true)
-    setTimeout(async () => {
-      await supabase.auth.signOut()
-    }, 1500)
+    setTimeout(async () => { await supabase.auth.signOut() }, 1500)
   }
 
   async function handleShare() {
@@ -1684,10 +1762,18 @@ useEffect(() => {
         />
       )}
 
-      {showDeleteAccountModal && (
-        <DeleteAccountModal
+      {showSelectChatsModal && (
+        <SelectChatsModal
+          chats={chats}
+          onConfirm={handleDeleteChatsById}
+          onCancel={() => setShowSelectChatsModal(false)}
+        />
+      )}
+
+      {showDeleteAccountConfirmModal && (
+        <DeleteAccountConfirmModal
           onConfirm={handleDeleteAccount}
-          onCancel={() => setShowDeleteAccountModal(false)}
+          onCancel={() => setShowDeleteAccountConfirmModal(false)}
         />
       )}
 
@@ -1835,8 +1921,7 @@ useEffect(() => {
                   {menuRow(t('languageMenu'),<Globe   size={18} color={MUTED} />,   () => setSettingsView('language'))}
                   <div style={{ borderTop: `1px solid var(--c-danger-sep)`, paddingTop: 12, marginTop: 4 }}>
                     <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--c-red-a99)', letterSpacing: '0.15em', marginBottom: 10 }}>{t('dangerZone')}</div>
-                    {menuRow(t('deleteChatsMenu'), <Trash2 size={18} color={RED} />, () => setSettingsView('deleteChats'), true)}
-                    {menuRow('Delete Account', <UserX size={18} color={RED} />, () => setShowDeleteAccountModal(true), true)}
+                    {menuRow(t('dangerZone'), <Trash2 size={18} color={RED} />, () => setSettingsView('dangerZone'), true)}
                   </div>
 
                   <div style={{ borderTop: `1px solid ${BORDER2}`, paddingTop: 12, marginTop: 4 }}>
@@ -1929,48 +2014,44 @@ useEffect(() => {
                 </>
               )}
 
-              {settingsView === 'deleteChats' && (
+              {settingsView === 'dangerZone' && (
                 <>
                   {backBtn(t('settingsTitle'))}
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: RED, letterSpacing: '0.15em', marginBottom: 16 }}>{t('dangerZone')}</div>
-                  <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 8, overflow: 'hidden' }}>
-                    <button
-                      onClick={() => setSettingsView('delete')}
-                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', borderBottom: `1px solid ${BORDER2}`, color: RED, fontSize: 12, fontFamily: 'monospace', letterSpacing: '0.1em', cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'var(--c-red-bg)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                    >
-                      <span style={{ fontSize: 14, flexShrink: 0 }}>⊘</span>
-                      <span>{t('deleteAllChats').toUpperCase()}</span>
-                    </button>
-                    <button
-                      onClick={() => { setSelectionMode(true); setSelectedChatIds(new Set()); setShowSettings(false); setSettingsView('menu') }}
-                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', color: TEXT, fontSize: 12, fontFamily: 'monospace', letterSpacing: '0.1em', cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s' }}
-                      onMouseEnter={e => e.currentTarget.style.background = SURFACE}
-                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                    >
-                      <span style={{ fontSize: 14, flexShrink: 0 }}>⊟</span>
-                      <span>{t('selectChatsToDelete').toUpperCase()}</span>
-                    </button>
-                  </div>
-                  <button
-                    onClick={() => setSettingsView('menu')}
-                    style={{ width: '100%', marginTop: 10, padding: '11px', borderRadius: 8, background: 'none', border: `1px solid ${BORDER2}`, color: MUTED, fontSize: 11, fontFamily: 'monospace', cursor: 'pointer', letterSpacing: '0.06em', transition: 'border-color 0.15s' }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = BORDER}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = BORDER2}
-                  >
-                    {t('cancel').toUpperCase()}
-                  </button>
-                </>
-              )}
 
-              {settingsView === 'delete' && (
-                <>
-                  {backBtn(t('deleteChatsMenu'), 'deleteChats')}
-                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: RED, letterSpacing: '0.15em', marginBottom: 16 }}>{t('deleteAllTitle')}</div>
-                  <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.6, marginBottom: 24 }}>{t('deleteAllDesc')}</p>
-                  <HoldToDelete onConfirm={handleDeleteAllChats} />
-                  {deleteAllError && <div style={{ marginTop: 10, fontSize: 11, color: RED, fontFamily: 'monospace' }}>{deleteAllError}</div>}
+                  <div style={{ border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, background: 'rgba(239,68,68,0.03)', padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+                    {/* ── 1. Delete Selected Chats ── */}
+                    <div>
+                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.08em', marginBottom: 6 }}>DELETE SELECTED CHATS</div>
+                      <button
+                        onClick={() => setShowSelectChatsModal(true)}
+                        style={{ width: '100%', padding: '11px', borderRadius: 8, background: 'transparent', border: `1px solid ${BORDER}`, color: TEXT, fontSize: 12, fontFamily: 'monospace', letterSpacing: '0.04em', cursor: 'pointer', transition: 'all 0.15s', textAlign: 'center' }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = RED; e.currentTarget.style.color = RED }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = TEXT }}
+                      >
+                        Select chats to delete…
+                      </button>
+                    </div>
+
+                    <div style={{ borderTop: `1px solid rgba(239,68,68,0.15)` }} />
+
+                    {/* ── 2. Delete All Chats ── */}
+                    <div>
+                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.08em', marginBottom: 6 }}>DELETE ALL CHATS</div>
+                      <HoldToDelete onConfirm={handleDeleteAllChats} label="Hold to delete all chats" />
+                      {deleteAllError && <div style={{ marginTop: 8, fontSize: 11, color: RED, fontFamily: 'monospace' }}>{deleteAllError}</div>}
+                    </div>
+
+                    <div style={{ borderTop: `1px solid rgba(239,68,68,0.15)` }} />
+
+                    {/* ── 3. Delete Account ── */}
+                    <div>
+                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: RED, letterSpacing: '0.08em', marginBottom: 6 }}>DELETE ACCOUNT</div>
+                      <HoldToDelete onConfirm={() => setShowDeleteAccountConfirmModal(true)} label="Hold to delete account" accent />
+                    </div>
+
+                  </div>
                 </>
               )}
             </div>
