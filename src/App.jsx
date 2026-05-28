@@ -399,14 +399,36 @@ function SignOutModal({ onConfirm, onCancel }) {
   )
 }
 
-function SelectChatsModal({ chats, onConfirm, onCancel }) {
+function SelectChatsModal({ userId, onConfirm, onCancel }) {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light'
+  const [chats, setChats] = useState([])
+  const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(new Set())
+
+  useEffect(() => {
+    supabase
+      .from('chats')
+      .select('id, title, created_at, updated_at')
+      .eq('user_id', userId)
+      .order('updated_at', { ascending: false })
+      .then(({ data }) => { setChats(data || []); setLoading(false) })
+  }, [userId])
 
   function toggle(id) {
     setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
   }
   const allSelected = chats.length > 0 && selected.size === chats.length
+
+  function fmtDate(iso) {
+    if (!iso) return ''
+    const d = new Date(iso)
+    const now = new Date()
+    const diffDays = Math.floor((now - d) / 86400000)
+    if (diffDays === 0) return 'Today'
+    if (diffDays === 1) return 'Yesterday'
+    if (diffDays < 7) return d.toLocaleDateString(undefined, { weekday: 'short' })
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  }
 
   const cardBg   = isLight ? '#ffffff' : '#111111'
   const cardBdr  = isLight ? '#e5e5e5' : '#2a2a2a'
@@ -420,26 +442,31 @@ function SelectChatsModal({ chats, onConfirm, onCancel }) {
       <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 1000, background: cardBg, border: `1px solid ${cardBdr}`, borderRadius: 8, padding: 24, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', width: 440, maxWidth: 'calc(100vw - 48px)', display: 'flex', flexDirection: 'column', maxHeight: '80vh' }}>
         <div style={{ fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.15em', color: mutedCol, marginBottom: 16, textTransform: 'uppercase', flexShrink: 0 }}>Select Chats to Delete</div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, flexShrink: 0 }}>
-          <span style={{ fontSize: 12, fontFamily: 'monospace', color: mutedCol }}>{selected.size} selected</span>
-          <button onClick={() => setSelected(allSelected ? new Set() : new Set(chats.map(c => c.id)))}
-            style={{ background: 'transparent', border: 'none', fontFamily: 'monospace', fontSize: 11, color: '#a855f7', cursor: 'pointer', padding: '2px 0', letterSpacing: '0.06em' }}>
-            {allSelected ? 'Deselect All' : 'Select All'}
-          </button>
-        </div>
+        {!loading && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, flexShrink: 0 }}>
+            <span style={{ fontSize: 12, fontFamily: 'monospace', color: mutedCol }}>{selected.size} selected</span>
+            <button onClick={() => setSelected(allSelected ? new Set() : new Set(chats.map(c => c.id)))}
+              style={{ background: 'transparent', border: 'none', fontFamily: 'monospace', fontSize: 11, color: '#a855f7', cursor: 'pointer', padding: '2px 0', letterSpacing: '0.06em' }}>
+              {allSelected ? 'Deselect All' : 'Select All'}
+            </button>
+          </div>
+        )}
 
         <div style={{ flex: 1, overflowY: 'auto', border: `1px solid ${cardBdr}`, borderRadius: 6, marginBottom: 20 }}>
-          {chats.length === 0
-            ? <div style={{ padding: '24px', textAlign: 'center', fontFamily: 'monospace', fontSize: 12, color: mutedCol }}>No chats</div>
-            : chats.map((chat, idx) => (
-              <div key={chat.id} onClick={() => toggle(chat.id)}
-                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', cursor: 'pointer', borderBottom: idx < chats.length - 1 ? `1px solid ${rowBdr}` : 'none', background: selected.has(chat.id) ? 'rgba(239,68,68,0.06)' : 'transparent', transition: 'background 0.1s', userSelect: 'none' }}>
-                <div style={{ width: 16, height: 16, borderRadius: 3, border: `1.5px solid ${selected.has(chat.id) ? '#ef4444' : (isLight ? '#ccc' : '#444')}`, background: selected.has(chat.id) ? '#ef4444' : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.1s' }}>
-                  {selected.has(chat.id) && <span style={{ color: '#fff', fontSize: 10, lineHeight: 1 }}>✓</span>}
+          {loading
+            ? <div style={{ padding: '32px', textAlign: 'center', fontFamily: 'monospace', fontSize: 12, color: mutedCol }}>Loading…</div>
+            : chats.length === 0
+              ? <div style={{ padding: '32px', textAlign: 'center', fontFamily: 'monospace', fontSize: 12, color: mutedCol }}>No chats found</div>
+              : chats.map((chat, idx) => (
+                <div key={chat.id} onClick={() => toggle(chat.id)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', cursor: 'pointer', borderBottom: idx < chats.length - 1 ? `1px solid ${rowBdr}` : 'none', background: selected.has(chat.id) ? 'rgba(239,68,68,0.06)' : 'transparent', transition: 'background 0.1s', userSelect: 'none' }}>
+                  <div style={{ width: 16, height: 16, borderRadius: 3, border: `1.5px solid ${selected.has(chat.id) ? '#ef4444' : (isLight ? '#ccc' : '#444')}`, background: selected.has(chat.id) ? '#ef4444' : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.1s' }}>
+                    {selected.has(chat.id) && <span style={{ color: '#fff', fontSize: 10, lineHeight: 1 }}>✓</span>}
+                  </div>
+                  <span style={{ fontSize: 13, color: textCol, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{chat.title || 'Untitled Chat'}</span>
+                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: mutedCol, flexShrink: 0 }}>{fmtDate(chat.updated_at || chat.created_at)}</span>
                 </div>
-                <span style={{ fontSize: 13, color: textCol, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{chat.title || 'Untitled'}</span>
-              </div>
-            ))
+              ))
           }
         </div>
 
@@ -454,7 +481,7 @@ function SelectChatsModal({ chats, onConfirm, onCancel }) {
             style={{ background: selected.size > 0 ? 'rgba(239,68,68,0.15)' : 'transparent', border: `1px solid ${selected.size > 0 ? '#ef4444' : (isLight ? '#d8d8d8' : '#333')}`, borderRadius: 6, color: selected.size > 0 ? '#ef4444' : mutedCol, fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', padding: '8px 20px', cursor: selected.size > 0 ? 'pointer' : 'default', textTransform: 'uppercase', transition: 'all 0.15s', opacity: selected.size > 0 ? 1 : 0.4 }}
             onMouseEnter={e => { if (selected.size > 0) e.currentTarget.style.background = 'rgba(239,68,68,0.25)' }}
             onMouseLeave={e => { if (selected.size > 0) e.currentTarget.style.background = 'rgba(239,68,68,0.15)' }}>
-            Delete{selected.size > 0 ? ` (${selected.size})` : ''}
+            {selected.size > 0 ? `Delete (${selected.size})` : 'Delete'}
           </button>
         </div>
       </div>
@@ -1764,7 +1791,7 @@ useEffect(() => {
 
       {showSelectChatsModal && (
         <SelectChatsModal
-          chats={chats}
+          userId={user.id}
           onConfirm={handleDeleteChatsById}
           onCancel={() => setShowSelectChatsModal(false)}
         />
