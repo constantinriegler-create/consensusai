@@ -1799,7 +1799,7 @@ useEffect(() => {
   if (!user) return <LoginPage />
 
   return (
-    <div style={{ display: 'flex', minHeight: '100dvh', height: isMobile ? 'auto' : '100dvh', overflow: isMobile ? 'visible' : 'hidden', background: BG, color: TEXT, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
+    <div style={{ display: 'flex', height: '100vh', height: '100dvh', overflow: 'hidden', background: BG, color: TEXT, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
 
       <input type="file" accept="image/*,.pdf,.txt,.md" style={{ display: 'none' }} id="file-input" onChange={e => handleFile(e.target.files[0])} />
 
