@@ -1799,12 +1799,12 @@ useEffect(() => {
   if (!user) return <LoginPage />
 
   return (
-    <div style={{ display: 'flex', height: '100vh', height: '100dvh', overflow: 'hidden', background: BG, color: TEXT, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
+    <div style={{ display: 'flex', minHeight: '100dvh', height: isMobile ? 'auto' : '100dvh', overflow: isMobile ? 'visible' : 'hidden', background: BG, color: TEXT, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
 
       <input type="file" accept="image/*,.pdf,.txt,.md" style={{ display: 'none' }} id="file-input" onChange={e => handleFile(e.target.files[0])} />
 
       {/* Ambient orb layer — fixed, full viewport, hidden via CSS in light mode */}
-      <div className="ambient-orbs" style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 2, pointerEvents: 'none', overflow: 'visible' }}>
+      <div className="ambient-orbs" style={{ position: 'fixed', inset: 0, width: '100vw', height: '100dvh', zIndex: 2, pointerEvents: 'none', overflow: 'visible' }}>
         {(() => {
           const orbColor = mode === 'premium' ? 'rgba(167,139,250,0.30)' : 'rgba(232,232,232,0.18)'
           const orbStyle = (top, left, anim) => ({ position: 'absolute', width: 500, height: 500, background: `radial-gradient(circle, ${orbColor} 0%, transparent 70%)`, top, left, filter: 'blur(80px)', borderRadius: '50%', animation: `${anim} ease-in-out infinite`, willChange: 'transform', transition: 'background 1s ease' })
