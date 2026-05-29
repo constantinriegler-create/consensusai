@@ -1804,7 +1804,7 @@ useEffect(() => {
       <input type="file" accept="image/*,.pdf,.txt,.md" style={{ display: 'none' }} id="file-input" onChange={e => handleFile(e.target.files[0])} />
 
       {/* Ambient orb layer — fixed, full viewport, hidden via CSS in light mode */}
-      <div className="ambient-orbs" style={{ position: 'fixed', inset: 0, width: '100vw', height: '100dvh', zIndex: 2, pointerEvents: 'none', overflow: 'visible' }}>
+      <div className="ambient-orbs" style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 2, pointerEvents: 'none', overflow: 'visible' }}>
         {(() => {
           const orbColor = mode === 'premium' ? 'rgba(167,139,250,0.30)' : 'rgba(232,232,232,0.18)'
           const orbStyle = (top, left, anim) => ({ position: 'absolute', width: 500, height: 500, background: `radial-gradient(circle, ${orbColor} 0%, transparent 70%)`, top, left, filter: 'blur(80px)', borderRadius: '50%', animation: `${anim} ease-in-out infinite`, willChange: 'transform', transition: 'background 1s ease' })
@@ -2233,7 +2233,7 @@ useEffect(() => {
             </div>
           )}
 
-          <div style={{ padding: '12px 16px', borderTop: `1px solid ${BORDER2}` }}>
+          <div style={{ padding: '12px 16px', borderTop: `1px solid ${BORDER2}`, flexShrink: 0 }}>
             <div style={{ marginTop: 0, marginBottom: 8, display: 'flex', gap: 8 }}>
               <div style={{ flex: 1, background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: AMBER }}>{credits.standard_credits}</div>
@@ -2250,7 +2250,7 @@ useEffect(() => {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <button onClick={() => { setShowSettings(true); setDeleteAllError(''); setSettingsView('menu') }}
+              <button onClick={() => { setShowSettings(true); setSettingsHovered(false); setDeleteAllError(''); setSettingsView('menu') }}
                 onMouseEnter={() => setSettingsHovered(true)} onMouseLeave={() => setSettingsHovered(false)}
                 style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 8, background: settingsHovered ? CARD : 'none', border: `1px solid ${settingsHovered ? BORDER : BORDER2}`, color: settingsHovered ? TEXT : MUTED, fontSize: 12, fontFamily: 'monospace', cursor: 'pointer', transition: 'all 0.15s', letterSpacing: '0.04em' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
