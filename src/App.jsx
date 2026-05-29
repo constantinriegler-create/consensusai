@@ -2559,23 +2559,16 @@ useEffect(() => {
                   style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : 'var(--c-amber-a20)') : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 36, padding: '0 12px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>{t('web')}</button>
               )}
               {isMobile && (
-                <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }}>
-                  {inputHintOpen && (
-                    <div style={{ position: 'absolute', bottom: 'calc(100% + 8px)', left: 0, background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 8, padding: '8px 12px', fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.05em', whiteSpace: 'nowrap', boxShadow: '0 4px 16px rgba(0,0,0,0.3)', zIndex: 50 }}>
-                      {t('inputHint')}
-                    </div>
-                  )}
-                  <button
-                    onClick={() => {
-                      setInputHintOpen(v => {
-                        if (!v) setTimeout(() => setInputHintOpen(false), 10000)
-                        return !v
-                      })
-                    }}
-                    style={{ width: 28, height: 28, borderRadius: '50%', background: 'transparent', border: `1px solid ${BORDER}`, color: MUTED2, fontFamily: 'monospace', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>
-                    ?
-                  </button>
-                </div>
+                <button
+                  onClick={() => {
+                    setInputHintOpen(v => {
+                      if (!v) setTimeout(() => setInputHintOpen(false), 10000)
+                      return !v
+                    })
+                  }}
+                  style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', width: 20, height: 20, borderRadius: '50%', background: 'transparent', border: `1px solid ${BORDER2}`, color: MUTED2, fontFamily: 'monospace', fontSize: 9, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>
+                  ?
+                </button>
               )}
               <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: 6 }}>
                 <button onClick={() => document.getElementById('file-input').click()}
@@ -2587,6 +2580,11 @@ useEffect(() => {
           </div>
           {!isMobile && (
             <div style={{ textAlign: 'center', fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 8, letterSpacing: '0.05em' }}>
+              {t('inputHint')}
+            </div>
+          )}
+          {isMobile && inputHintOpen && (
+            <div style={{ textAlign: 'center', fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.05em', marginTop: 8, padding: '6px 12px', background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 8 }}>
               {t('inputHint')}
             </div>
           )}
