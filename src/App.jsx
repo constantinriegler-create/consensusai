@@ -1171,7 +1171,7 @@ function LoginPage() {
         {/* Hero header — outside the card */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 64, height: 64, borderRadius: 18, marginBottom: 16, boxShadow: `0 0 32px ${PURPLE}30` }} />
-          <div style={{ fontSize: 18, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.25em', marginBottom: 14, fontWeight: 700 }}>VELE AI</div>
+          <div style={{ fontSize: 22, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.25em', marginBottom: 14, fontWeight: 700 }}>VELE AI</div>
           {authMode === 'signup' && (
             <h1 style={{ fontSize: isMobile ? 28 : 32, fontWeight: 800, color: TEXT, margin: 0, marginBottom: 12, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
               {t('createAccount')}
