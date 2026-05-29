@@ -1051,6 +1051,7 @@ function LoginPage() {
   const [focused, setFocused] = useState(null)
   const [lang, setLang] = useState(i18n.language.startsWith('de') ? 'de' : 'en')
   const isMobile = window.innerWidth <= 768
+  const [langOpen, setLangOpen] = useState(false)
 
   // index.css locks body + #root to overflow:hidden for the main chat UI.
   // The login page needs to scroll on mobile when content exceeds the viewport.
@@ -1131,51 +1132,51 @@ function LoginPage() {
       padding: isMobile ? '24px 20px 40px' : '20px 20px 40px',
     }}>
 
-      {/* Language picker — absolute on desktop, inline flow on mobile */}
-      {!isMobile && (
-        <div style={{ position: 'absolute', top: 20, right: 20, display: 'flex', gap: 6 }}>
-          {['en', 'de', 'ko', 'es'].map(l => (
-            <button key={l} onClick={() => changeLang(l)} style={{
-              background: lang === l ? TEXT : 'transparent',
-              border: `1px solid ${lang === l ? TEXT : BORDER}`,
-              borderRadius: 20, color: lang === l ? BG : MUTED,
-              fontFamily: 'monospace', fontSize: 10, fontWeight: 700,
-              letterSpacing: '0.1em', padding: '5px 12px', cursor: 'pointer',
-              textTransform: 'uppercase', transition: 'all 0.15s',
-            }}>
-              {l.toUpperCase()}
-            </button>
-          ))}
-        </div>
-      )}
+      {/* Globe language picker — top-right, opens a dropdown */}
+      <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 20 }}>
+        <button
+          onClick={() => setLangOpen(o => !o)}
+          style={{ background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 8, color: MUTED, padding: '7px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color 0.15s' }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = MUTED}
+          onMouseLeave={e => e.currentTarget.style.borderColor = BORDER}
+        >
+          <Globe size={16} color={MUTED} />
+        </button>
+        {langOpen && (
+          <>
+            <div onClick={() => setLangOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 18 }} />
+            <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 19, background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 8, overflow: 'hidden', minWidth: 140, boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}>
+              {[
+                { value: 'en', label: 'English' },
+                { value: 'de', label: 'Deutsch' },
+                { value: 'ko', label: '한국어' },
+                { value: 'es', label: 'Español' },
+              ].map((opt, idx, arr) => (
+                <button key={opt.value} onClick={() => { changeLang(opt.value); setLangOpen(false) }}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: lang === opt.value ? `${PURPLE}15` : 'transparent', border: 'none', borderBottom: idx < arr.length - 1 ? `1px solid ${BORDER}` : 'none', color: lang === opt.value ? PURPLE : TEXT, fontFamily: 'monospace', fontSize: 12, cursor: 'pointer', textAlign: 'left', transition: 'background 0.1s' }}
+                  onMouseEnter={e => { if (lang !== opt.value) e.currentTarget.style.background = CARD }}
+                  onMouseLeave={e => { if (lang !== opt.value) e.currentTarget.style.background = 'transparent' }}
+                >
+                  <span>{opt.label}</span>
+                  {lang === opt.value && <span style={{ fontSize: 10 }}>✓</span>}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
 
       <div style={{ width: '100%', maxWidth: 420 }}>
-
-        {/* Language picker — inline on mobile, sits above the logo */}
-        {isMobile && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 28 }}>
-            {['en', 'de', 'ko', 'es'].map(l => (
-              <button key={l} onClick={() => changeLang(l)} style={{
-                background: lang === l ? TEXT : 'transparent',
-                border: `1px solid ${lang === l ? TEXT : BORDER}`,
-                borderRadius: 20, color: lang === l ? BG : MUTED,
-                fontFamily: 'monospace', fontSize: 10, fontWeight: 700,
-                letterSpacing: '0.1em', padding: '5px 12px', cursor: 'pointer',
-                textTransform: 'uppercase', transition: 'all 0.15s',
-              }}>
-                {l.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Hero header — outside the card */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 64, height: 64, borderRadius: 18, marginBottom: 16, boxShadow: `0 0 32px ${PURPLE}30` }} />
-          <div style={{ fontSize: 11, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.2em', marginBottom: 14 }}>VELE AI</div>
-          <h1 style={{ fontSize: isMobile ? 34 : 40, fontWeight: 800, color: TEXT, margin: 0, marginBottom: 12, letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-            {authMode === 'signup' ? t('createAccount') : t('honestAI')}
-          </h1>
+          <div style={{ fontSize: 18, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.25em', marginBottom: 14, fontWeight: 700 }}>VELE AI</div>
+          {authMode === 'signup' && (
+            <h1 style={{ fontSize: isMobile ? 28 : 32, fontWeight: 800, color: TEXT, margin: 0, marginBottom: 12, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+              {t('createAccount')}
+            </h1>
+          )}
           <p style={{ color: 'var(--c-readable)', fontSize: 15, lineHeight: 1.65, margin: '0 auto', maxWidth: 340 }}>
             {authMode === 'signup' ? t('signUpSubtitle') : t('signInSubtitle')}
           </p>
