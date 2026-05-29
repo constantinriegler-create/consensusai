@@ -811,6 +811,11 @@ function UpdateAnnouncementModal({ onDismiss }) {
   const { t } = useTranslation()
   const isMobile = window.innerWidth <= 768
   const updates = [
+    { title: t('upd_codeSplitting_title'), desc: t('upd_codeSplitting_desc') },
+    { title: t('upd_mobileLogin_title'), desc: t('upd_mobileLogin_desc') },
+    { title: t('upd_mobileHintBtn_title'), desc: t('upd_mobileHintBtn_desc') },
+    { title: t('upd_mobilePolicyLinks_title'), desc: t('upd_mobilePolicyLinks_desc') },
+    { title: t('upd_mobileLangPicker_title'), desc: t('upd_mobileLangPicker_desc') },
     { title: t('upd_starterCredits_title'), desc: t('upd_starterCredits_desc') },
     { title: t('upd_mobileLayout_title'), desc: t('upd_mobileLayout_desc') },
     { title: t('upd_ambientLighting_title'), desc: t('upd_ambientLighting_desc') },
@@ -831,7 +836,7 @@ function UpdateAnnouncementModal({ onDismiss }) {
             <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.15em', marginBottom: 8 }}>UPDATE</div>
             <h2 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: TEXT, margin: 0, marginBottom: 4, textAlign: 'center' }}>{t('whatsNewTitle')}</h2>
             <p style={{ fontSize: 13, color: MUTED, margin: 0, marginBottom: 4, textAlign: 'center' }}>Version 1.0</p>
-            <p style={{ fontSize: 10, color: MUTED2, margin: 0, fontFamily: 'monospace', letterSpacing: '0.06em', textAlign: 'center' }}>Latest update: 24. May 2026</p>
+            <p style={{ fontSize: 10, color: MUTED2, margin: 0, fontFamily: 'monospace', letterSpacing: '0.06em', textAlign: 'center' }}>Latest update: 30. May 2026</p>
           </div>
         </div>
 

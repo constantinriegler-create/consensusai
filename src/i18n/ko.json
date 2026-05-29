@@ -161,6 +161,17 @@
   "upd_whatsNewButton_title": "새로운 기능 버튼",
   "upd_whatsNewButton_desc": "모바일에서 전체 레이블과 함께 완전히 표시됩니다",
 
+  "upd_codeSplitting_title": "더 빠른 로딩",
+  "upd_codeSplitting_desc": "코드 분할 및 지연 로딩 적용 — InfoPage, SharePage, 정책 페이지가 필요할 때만 로드됩니다.",
+  "upd_mobileLogin_title": "모바일 로그인 개선",
+  "upd_mobileLogin_desc": "로그인 페이지가 이제 모바일에서 전체 화면을 채우고 Google 로그인 버튼이 잘리지 않습니다.",
+  "upd_mobileHintBtn_title": "모바일 입력 힌트",
+  "upd_mobileHintBtn_desc": "작은 ? 버튼이 모바일에서 입력 힌트 텍스트를 대체합니다. 탭하면 단축키를 볼 수 있습니다.",
+  "upd_mobilePolicyLinks_title": "정책 링크를 설정으로 이동",
+  "upd_mobilePolicyLinks_desc": "개인정보처리방침, 이용약관, 환불 정책, 쿠키 정책 링크가 모바일 설정으로 이동했습니다.",
+  "upd_mobileLangPicker_title": "언어 선택기 재설계",
+  "upd_mobileLangPicker_desc": "언어 선택기가 이제 드롭다운이 있는 지구본 아이콘으로 변경되어 모바일에서 겹침 문제가 해결됐습니다.",
+
   "code": "코드",
   "formula": "수식",
 

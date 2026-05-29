@@ -161,6 +161,17 @@
   "upd_whatsNewButton_title": "Botón de novedades",
   "upd_whatsNewButton_desc": "Ahora totalmente visible en móvil con la etiqueta completa mostrada",
 
+  "upd_codeSplitting_title": "Carga más rápida",
+  "upd_codeSplitting_desc": "División de código y rutas con carga diferida — InfoPage, SharePage y páginas de políticas ahora se cargan bajo demanda.",
+  "upd_mobileLogin_title": "Inicio de sesión móvil mejorado",
+  "upd_mobileLogin_desc": "La página de inicio de sesión ahora ocupa toda la pantalla en móvil y el botón de Google siempre es visible.",
+  "upd_mobileHintBtn_title": "Ayuda de entrada en móvil",
+  "upd_mobileHintBtn_desc": "Un pequeño botón ? reemplaza el texto de ayuda en móvil para una interfaz más limpia.",
+  "upd_mobilePolicyLinks_title": "Políticas en Configuración",
+  "upd_mobilePolicyLinks_desc": "Los enlaces de Privacidad, Términos, Devoluciones y Cookies se movieron a Configuración en móvil.",
+  "upd_mobileLangPicker_title": "Selector de idioma rediseñado",
+  "upd_mobileLangPicker_desc": "El selector de idioma ahora es un icono de globo con menú desplegable — sin solapamientos en móvil.",
+
   "code": "CÓDIGO",
   "formula": "FÓRMULA",
 

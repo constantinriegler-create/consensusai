@@ -161,6 +161,17 @@
   "upd_whatsNewButton_title": "What's New Button",
   "upd_whatsNewButton_desc": "Now fully visible on mobile with complete label shown",
 
+  "upd_codeSplitting_title": "Faster Load Times",
+  "upd_codeSplitting_desc": "Code splitting and lazy-loaded routes — InfoPage, SharePage, and policy pages now load on demand, reducing initial bundle size.",
+  "upd_mobileLogin_title": "Mobile Login Improved",
+  "upd_mobileLogin_desc": "Login page now fills the full screen on mobile, scrolls correctly, and won't cut off the Google sign-in button.",
+  "upd_mobileHintBtn_title": "Mobile Input Hint",
+  "upd_mobileHintBtn_desc": "A small ? button replaces the input hint text on mobile for a cleaner look. Tap it to see keyboard shortcuts.",
+  "upd_mobilePolicyLinks_title": "Policy Links in Settings",
+  "upd_mobilePolicyLinks_desc": "Privacy Policy, Terms, Refund Policy, and Cookie Policy links moved into Settings on mobile for a cleaner chat view.",
+  "upd_mobileLangPicker_title": "Language Picker Redesigned",
+  "upd_mobileLangPicker_desc": "Language selector is now a globe icon with a dropdown — no more overlapping pills on mobile.",
+
   "code": "CODE",
   "formula": "FORMULA",
 

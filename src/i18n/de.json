@@ -161,6 +161,17 @@
   "upd_whatsNewButton_title": "Was-ist-neu-Button",
   "upd_whatsNewButton_desc": "Jetzt auf Mobilgeräten vollständig sichtbar mit vollständiger Beschriftung",
 
+  "upd_codeSplitting_title": "Schnellere Ladezeiten",
+  "upd_codeSplitting_desc": "Code-Splitting und lazy-geladene Routen — InfoPage, SharePage und Rechtsseiten werden jetzt bei Bedarf geladen.",
+  "upd_mobileLogin_title": "Mobile Anmeldung verbessert",
+  "upd_mobileLogin_desc": "Die Anmeldeseite füllt jetzt den gesamten Bildschirm auf Mobilgeräten aus und blendet den Google-Button nicht mehr ab.",
+  "upd_mobileHintBtn_title": "Mobiler Eingabe-Hinweis",
+  "upd_mobileHintBtn_desc": "Ein kleiner ?-Button ersetzt den Hinweistext auf Mobilgeräten. Antippen für Tastaturkürzel.",
+  "upd_mobilePolicyLinks_title": "Rechtslinks in Einstellungen",
+  "upd_mobilePolicyLinks_desc": "Datenschutz, AGB, Rückgabe und Cookie-Links wurden auf Mobilgeräten in die Einstellungen verschoben.",
+  "upd_mobileLangPicker_title": "Sprachauswahl neu gestaltet",
+  "upd_mobileLangPicker_desc": "Die Sprachauswahl ist jetzt ein Globus-Symbol mit Dropdown — keine überlappenden Schaltflächen mehr auf Mobilgeräten.",
+
   "code": "CODE",
   "formula": "FORMEL",
 
