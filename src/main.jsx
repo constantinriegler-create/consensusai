@@ -1,30 +1,35 @@
-import { StrictMode } from 'react'
+import { StrictMode, lazy, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import SharePage from './SharePage.jsx'
-import { PrivacyPolicy, TermsOfService, RefundPolicy, CookiePolicy, DPA } from './PolicyPage.jsx'
 
 const path = window.location.pathname
-
 const shareMatch = path.match(/^\/share\/([^/]+)$/)
 
-const policyMap = {
-  '/privacy-policy': PrivacyPolicy,
-  '/terms':          TermsOfService,
-  '/refund-policy':  RefundPolicy,
-  '/cookie-policy':  CookiePolicy,
-  '/dpa':            DPA,
+// Only one of these ever loads per page visit — lazy-load all of them
+const SharePage = lazy(() => import('./SharePage.jsx'))
+
+const policyLazy = {
+  '/privacy-policy': lazy(() => import('./PolicyPage.jsx').then(m => ({ default: m.PrivacyPolicy }))),
+  '/terms':          lazy(() => import('./PolicyPage.jsx').then(m => ({ default: m.TermsOfService }))),
+  '/refund-policy':  lazy(() => import('./PolicyPage.jsx').then(m => ({ default: m.RefundPolicy }))),
+  '/cookie-policy':  lazy(() => import('./PolicyPage.jsx').then(m => ({ default: m.CookiePolicy }))),
+  '/dpa':            lazy(() => import('./PolicyPage.jsx').then(m => ({ default: m.DPA }))),
 }
 
-const PolicyComponent = policyMap[path]
+const PolicyComponent = policyLazy[path]
+
+// Minimal dark fallback — matches app background, no layout shift
+const PageFallback = () => (
+  <div style={{ minHeight: '100dvh', background: '#080808' }} />
+)
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     {shareMatch
-      ? <SharePage shareId={shareMatch[1]} />
+      ? <Suspense fallback={<PageFallback />}><SharePage shareId={shareMatch[1]} /></Suspense>
       : PolicyComponent
-        ? <PolicyComponent />
+        ? <Suspense fallback={<PageFallback />}><PolicyComponent /></Suspense>
         : <App />
     }
   </StrictMode>,

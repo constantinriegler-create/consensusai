@@ -1,11 +1,12 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, lazy, Suspense } from 'react'
 import { createPortal } from 'react-dom'
 import ReactMarkdown from 'react-markdown'
 import { useTranslation } from 'react-i18next'
 import { User, Diamond, Sun, Globe, Trash2, LogOut, UserX } from 'lucide-react'
 import supabase from './supabase.js'
-import InfoPage from './InfoPage.jsx'
-import './i18n/index.js'
+import { loadLanguage } from './i18n/index.js'
+
+const InfoPage = lazy(() => import('./InfoPage.jsx'))
 
 const AMBER = 'var(--c-amber)'
 const AMBER_DIM = 'var(--c-amber-dim)'
@@ -1073,8 +1074,8 @@ function LoginPage() {
 
   function changeLang(l) {
     setLang(l)
-    i18n.changeLanguage(l)
     localStorage.setItem('language', l)
+    loadLanguage(l).then(() => i18n.changeLanguage(l))
   }
 
   async function handleGoogleLogin() {
@@ -1423,8 +1424,8 @@ useEffect(() => {
   }, [themeMode])
 
   function changeLanguage(lang) {
-    i18n.changeLanguage(lang)
     localStorage.setItem('language', lang)
+    loadLanguage(lang).then(() => i18n.changeLanguage(lang))
   }
 
   // Auth listener
@@ -1818,7 +1819,9 @@ useEffect(() => {
       {showWhatsNew && <UpdateAnnouncementModal onDismiss={() => setShowWhatsNew(false)} />}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} user={user} />}
       {showInfo && (
-        <InfoPage onClose={() => setShowInfo(false)} />
+        <Suspense fallback={null}>
+          <InfoPage onClose={() => setShowInfo(false)} />
+        </Suspense>
       )}
 
       {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} user={user} onPurchase={() => loadUserData(user)} />}
