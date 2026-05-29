@@ -1100,31 +1100,55 @@ function LoginPage() {
   })
 
   return (
-    <div style={{ minHeight: '100dvh', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', padding: '20px 20px 40px' }}>
+    <div style={{
+      minHeight: '100dvh',
+      position: 'relative',
+      display: 'flex',
+      flexDirection: isMobile ? 'column' : 'row',
+      alignItems: 'center',
+      justifyContent: isMobile ? 'flex-start' : 'center',
+      background: BG,
+      fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
+      padding: isMobile ? '24px 20px 40px' : '20px 20px 40px',
+    }}>
 
-      {/* Language picker */}
-      <div style={{ position: 'absolute', top: 20, right: 20, display: 'flex', gap: 6 }}>
-        {['en', 'de', 'ko', 'es'].map(l => (
-          <button key={l} onClick={() => changeLang(l)} style={{
-            background: lang === l ? TEXT : 'transparent',
-            border: `1px solid ${lang === l ? TEXT : BORDER}`,
-            borderRadius: 20,
-            color: lang === l ? BG : MUTED,
-            fontFamily: 'monospace',
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: '0.1em',
-            padding: '5px 12px',
-            cursor: 'pointer',
-            textTransform: 'uppercase',
-            transition: 'all 0.15s',
-          }}>
-            {l.toUpperCase()}
-          </button>
-        ))}
-      </div>
+      {/* Language picker — absolute on desktop, inline flow on mobile */}
+      {!isMobile && (
+        <div style={{ position: 'absolute', top: 20, right: 20, display: 'flex', gap: 6 }}>
+          {['en', 'de', 'ko', 'es'].map(l => (
+            <button key={l} onClick={() => changeLang(l)} style={{
+              background: lang === l ? TEXT : 'transparent',
+              border: `1px solid ${lang === l ? TEXT : BORDER}`,
+              borderRadius: 20, color: lang === l ? BG : MUTED,
+              fontFamily: 'monospace', fontSize: 10, fontWeight: 700,
+              letterSpacing: '0.1em', padding: '5px 12px', cursor: 'pointer',
+              textTransform: 'uppercase', transition: 'all 0.15s',
+            }}>
+              {l.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div style={{ width: '100%', maxWidth: 420 }}>
+
+        {/* Language picker — inline on mobile, sits above the logo */}
+        {isMobile && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 28 }}>
+            {['en', 'de', 'ko', 'es'].map(l => (
+              <button key={l} onClick={() => changeLang(l)} style={{
+                background: lang === l ? TEXT : 'transparent',
+                border: `1px solid ${lang === l ? TEXT : BORDER}`,
+                borderRadius: 20, color: lang === l ? BG : MUTED,
+                fontFamily: 'monospace', fontSize: 10, fontWeight: 700,
+                letterSpacing: '0.1em', padding: '5px 12px', cursor: 'pointer',
+                textTransform: 'uppercase', transition: 'all 0.15s',
+              }}>
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Hero header — outside the card */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
