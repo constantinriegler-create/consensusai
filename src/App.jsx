@@ -1052,6 +1052,25 @@ function LoginPage() {
   const [lang, setLang] = useState(i18n.language.startsWith('de') ? 'de' : 'en')
   const isMobile = window.innerWidth <= 768
 
+  // index.css locks body + #root to overflow:hidden for the main chat UI.
+  // The login page needs to scroll on mobile when content exceeds the viewport.
+  useEffect(() => {
+    if (!isMobile) return
+    const root = document.getElementById('root')
+    document.body.style.overflow           = 'auto'
+    document.body.style.height             = 'auto'
+    document.documentElement.style.overflow = 'auto'
+    document.documentElement.style.height   = 'auto'
+    if (root) { root.style.overflow = 'auto'; root.style.height = 'auto' }
+    return () => {
+      document.body.style.overflow           = ''
+      document.body.style.height             = ''
+      document.documentElement.style.overflow = ''
+      document.documentElement.style.height   = ''
+      if (root) { root.style.overflow = ''; root.style.height = '' }
+    }
+  }, [isMobile])
+
   function changeLang(l) {
     setLang(l)
     i18n.changeLanguage(l)
