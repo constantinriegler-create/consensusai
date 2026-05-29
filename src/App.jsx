@@ -1394,6 +1394,13 @@ const [messages, setMessages] = useState([])
   const [shareModalUrl, setShareModalUrl] = useState(null)
   const [welcomeToast, setWelcomeToast] = useState(false)
   const [showCookieBanner, setShowCookieBanner] = useState(() => !localStorage.getItem('cookieConsent'))
+  const [inputHintOpen, setInputHintOpen] = useState(false)
+  useEffect(() => {
+    if (!inputHintOpen) return
+    const dismiss = () => setInputHintOpen(false)
+    document.addEventListener('pointerdown', dismiss, { once: true, capture: true })
+    return () => document.removeEventListener('pointerdown', dismiss, { capture: true })
+  }, [inputHintOpen])
   const [showSignOutModal, setShowSignOutModal] = useState(false)
   const [showSelectChatsModal, setShowSelectChatsModal] = useState(false)
   const [showDeleteAccountConfirmModal, setShowDeleteAccountConfirmModal] = useState(false)
@@ -2544,12 +2551,31 @@ useEffect(() => {
                 onKeyDown={handleKeyDown}
                 onPaste={e => { const file = e.clipboardData.files[0]; if (file) handleFile(file) }}
                 rows={1}
-                style={{ width: '100%', padding: isMobile ? '12px 92px 12px 14px' : '14px 90px 14px 80px', borderRadius: 10, border: `1px solid ${mode === 'premium' ? (prompt ? `${PURPLE}90` : `${PURPLE}50`) : (prompt ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.22)')}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none', caretColor: mode === 'premium' ? PURPLE : AMBER }}
+                style={{ width: '100%', padding: isMobile ? '12px 92px 12px 46px' : '14px 90px 14px 80px', borderRadius: 10, border: `1px solid ${mode === 'premium' ? (prompt ? `${PURPLE}90` : `${PURPLE}50`) : (prompt ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.22)')}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none', caretColor: mode === 'premium' ? PURPLE : AMBER }}
               />
               {!isMobile && (
                 <button onClick={() => setUseWebSearch(!useWebSearch)}
                   title={t(useWebSearch ? 'webSearchOn' : 'webSearchOff')}
                   style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : 'var(--c-amber-a20)') : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 36, padding: '0 12px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>{t('web')}</button>
+              )}
+              {isMobile && (
+                <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }}>
+                  {inputHintOpen && (
+                    <div style={{ position: 'absolute', bottom: 'calc(100% + 8px)', left: 0, background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 8, padding: '8px 12px', fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.05em', whiteSpace: 'nowrap', boxShadow: '0 4px 16px rgba(0,0,0,0.3)', zIndex: 50 }}>
+                      {t('inputHint')}
+                    </div>
+                  )}
+                  <button
+                    onClick={() => {
+                      setInputHintOpen(v => {
+                        if (!v) setTimeout(() => setInputHintOpen(false), 10000)
+                        return !v
+                      })
+                    }}
+                    style={{ width: 28, height: 28, borderRadius: '50%', background: 'transparent', border: `1px solid ${BORDER}`, color: MUTED2, fontFamily: 'monospace', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>
+                    ?
+                  </button>
+                </div>
               )}
               <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: 6 }}>
                 <button onClick={() => document.getElementById('file-input').click()}
@@ -2559,9 +2585,11 @@ useEffect(() => {
               </div>
             </div>
           </div>
-          <div style={{ textAlign: 'center', fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 8, letterSpacing: '0.05em' }}>
-            {t('inputHint')}
-          </div>
+          {!isMobile && (
+            <div style={{ textAlign: 'center', fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 8, letterSpacing: '0.05em' }}>
+              {t('inputHint')}
+            </div>
+          )}
         </div>
       </div>
     </div>
