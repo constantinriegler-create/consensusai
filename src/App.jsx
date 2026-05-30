@@ -6,7 +6,15 @@ import { User, Diamond, Sun, Globe, Trash2, LogOut, UserX } from 'lucide-react'
 import supabase from './supabase.js'
 import { loadLanguage } from './i18n/index.js'
 
-const InfoPage = lazy(() => import('./InfoPage.jsx'))
+const InfoPage        = lazy(() => import('./InfoPage.jsx'))
+const EarlyAccessGate = lazy(() => import('./EarlyAccessGate.jsx'))
+
+const GATE_TARGET = new Date('2026-06-15T13:00:00Z') // June 15 2026 15:00 CEST
+function gateRequired() {
+  if (Date.now() >= GATE_TARGET) return false
+  if (localStorage.getItem('earlyAccessGranted') === 'true') return false
+  return true
+}
 
 const AMBER = 'var(--c-amber)'
 const AMBER_DIM = 'var(--c-amber-dim)'
@@ -1358,6 +1366,7 @@ export default function App() {
   ]
 
   const [user, setUser] = useState(null)
+  const [gateGranted, setGateGranted] = useState(() => !gateRequired())
   const [authLoading, setAuthLoading] = useState(true)
   const [credits, setCredits] = useState({ standard_credits: 0, premium_credits: 0 })
   const [prompt, setPrompt] = useState('')
@@ -1808,7 +1817,16 @@ useEffect(() => {
     </div>
   )
 
-  if (!user) return <LoginPage />
+  if (!user) {
+    if (!gateGranted) {
+      return (
+        <Suspense fallback={<div style={{ minHeight: '100dvh', background: '#0a0a0a' }} />}>
+          <EarlyAccessGate onGranted={() => setGateGranted(true)} />
+        </Suspense>
+      )
+    }
+    return <LoginPage />
+  }
 
   return (
     <div style={{ display: 'flex', height: '100vh', height: '100dvh', overflow: 'hidden', background: BG, color: TEXT, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
