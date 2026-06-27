@@ -4,6 +4,7 @@ import cors from 'cors'
 import { Resend } from 'resend'
 import { router } from './orchestrator/router.js'
 import { premiumRouter } from './orchestrator/premium.js'
+import { liteRouter } from './orchestrator/lite.js'
 import { requireAuth, getCredits, addCredits, deductCredit, saveChat, saveMessages, getUserChats, deleteChat, deleteAllChats, shareChat, getSharedChat } from './auth.js'
 import { stripe, PACKS } from './stripe.js'
 import supabase from './supabase.js'
@@ -42,8 +43,9 @@ app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), async
       return res.status(400).json({ error: 'Invalid metadata' })
     }
 
-    const creditType = packId.startsWith('premium') ? 'premium' : 'standard'
+    const creditType = packId.startsWith('premium') ? 'premium' : packId.startsWith('lite') ? 'lite' : 'standard'
     await addCredits(userId, creditType, pack.credits)
+    if (pack.liteBonus) await addCredits(userId, 'lite', pack.liteBonus)
 
     await supabase
       .from('payments')
@@ -55,7 +57,7 @@ app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), async
         amount_cents: pack.amount_cents,
       })
 
-    console.log(`✅ Added ${pack.credits} ${creditType} credits to user ${userId} (${packId})`)
+    console.log(`✅ Added ${pack.credits} ${creditType} credits to user ${userId} (${packId})${pack.liteBonus ? ` + ${pack.liteBonus} lite bonus` : ''}`)
   }
 
   res.json({ received: true })
@@ -307,7 +309,7 @@ app.post('/api/query', requireAuth, async (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream')
     res.setHeader('Cache-Control', 'no-cache')
     res.setHeader('Connection', 'keep-alive')
-    res.write(`data: ${JSON.stringify({ type: 'status', message: 'Asking GPT-4o, Claude, DeepSeek, and Grok simultaneously...' })}\n\n`)
+    res.write(`data: ${JSON.stringify({ type: 'status', message: 'Asking GPT-5.4, Claude, DeepSeek, and Grok simultaneously...' })}\n\n`)
 
     const debug = req.query.debug === '1'
     const result = await router(prompt, attachment, (chunk) => {
@@ -327,6 +329,47 @@ app.post('/api/query', requireAuth, async (req, res) => {
     res.end()
   } catch (err) {
     console.error('FULL ERROR:', err)
+    res.write(`data: ${JSON.stringify({ type: 'error', message: err.message })}\n\n`)
+    res.end()
+  }
+})
+
+// Lite query
+app.post('/api/query/lite', requireAuth, async (req, res) => {
+  const { prompt, attachment, useWebSearch, conversationHistory = [], chatId = null } = req.body
+  const history = conversationHistory.slice(-20)
+
+  try {
+    await deductCredit(req.user.id, 'lite')
+  } catch (err) {
+    if (err.message === 'INSUFFICIENT_CREDITS') {
+      return res.status(402).json({ error: 'INSUFFICIENT_CREDITS' })
+    }
+    return res.status(500).json({ error: err.message })
+  }
+
+  try {
+    res.setHeader('Content-Type', 'text/event-stream')
+    res.setHeader('Cache-Control', 'no-cache')
+    res.setHeader('Connection', 'keep-alive')
+
+    const debug = req.query.debug === '1'
+    const result = await liteRouter(prompt, attachment, (event) => {
+      res.write(`data: ${JSON.stringify({ type: 'status', message: event })}\n\n`)
+    }, useWebSearch, history, debug)
+
+    let finalChatId = chatId
+    if (!finalChatId) {
+      finalChatId = await saveChat(req.user.id, prompt.slice(0, 40), 'lite')
+    }
+    saveMessages(finalChatId, prompt, result, 'lite').catch(e => console.error('Save error:', e))
+
+    const donePayload = { type: 'done', chatId: finalChatId, answer: result.synthesis, individual: null, sources: result.sources || [] }
+    if (debug && result.debug_cost) donePayload.debug_cost = result.debug_cost
+    res.write(`data: ${JSON.stringify(donePayload)}\n\n`)
+    res.end()
+  } catch (err) {
+    console.error('LITE ERROR:', err)
     res.write(`data: ${JSON.stringify({ type: 'error', message: err.message })}\n\n`)
     res.end()
   }

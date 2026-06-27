@@ -21,7 +21,7 @@ export async function requireAuth(req, res, next) {
 export async function getCredits(userId) {
   const { data, error } = await supabase
     .from('credits')
-    .select('standard_credits, premium_credits')
+    .select('standard_credits, premium_credits, lite_credits')
     .eq('user_id', userId)
     .single()
 
@@ -29,8 +29,14 @@ export async function getCredits(userId) {
   return data
 }
 
+function creditCol(type) {
+  if (type === 'premium') return 'premium_credits'
+  if (type === 'lite')    return 'lite_credits'
+  return 'standard_credits'
+}
+
 export async function addCredits(userId, type, amount) {
-  const col = type === 'premium' ? 'premium_credits' : 'standard_credits'
+  const col = creditCol(type)
   const credits = await getCredits(userId)
   const current = credits[col] || 0
 
@@ -44,7 +50,7 @@ export async function addCredits(userId, type, amount) {
 }
 
 export async function deductCredit(userId, type) {
-  const col = type === 'premium' ? 'premium_credits' : 'standard_credits'
+  const col = creditCol(type)
   const credits = await getCredits(userId)
   const current = credits[col]
 

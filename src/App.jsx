@@ -30,6 +30,7 @@ const GREEN = '#22c55e'
 const YELLOW = '#eab308'
 const RED = '#ef4444'
 const PURPLE = '#a855f7'
+const LITE = '#0ea5e9'
 
 const MODEL_META = [
   { key: 'openai', label: 'GPT-5.4', color: '#10a37f' },
@@ -162,6 +163,16 @@ function ModelAgreementBar({ content, resolution, isPremium }) {
       <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 4, lineHeight: 1.5 }}>
         {score}% {t('agreementLegend')} · <span style={{ color: GREEN }}>green</span>=high, <span style={{ color: YELLOW }}>yellow</span>=partial, <span style={{ color: RED }}>red</span>=conflict
       </div>
+    </div>
+  )
+}
+
+function LiteRoutingTag({ routedTo }) {
+  if (!routedTo) return null
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 16, fontSize: 11, fontFamily: 'monospace', color: MUTED2 }}>
+      <span style={{ color: LITE, fontSize: 13 }}>⇢</span>
+      <span>Routed to <span style={{ color: LITE, fontWeight: 600 }}>{routedTo.label}</span> — {routedTo.reason}</span>
     </div>
   )
 }
@@ -639,7 +650,7 @@ function ChatItem({ chat, active, onSelect, onRename, onDelete, selectionMode = 
             {isSelected && <span style={{ color: '#fff', fontSize: 9, lineHeight: 1, fontWeight: 700 }}>✓</span>}
           </span>
         ) : (
-          <span style={{ color: chat.mode === 'premium' ? PURPLE : TEXT, flexShrink: 0 }}>◆</span>
+          <span style={{ color: chat.mode === 'premium' ? PURPLE : chat.mode === 'lite' ? LITE : TEXT, flexShrink: 0 }}>◆</span>
         )}
         {chat.title}
       </span>
@@ -688,25 +699,34 @@ function ModelRow({ label, color }) {
 
 function ModeToggle({ mode, setMode, disabled }) {
   const { t } = useTranslation()
-  const isPremium = mode === 'premium'
+  const pillIndex = mode === 'lite' ? 0 : mode === 'standard' ? 1 : 2
+  const pillColor  = mode === 'lite' ? LITE : mode === 'standard' ? '#ffffff' : PURPLE
+  const textColor  = (m) => {
+    if (mode === m) return mode === 'standard' ? '#000000' : '#ffffff'
+    return MUTED
+  }
   return (
     <div style={{ position: 'relative', display: 'inline-flex', border: `1px solid ${BORDER}`, borderRadius: 999, padding: 3, fontSize: 11, fontFamily: 'monospace' }}>
       {/* Sliding pill */}
       <div style={{
         position: 'absolute', top: 3, bottom: 3, left: 3,
-        width: 'calc((100% - 6px) / 2)',
+        width: 'calc((100% - 6px) / 3)',
         borderRadius: 999,
-        background: isPremium ? PURPLE : '#ffffff',
-        transform: isPremium ? 'translateX(100%)' : 'translateX(0)',
+        background: pillColor,
+        transform: `translateX(${pillIndex * 100}%)`,
         transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
         pointerEvents: 'none',
       }} />
+      <button onClick={() => !disabled && setMode('lite')} disabled={disabled}
+        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: textColor('lite'), cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
+        {t('lite')}
+      </button>
       <button onClick={() => !disabled && setMode('standard')} disabled={disabled}
-        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: !isPremium ? '#000000' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
+        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: textColor('standard'), cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
         {t('standard')}
       </button>
       <button onClick={() => !disabled && setMode('premium')} disabled={disabled}
-        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: isPremium ? '#ffffff' : MUTED, cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
+        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: textColor('premium'), cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
         {t('premium')}
       </button>
     </div>
@@ -1385,7 +1405,7 @@ export default function App() {
   const [user, setUser] = useState(null)
   const [gateGranted, setGateGranted] = useState(() => !gateRequired())
   const [authLoading, setAuthLoading] = useState(true)
-  const [credits, setCredits] = useState({ standard_credits: 0, premium_credits: 0 })
+  const [credits, setCredits] = useState({ standard_credits: 0, premium_credits: 0, lite_credits: 0 })
   const [prompt, setPrompt] = useState('')
 const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
@@ -1526,6 +1546,7 @@ useEffect(() => {
             resolution: m.resolution,
             sources: m.content?.sources || [],
             isPremium: chat.mode === 'premium',
+            isLite: chat.mode === 'lite',
           }))
         }))
         setChats(formatted)
@@ -1551,9 +1572,10 @@ useEffect(() => {
   async function handleSubmit() {
     if (!prompt.trim() || loading) return
     const isPremium = mode === 'premium'
+    const isLite = mode === 'lite'
 
     // Check credits locally first
-    const availableCredits = isPremium ? credits.premium_credits : credits.standard_credits
+    const availableCredits = isLite ? credits.lite_credits : isPremium ? credits.premium_credits : credits.standard_credits
     if (availableCredits <= 0) {
       setShowBuyModal(true)
       return
@@ -1565,7 +1587,7 @@ useEffect(() => {
     const userMessage = prompt
     setPrompt('')
     const newMessages = [...messages, {
-      role: 'user', content: userMessage, isPremium,
+      role: 'user', content: userMessage, isPremium, isLite,
       attachment: attachment ? { name: attachment.name, type: attachment.type, data: attachment.type?.startsWith('image/') ? attachment.data : null } : null
     }]
     setMessages(newMessages)
@@ -1577,7 +1599,7 @@ useEffect(() => {
     setAttachment(null)
 
     const token = await getAuthHeader()
-    const endpoint = isPremium ? '/api/query/premium' : '/api/query'
+    const endpoint = isLite ? '/api/query/lite' : isPremium ? '/api/query/premium' : '/api/query'
 
     const conversationHistory = messages
       .filter(m => m.role === 'user' || m.role === 'assistant')
@@ -1604,11 +1626,8 @@ useEffect(() => {
     }
 
     // Deduct from local state optimistically
-    setCredits(prev => ({
-      ...prev,
-      [isPremium ? 'premium_credits' : 'standard_credits']:
-        prev[isPremium ? 'premium_credits' : 'standard_credits'] - 1
-    }))
+    const creditKey = isLite ? 'lite_credits' : isPremium ? 'premium_credits' : 'standard_credits'
+    setCredits(prev => ({ ...prev, [creditKey]: prev[creditKey] - 1 }))
 
     const reader = res.body.getReader()
     const decoder = new TextDecoder()
@@ -1635,7 +1654,7 @@ useEffect(() => {
           }
           if (parsed.type === 'done') {
             const assistantMsg = {
-              role: 'assistant', isPremium,
+              role: 'assistant', isPremium, isLite,
               content: parsed.answer,
               individual: parsed.individual,
               rounds: parsed.rounds,
@@ -1654,7 +1673,7 @@ useEffect(() => {
               setChats(prev => [{
                 id: realChatId,
                 title: userMessage.slice(0, 28) + (userMessage.length > 28 ? '...' : ''),
-                mode: isPremium ? 'premium' : 'standard',
+                mode: isLite ? 'lite' : isPremium ? 'premium' : 'standard',
                 messages: finalMessages,
               }, ...prev])
               setActiveChatId(realChatId)
@@ -1817,7 +1836,7 @@ useEffect(() => {
   }
 
   function exportPDF(msg, question) {
-    const content = `VELE AI Export\n${'='.repeat(50)}\n\nMode: ${msg.isPremium ? 'Premium' : 'Standard'}\nQuestion: ${question}\n\nAnswer:\n${msg.content.summary}\n\nGPT-5.4:\n${msg.individual?.openai || ''}\n\nClaude:\n${msg.individual?.claude || ''}\n\nDeepSeek:\n${msg.individual?.deepseek || ''}\n\nGrok:\n${msg.individual?.grok || ''}`
+    const content = `VELE AI Export\n${'='.repeat(50)}\n\nMode: ${msg.isPremium ? 'Premium' : msg.isLite ? 'Lite' : 'Standard'}\nQuestion: ${question}\n\nAnswer:\n${msg.content.summary}${msg.isLite && msg.content.routedTo ? `\n\nRouted to: ${msg.content.routedTo.label} — ${msg.content.routedTo.reason}` : ''}\n\n${msg.isLite ? '' : `GPT-5.4:\n${msg.individual?.openai || ''}\n\nClaude:\n${msg.individual?.claude || ''}\n\nDeepSeek:\n${msg.individual?.deepseek || ''}\n\nGrok:\n${msg.individual?.grok || ''}`}`
     const blob = new Blob([content], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -1853,7 +1872,7 @@ useEffect(() => {
       {/* Ambient orb layer — fixed, full viewport, hidden via CSS in light mode */}
       <div className="ambient-orbs" style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 2, pointerEvents: 'none', overflow: 'visible' }}>
         {(() => {
-          const orbColor = mode === 'premium' ? 'rgba(167,139,250,0.30)' : 'rgba(232,232,232,0.18)'
+          const orbColor = mode === 'premium' ? 'rgba(167,139,250,0.30)' : mode === 'lite' ? 'rgba(14,165,233,0.15)' : 'rgba(232,232,232,0.18)'
           const orbStyle = (top, left, anim) => ({ position: 'absolute', width: 500, height: 500, background: `radial-gradient(circle, ${orbColor} 0%, transparent 70%)`, top, left, filter: 'blur(80px)', borderRadius: '50%', animation: `${anim} ease-in-out infinite`, willChange: 'transform', transition: 'background 1s ease' })
           return (<>
             <div style={orbStyle('10%', '10%', 'orb1 15s')} />
@@ -2094,7 +2113,11 @@ useEffect(() => {
                 <>
                   {backBtn(t('settingsTitle'))}
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>{t('credits').toUpperCase()}</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 20 }}>
+                    <div style={{ background: `${LITE}10`, border: `1px solid ${LITE}30`, borderRadius: 10, padding: '16px', textAlign: 'center' }}>
+                      <div style={{ fontSize: 28, fontWeight: 700, color: LITE }}>{credits.lite_credits}</div>
+                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 4 }}>{t('lite')}</div>
+                    </div>
                     <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, padding: '16px', textAlign: 'center' }}>
                       <div style={{ fontSize: 28, fontWeight: 700, color: AMBER }}>{credits.standard_credits}</div>
                       <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 4 }}>{t('standard')}</div>
@@ -2283,13 +2306,17 @@ useEffect(() => {
           )}
 
           <div style={{ padding: '12px 16px', borderTop: `1px solid ${BORDER2}`, flexShrink: 0 }}>
-            <div style={{ marginTop: 0, marginBottom: 8, display: 'flex', gap: 8 }}>
-              <div style={{ flex: 1, background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: AMBER }}>{credits.standard_credits}</div>
+            <div style={{ marginTop: 0, marginBottom: 8, display: 'flex', gap: 6 }}>
+              <div style={{ flex: 1, background: `${LITE}10`, border: `1px solid ${LITE}30`, borderRadius: 6, padding: '6px 6px', textAlign: 'center' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: LITE, textShadow: mode === 'lite' ? `0 0 8px ${LITE}60` : 'none', transition: 'text-shadow 0.2s' }}>{credits.lite_credits}</div>
+                <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>{t('lite')}</div>
+              </div>
+              <div style={{ flex: 1, background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 6, padding: '6px 6px', textAlign: 'center' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: AMBER }}>{credits.standard_credits}</div>
                 <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>{t('std')}</div>
               </div>
-              <div style={{ flex: 1, background: `${PURPLE}10`, border: `1px solid ${PURPLE}30`, borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: PURPLE, textShadow: mode === 'premium' ? `0 0 8px ${PURPLE}60` : 'none', transition: 'text-shadow 0.2s' }}>{credits.premium_credits}</div>
+              <div style={{ flex: 1, background: `${PURPLE}10`, border: `1px solid ${PURPLE}30`, borderRadius: 6, padding: '6px 6px', textAlign: 'center' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: PURPLE, textShadow: mode === 'premium' ? `0 0 8px ${PURPLE}60` : 'none', transition: 'text-shadow 0.2s' }}>{credits.premium_credits}</div>
                 <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2 }}>{t('premium')}</div>
               </div>
               <button onClick={() => setShowBuyModal(true)}
@@ -2372,7 +2399,8 @@ useEffect(() => {
                 {getGreeting(t)}{name ? `, ${name}` : ''}.
               </div>
               <div style={{ fontSize: 15, color: MUTED, marginBottom: mode === 'premium' ? 16 : 48, lineHeight: 1.7 }}>
-                <div>{mode === 'premium' ? t('subtitlePremium') : t('subtitleStandard')}</div>
+                <div>{mode === 'premium' ? t('subtitlePremium') : mode === 'lite' ? t('subtitleLite') : t('subtitleStandard')}</div>
+                {credits.lite_credits > 0 && <div style={{ color: LITE }}>{t('liteQueriesRemaining', { count: credits.lite_credits, unit: credits.lite_credits === 1 ? t('query') : t('queries') })}</div>}
                 {credits.standard_credits > 0 && <div style={{ color: GREEN }}>{t('standardQueriesRemaining', { count: credits.standard_credits, unit: credits.standard_credits === 1 ? t('query') : t('queries') })}</div>}
                 {credits.premium_credits > 0 && <div style={{ color: PURPLE }}>{t('premiumQueriesRemaining', { count: credits.premium_credits, unit: credits.premium_credits === 1 ? t('query') : t('queries') })}</div>}
               </div>
@@ -2417,8 +2445,9 @@ useEffect(() => {
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.1em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span>{t('queryLabel')}</span>
                     {msg.isPremium && <span style={{ color: PURPLE }}>◆ PREMIUM</span>}
+                    {msg.isLite && <span style={{ color: LITE }}>⚡ LITE</span>}
                   </div>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: TEXT, lineHeight: 1.3, borderLeft: `3px solid ${msg.isPremium ? PURPLE : AMBER}`, paddingLeft: 16 }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: TEXT, lineHeight: 1.3, borderLeft: `3px solid ${msg.isPremium ? PURPLE : msg.isLite ? LITE : AMBER}`, paddingLeft: 16 }}>
                     {msg.content}
                   </div>
                   {msg.attachment?.type?.startsWith('image/') && msg.attachment.data && (
@@ -2434,15 +2463,17 @@ useEffect(() => {
               ) : (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-                    <div style={{ fontSize: 10, fontFamily: 'monospace', color: msg.isPremium ? PURPLE : AMBER, letterSpacing: '0.1em' }}>
-                      {msg.isPremium ? t('debateWinner') : t('synthesis')}
+                    <div style={{ fontSize: 10, fontFamily: 'monospace', color: msg.isPremium ? PURPLE : msg.isLite ? LITE : AMBER, letterSpacing: '0.1em' }}>
+                      {msg.isPremium ? t('debateWinner') : msg.isLite ? t('lite') : t('synthesis')}
                     </div>
                     <div style={{ flex: 1, height: '1px', background: BORDER2 }}/>
-                    <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 4, padding: '2px 8px' }}>
-                      {({'high': t('highConfidence'), 'medium': t('mediumConfidence'), 'low': t('lowConfidence')}[msg.content.confidence] ?? msg.content.confidence ?? '').toUpperCase()} {t('confidence')}
-                    </div>
+                    {!msg.isLite && (
+                      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 4, padding: '2px 8px' }}>
+                        {({'high': t('highConfidence'), 'medium': t('mediumConfidence'), 'low': t('lowConfidence')}[msg.content.confidence] ?? msg.content.confidence ?? '').toUpperCase()} {t('confidence')}
+                      </div>
+                    )}
                   </div>
-                  <div style={{ marginBottom: 24, padding: '24px 28px', background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 12, borderLeft: `3px solid ${msg.isPremium ? PURPLE : AMBER}` }}>
+                  <div style={{ marginBottom: 24, padding: '24px 28px', background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 12, borderLeft: `3px solid ${msg.isPremium ? PURPLE : msg.isLite ? LITE : AMBER}` }}>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12, gap: 8 }}>
                       <CopyButton text={msg.content.summary} />
                       <button onClick={() => exportPDF(msg, messages[i-1]?.content || '')}
@@ -2453,11 +2484,14 @@ useEffect(() => {
                     <FormattedText text={msg.content.summary} />
                   </div>
 
-                  <ModelAgreementBar content={msg.content} resolution={msg.isPremium ? msg.resolution : null} isPremium={msg.isPremium} />
+                  {msg.isLite
+                    ? <LiteRoutingTag routedTo={msg.content?.routedTo} />
+                    : <ModelAgreementBar content={msg.content} resolution={msg.isPremium ? msg.resolution : null} isPremium={msg.isPremium} />
+                  }
 
                   {msg.isPremium && msg.votes && <VoteTally votes={msg.votes} counts={msg.resolution?.counts} resolution={msg.resolution} />}
 
-                  {!msg.isPremium && (
+                  {!msg.isPremium && !msg.isLite && (
                     <div style={{ marginBottom: 16, padding: isMobile ? '14px 16px' : '20px 24px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10 }}>
                       <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.12em', marginBottom: 18 }}>{t('signalAnalysis')}</div>
                       <ConfidenceBar color={GREEN} points={msg.content.agreed} label={t('consensusSignal')} />
@@ -2488,7 +2522,7 @@ useEffect(() => {
                     </div>
                   )}
 
-                  <IndividualAnswers individual={msg.individual} />
+                  {!msg.isLite && <IndividualAnswers individual={msg.individual} />}
                   {msg.isPremium && <DebateHistory rounds={msg.rounds} />}
                 </div>
               )}
@@ -2498,16 +2532,16 @@ useEffect(() => {
           {loading && (
             <div style={{ maxWidth: 720, margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px' }}>
               {mode === 'premium' && <PremiumProgress currentStatus={statusText} rounds={liveRounds} />}
-              {mode === 'standard' && statusText && !streamingText && (
+              {(mode === 'standard' || mode === 'lite') && statusText && !streamingText && (
                 <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em', marginBottom: 16 }}>{statusText.toUpperCase()}</div>
               )}
               {streamingText ? (
-                <div style={{ padding: '24px 28px', background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 12, borderLeft: `3px solid ${mode === 'premium' ? PURPLE : AMBER}` }}>
-                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: mode === 'premium' ? PURPLE : AMBER, letterSpacing: '0.1em', marginBottom: 12 }}>
+                <div style={{ padding: '24px 28px', background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 12, borderLeft: `3px solid ${mode === 'premium' ? PURPLE : mode === 'lite' ? LITE : AMBER}` }}>
+                  <div style={{ fontSize: 10, fontFamily: 'monospace', color: mode === 'premium' ? PURPLE : mode === 'lite' ? LITE : AMBER, letterSpacing: '0.1em', marginBottom: 12 }}>
                     {mode === 'premium' ? t('debateWinnerStreaming') : t('synthesisStreaming')}
                   </div>
                   <FormattedText text={streamingText} />
-                  <span style={{ display: 'inline-block', width: 2, height: 16, background: mode === 'premium' ? PURPLE : AMBER, marginLeft: 2, verticalAlign: 'middle', animation: 'blink 1s infinite' }}/>
+                  <span style={{ display: 'inline-block', width: 2, height: 16, background: mode === 'premium' ? PURPLE : mode === 'lite' ? LITE : AMBER, marginLeft: 2, verticalAlign: 'middle', animation: 'blink 1s infinite' }}/>
                 </div>
               ) : mode === 'standard' && (
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -2566,14 +2600,16 @@ useEffect(() => {
                   {isMobile && (
                     <button onClick={() => setUseWebSearch(!useWebSearch)}
                       title={t(useWebSearch ? 'webSearchOn' : 'webSearchOff')}
-                      style={{ background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : 'var(--c-amber-a20)') : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 32, padding: '0 10px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'inline-flex', alignItems: 'center', transition: 'all 0.15s', flexShrink: 0 }}>{t('web')}</button>
+                      style={{ background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : mode === 'lite' ? `${LITE}20` : 'var(--c-amber-a20)') : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : mode === 'lite' ? LITE : AMBER) : BORDER}`, borderRadius: 7, height: 32, padding: '0 10px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : mode === 'lite' ? LITE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'inline-flex', alignItems: 'center', transition: 'all 0.15s', flexShrink: 0 }}>{t('web')}</button>
                   )}
                 </div>
                 <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, textAlign: 'right' }}>
-                  {mode === 'standard'
+                  {mode === 'lite'
+                    ? t('liteQueriesLeft', { count: credits.lite_credits, unit: credits.lite_credits === 1 ? t('query') : t('queries') })
+                    : mode === 'standard'
                     ? t('standardQueriesLeft', { count: credits.standard_credits, unit: credits.standard_credits === 1 ? t('query') : t('queries') })
                     : t('premiumQueriesLeft', { count: credits.premium_credits, unit: credits.premium_credits === 1 ? t('query') : t('queries') })}
-                  {(mode === 'standard' ? credits.standard_credits : credits.premium_credits) === 0 && (
+                  {(mode === 'lite' ? credits.lite_credits : mode === 'standard' ? credits.standard_credits : credits.premium_credits) === 0 && (
                     <button onClick={() => setShowBuyModal(true)} style={{ marginLeft: 8, background: 'none', border: 'none', color: AMBER, fontSize: 10, fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}>
                       {t('buyMore')}
                     </button>
@@ -2585,18 +2621,18 @@ useEffect(() => {
               <textarea
                 ref={inputRef}
                 autoFocus
-                placeholder={mode === 'premium' ? t('askAnythingDebate') : t('askAnything')}
+                placeholder={mode === 'premium' ? t('askAnythingDebate') : mode === 'lite' ? t('askAnythingLite') : t('askAnything')}
                 value={prompt}
                 onChange={e => setPrompt(e.target.value)}
                 onKeyDown={handleKeyDown}
                 onPaste={e => { const file = e.clipboardData.files[0]; if (file) handleFile(file) }}
                 rows={1}
-                style={{ width: '100%', padding: isMobile ? '12px 92px 12px 46px' : '14px 90px 14px 80px', borderRadius: 10, border: `1px solid ${mode === 'premium' ? (prompt ? `${PURPLE}90` : `${PURPLE}50`) : (prompt ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.22)')}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none', caretColor: mode === 'premium' ? PURPLE : AMBER }}
+                style={{ width: '100%', padding: isMobile ? '12px 92px 12px 46px' : '14px 90px 14px 80px', borderRadius: 10, border: `1px solid ${mode === 'premium' ? (prompt ? `${PURPLE}90` : `${PURPLE}50`) : mode === 'lite' ? (prompt ? `${LITE}90` : `${LITE}50`) : (prompt ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.22)')}`, background: SURFACE, color: TEXT, fontSize: 15, resize: 'none', lineHeight: 1.6, boxSizing: 'border-box', transition: 'border-color 0.2s', outline: 'none', caretColor: mode === 'premium' ? PURPLE : mode === 'lite' ? LITE : AMBER }}
               />
               {!isMobile && (
                 <button onClick={() => setUseWebSearch(!useWebSearch)}
                   title={t(useWebSearch ? 'webSearchOn' : 'webSearchOff')}
-                  style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : 'var(--c-amber-a20)') : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : BORDER}`, borderRadius: 7, height: 36, padding: '0 12px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>{t('web')}</button>
+                  style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : mode === 'lite' ? `${LITE}20` : 'var(--c-amber-a20)') : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : mode === 'lite' ? LITE : AMBER) : BORDER}`, borderRadius: 7, height: 36, padding: '0 12px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : mode === 'lite' ? LITE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>{t('web')}</button>
               )}
               {isMobile && (
                 <button
@@ -2614,7 +2650,7 @@ useEffect(() => {
                 <button onClick={() => document.getElementById('file-input').click()}
                   style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 7, width: isMobile ? 40 : 36, height: isMobile ? 40 : 36, cursor: 'pointer', color: MUTED, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⊕</button>
                 <button onClick={handleSubmit} disabled={loading}
-                  style={{ background: prompt && !loading ? (mode === 'premium' ? PURPLE : AMBER) : MUTED2, border: 'none', borderRadius: 7, width: isMobile ? 40 : 36, height: isMobile ? 40 : 36, cursor: !loading && prompt ? 'pointer' : 'default', color: prompt ? (mode === 'premium' ? '#fff' : BG) : MUTED, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', fontWeight: 700 }}>↑</button>
+                  style={{ background: prompt && !loading ? (mode === 'premium' ? PURPLE : mode === 'lite' ? LITE : AMBER) : MUTED2, border: 'none', borderRadius: 7, width: isMobile ? 40 : 36, height: isMobile ? 40 : 36, cursor: !loading && prompt ? 'pointer' : 'default', color: prompt ? (mode === 'premium' || mode === 'lite' ? '#fff' : BG) : MUTED, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', fontWeight: 700 }}>↑</button>
               </div>
             </div>
           </div>
