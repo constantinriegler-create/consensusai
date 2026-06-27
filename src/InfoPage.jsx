@@ -197,7 +197,7 @@ export default function InfoPage({ onClose }) {
           </p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {[
-              { dot: '#10a37f', label: 'GPT-4o' },
+              { dot: '#10a37f', label: 'GPT-5.4' },
               { dot: '#cc785c', label: 'Claude' },
               { dot: '#4d6bfe', label: 'DeepSeek' },
               { dot: '#e8e8e8', label: 'Grok' },
@@ -321,7 +321,7 @@ export default function InfoPage({ onClose }) {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
-            <ModelCard name="GPT-4o" provider="OpenAI" color="#10a37f" description={t('info_gpt_desc')} />
+            <ModelCard name="GPT-5.4" provider="OpenAI" color="#10a37f" description={t('info_gpt_desc')} />
             <ModelCard name="Claude" provider="Anthropic" color="#cc785c" description={t('info_claude_desc')} />
             <ModelCard name="DeepSeek" provider="DeepSeek" color="#4d6bfe" description={t('info_deepseek_desc')} />
             <ModelCard name="Grok" provider="xAI" color="#9ca3af" description={t('info_grok_desc')} />

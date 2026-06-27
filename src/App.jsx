@@ -32,7 +32,7 @@ const RED = '#ef4444'
 const PURPLE = '#a855f7'
 
 const MODEL_META = [
-  { key: 'openai', label: 'GPT-4o', color: '#10a37f' },
+  { key: 'openai', label: 'GPT-5.4', color: '#10a37f' },
   { key: 'claude', label: 'Claude', color: '#cc785c' },
   { key: 'deepseek', label: 'DeepSeek', color: '#4d6bfe' },
   { key: 'grok', label: 'Grok', color: '#e8e8e8' },
@@ -1817,7 +1817,7 @@ useEffect(() => {
   }
 
   function exportPDF(msg, question) {
-    const content = `VELE AI Export\n${'='.repeat(50)}\n\nMode: ${msg.isPremium ? 'Premium' : 'Standard'}\nQuestion: ${question}\n\nAnswer:\n${msg.content.summary}\n\nGPT-4o:\n${msg.individual?.openai || ''}\n\nClaude:\n${msg.individual?.claude || ''}\n\nDeepSeek:\n${msg.individual?.deepseek || ''}\n\nGrok:\n${msg.individual?.grok || ''}`
+    const content = `VELE AI Export\n${'='.repeat(50)}\n\nMode: ${msg.isPremium ? 'Premium' : 'Standard'}\nQuestion: ${question}\n\nAnswer:\n${msg.content.summary}\n\nGPT-5.4:\n${msg.individual?.openai || ''}\n\nClaude:\n${msg.individual?.claude || ''}\n\nDeepSeek:\n${msg.individual?.deepseek || ''}\n\nGrok:\n${msg.individual?.grok || ''}`
     const blob = new Blob([content], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -2511,7 +2511,7 @@ useEffect(() => {
                 </div>
               ) : mode === 'standard' && (
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                  {['GPT-4o', 'Claude', 'DeepSeek', 'Grok', 'Synthesis'].map(m => (
+                  {['GPT-5.4', 'Claude', 'DeepSeek', 'Grok', 'Synthesis'].map(m => (
                     <div key={m} style={{ fontSize: 11, fontFamily: 'monospace', color: MUTED, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 5, padding: '4px 10px' }}>{m} ···</div>
                   ))}
                 </div>

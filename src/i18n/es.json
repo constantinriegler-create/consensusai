@@ -24,7 +24,7 @@
 
   "multiModel": "MULTI-MODELO",
   "multiModelDesc": "4 modelos responden en paralelo",
-  "multiModelDetail": "Tu consulta se envía simultáneamente a GPT-4o, Claude, DeepSeek y Grok. Cada uno responde de forma independiente antes de comenzar la síntesis.",
+  "multiModelDetail": "Tu consulta se envía simultáneamente a GPT-5.4, Claude, DeepSeek y Grok. Cada uno responde de forma independiente antes de comenzar la síntesis.",
   "consensusFeature": "CONSENSO",
   "consensusDesc": "Acuerdo y conflicto mapeados visualmente",
   "consensusDetail": "Un paso de síntesis analiza dónde los modelos estuvieron de acuerdo, se superpusieron parcialmente o entraron en conflicto. Codificado por colores: verde para consenso, amarillo para parcial, rojo para conflicto.",

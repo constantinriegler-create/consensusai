@@ -1,7 +1,7 @@
+import { OPENAI_MODEL } from '../providers/openai.js'
+
 // ─── Pricing table ────────────────────────────────────────────────────────────
 // All prices in USD per 1,000,000 tokens.
-// TODO: Replace placeholder values with current prices from each provider's
-//       pricing page before using these numbers for real spend analysis.
 //
 //  OpenAI:    https://openai.com/api/pricing
 //  Anthropic: https://www.anthropic.com/pricing#api
@@ -10,9 +10,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 export const PRICING = {
   openai: {
-    model:  'gpt-4o',
-    input:  2.50,   // TODO: verify current gpt-4o input price  ($/1M tokens)
-    output: 10.00,  // TODO: verify current gpt-4o output price ($/1M tokens)
+    model:  OPENAI_MODEL,
+    input:  2.50,   // gpt-5.4 input  ($/1M tokens)
+    output: 15.00,  // gpt-5.4 output ($/1M tokens)
   },
   anthropic: {
     model:  'claude-sonnet-4-6',

@@ -24,7 +24,7 @@
 
   "multiModel": "MULTI-MODEL",
   "multiModelDesc": "4 models answer in parallel",
-  "multiModelDetail": "Your prompt is sent simultaneously to GPT-4o, Claude, DeepSeek, and Grok. Each answers independently before synthesis begins.",
+  "multiModelDetail": "Your prompt is sent simultaneously to GPT-5.4, Claude, DeepSeek, and Grok. Each answers independently before synthesis begins.",
   "consensusFeature": "CONSENSUS",
   "consensusDesc": "Agreement and conflict mapped visually",
   "consensusDetail": "A synthesis pass analyzes where models agreed, partially overlapped, or conflicted. Color-coded: green for consensus, yellow for partial, red for conflict.",

@@ -1,3 +1,5 @@
+export const OPENAI_MODEL = process.env.OPENAI_MODEL ?? 'gpt-5.4'
+
 export async function callOpenAI(prompt, attachment, history = []) {
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY
   let content
@@ -27,7 +29,7 @@ export async function callOpenAI(prompt, attachment, history = []) {
       'Authorization': `Bearer ${OPENAI_API_KEY}`
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: OPENAI_MODEL,
       messages: [...historyMessages, { role: 'user', content }]
     })
   })

@@ -24,7 +24,7 @@
 
   "multiModel": "멀티모델",
   "multiModelDesc": "4개 모델이 동시에 답변",
-  "multiModelDetail": "질문이 GPT-4o, Claude, DeepSeek, Grok에 동시에 전송됩니다. 각 모델은 합성이 시작되기 전에 독립적으로 답변합니다.",
+  "multiModelDetail": "질문이 GPT-5.4, Claude, DeepSeek, Grok에 동시에 전송됩니다. 각 모델은 합성이 시작되기 전에 독립적으로 답변합니다.",
   "consensusFeature": "합의",
   "consensusDesc": "동의와 충돌을 시각적으로 표시",
   "consensusDetail": "합성 과정에서 모델들이 동의한 부분, 부분적으로 겹친 부분, 충돌한 부분을 분석합니다. 색상 코드: 초록은 합의, 노랑은 부분, 빨강은 충돌.",
