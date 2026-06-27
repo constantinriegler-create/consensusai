@@ -71,7 +71,10 @@ export async function saveChat(userId, title, mode) {
     .select('id')
     .single()
 
-  if (error) throw new Error('Could not save chat')
+  if (error) {
+    console.error('[saveChat] Supabase error:', error.code, error.message, '| mode:', mode)
+    throw new Error(`Could not save chat: ${error.message}`)
+  }
   return data.id
 }
 
@@ -95,7 +98,10 @@ export async function saveMessages(chatId, userPrompt, assistantResult, mode) {
       }
     ])
 
-  if (error) throw new Error('Could not save messages')
+  if (error) {
+    console.error('[saveMessages] Supabase error:', error.code, error.message)
+    throw new Error(`Could not save messages: ${error.message}`)
+  }
 }
 
 export async function deleteChat(userId, chatId) {
