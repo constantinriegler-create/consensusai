@@ -2225,11 +2225,27 @@ useEffect(() => {
         )
       })()}
 
+      {/* Mobile backdrop */}
       {isMobile && (
         <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 49, opacity: sidebarOpen ? 1 : 0, pointerEvents: sidebarOpen ? 'auto' : 'none', transition: 'opacity 250ms ease-out' }} />
       )}
-      {(sidebarOpen || isMobile) && (
-        <div style={isMobile ? { position: 'fixed', top: 0, left: 0, height: '100dvh', width: '85vw', maxWidth: 320, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', zIndex: 50, overflowY: 'auto', transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)', transition: 'transform 320ms cubic-bezier(0.4, 0, 0.2, 1)' } : { width: 240, background: SURFACE, borderRight: `1px solid ${BORDER2}`, display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'relative', zIndex: 1 }}>
+
+      {/* Sidebar — mobile: slide-in overlay; desktop: width-animated with icon rail */}
+      <div style={isMobile ? {
+        position: 'fixed', top: 0, left: 0, height: '100dvh', width: '85vw', maxWidth: 320,
+        background: SURFACE, borderRight: `1px solid ${BORDER2}`,
+        display: 'flex', flexDirection: 'column', zIndex: 50, overflowY: 'auto',
+        transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
+        transition: 'transform 320ms cubic-bezier(0.4, 0, 0.2, 1)',
+      } : {
+        width: sidebarOpen ? 240 : 60,
+        transition: 'width 250ms cubic-bezier(0.4, 0, 0.2, 1)',
+        background: SURFACE, borderRight: `1px solid ${BORDER2}`,
+        display: 'flex', flexDirection: 'column', flexShrink: 0,
+        overflow: 'hidden', zIndex: 1,
+      }}>
+        {(sidebarOpen || isMobile) ? (
+        <div style={{ width: 240, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
           <div style={{ padding: '20px 16px 16px', borderBottom: `1px solid ${BORDER2}` }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -2368,11 +2384,68 @@ useEffect(() => {
             </div>
           </div>
         </div>
-      )}
+        ) : (
+        /* ── Collapsed icon rail (desktop only, 60 px) ── */
+        <div style={{ width: 60, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0 16px', flex: 1 }}>
+          {/* Logo → re-opens sidebar */}
+          <button onClick={() => setSidebarOpen(true)} title="VELE AI"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, borderRadius: 8, marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 28, height: 28, borderRadius: 7 }} />
+          </button>
+          {/* New chat */}
+          <button onClick={newChat} title={t('newChat')}
+            onMouseEnter={e => { e.currentTarget.style.background = CARD; e.currentTarget.style.color = TEXT }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = MUTED }}
+            style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', color: MUTED, cursor: 'pointer', borderRadius: 8, marginBottom: 2, transition: 'background 0.15s, color 0.15s' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          {/* Search → opens sidebar */}
+          <button onClick={() => setSidebarOpen(true)} title={t('searchChats')}
+            onMouseEnter={e => { e.currentTarget.style.background = CARD; e.currentTarget.style.color = TEXT }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = MUTED }}
+            style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', color: MUTED, cursor: 'pointer', borderRadius: 8, marginBottom: 2, transition: 'background 0.15s, color 0.15s' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
+          {/* History / expand */}
+          <button onClick={() => setSidebarOpen(true)} title={t('sessions')}
+            onMouseEnter={e => { e.currentTarget.style.background = CARD; e.currentTarget.style.color = TEXT }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = MUTED }}
+            style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', color: MUTED, cursor: 'pointer', borderRadius: 8, marginBottom: 2, transition: 'background 0.15s, color 0.15s' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <line x1="9" y1="3" x2="9" y2="21"/>
+            </svg>
+          </button>
+          <div style={{ flex: 1 }} />
+          {/* Active-mode credit count — color-matched to current mode */}
+          <div onClick={() => setShowBuyModal(true)} title={t('buyMoreCredits')}
+            style={{ textAlign: 'center', marginBottom: 10, cursor: 'pointer', padding: '4px 0' }}>
+            <div style={{ fontSize: 14, fontWeight: 700, lineHeight: 1, color: mode === 'lite' ? LITE : mode === 'premium' ? PURPLE : AMBER }}>
+              {mode === 'lite' ? credits.lite_credits : mode === 'premium' ? credits.premium_credits : credits.standard_credits}
+            </div>
+            <div style={{ fontSize: 8, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.05em', marginTop: 3 }}>
+              {mode === 'lite' ? 'LITE' : mode === 'premium' ? 'PRO' : 'STD'}
+            </div>
+          </div>
+          {/* User avatar → settings */}
+          <button onClick={() => { setShowSettings(true); setSettingsView('menu') }} title={t('settings')}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', background: CARD, border: `1px solid ${BORDER2}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: MUTED, fontFamily: 'monospace' }}>
+              {(user?.user_metadata?.full_name?.[0] || user?.email?.[0] || '?').toUpperCase()}
+            </div>
+          </button>
+        </div>
+        )}
+      </div>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         <div style={{ padding: '12px 20px', borderBottom: `1px solid ${BORDER2}`, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, background: 'transparent' }}>
-          {!sidebarOpen && (
+          {!sidebarOpen && isMobile && (
             <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, cursor: 'pointer', fontSize: 12, padding: '4px 10px', fontFamily: 'monospace' }}>☰</button>
           )}
           <div style={{ flex: 1 }}/>
