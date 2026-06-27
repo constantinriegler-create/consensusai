@@ -348,11 +348,18 @@ app.post('/api/query/lite', requireAuth, async (req, res) => {
       res.write(`data: ${JSON.stringify({ type: 'status', message: event })}\n\n`)
     }, useWebSearch, history, debug)
 
+    // Save chat — isolated so a DB failure never blocks the answer reaching the user
     let finalChatId = chatId
-    if (!finalChatId) {
-      finalChatId = await saveChat(req.user.id, prompt.slice(0, 40), 'lite')
+    try {
+      if (!finalChatId) {
+        finalChatId = await saveChat(req.user.id, prompt.slice(0, 40), 'lite')
+        console.log('[lite] Chat saved, id:', finalChatId)
+      }
+      saveMessages(finalChatId, prompt, result, 'lite').catch(e => console.error('[lite] Save messages error:', e))
+    } catch (saveErr) {
+      console.error('[lite] saveChat failed (answer still delivered):', saveErr.message)
+      // finalChatId stays null — frontend treats it as an unsaved session
     }
-    saveMessages(finalChatId, prompt, result, 'lite').catch(e => console.error('[lite] Save messages error:', e))
 
     const donePayload = { type: 'done', chatId: finalChatId, answer: result.synthesis, individual: null, sources: result.sources || [] }
     if (debug && result.debug_cost) donePayload.debug_cost = result.debug_cost
