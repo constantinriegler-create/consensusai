@@ -94,17 +94,6 @@ app.post('/api/promo', async (req, res) => {
     return res.status(400).json({ error: 'Invalid promo code' })
   }
 
-  // Check if already applied
-  const { data: existing } = await supabase
-    .from('credits')
-    .select('standard_credits, premium_credits, lite_credits')
-    .eq('user_id', userId)
-    .single()
-
-  if (existing && existing.standard_credits >= 99999) {
-    return res.status(400).json({ error: 'This code has already been applied to your account' })
-  }
-
   const { error } = await supabase
     .from('credits')
     .upsert(
