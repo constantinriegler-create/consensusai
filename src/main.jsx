@@ -1,5 +1,6 @@
 import { StrictMode, lazy, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
+import { Analytics } from '@vercel/analytics/react'
 import './index.css'
 import App from './App.jsx'
 
@@ -32,5 +33,6 @@ createRoot(document.getElementById('root')).render(
         ? <Suspense fallback={<PageFallback />}><PolicyComponent /></Suspense>
         : <App />
     }
+    <Analytics />
   </StrictMode>,
 )
