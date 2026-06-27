@@ -47,6 +47,23 @@ function getGreeting(t) {
   return t('goodEvening')
 }
 
+function UserAvatar({ user, size = 28 }) {
+  const [imgError, setImgError] = useState(false)
+  const avatarUrl = imgError ? null : (user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null)
+  const initial = (user?.user_metadata?.full_name?.[0] || user?.email?.[0] || '?').toUpperCase()
+  if (avatarUrl) {
+    return (
+      <img src={avatarUrl} alt="" onError={() => setImgError(true)}
+        style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', display: 'block', flexShrink: 0 }} />
+    )
+  }
+  return (
+    <div style={{ width: size, height: size, borderRadius: '50%', background: CARD, border: `1px solid ${BORDER2}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: Math.floor(size * 0.4), fontWeight: 700, color: MUTED, fontFamily: 'monospace', flexShrink: 0 }}>
+      {initial}
+    </div>
+  )
+}
+
 function FormattedText({ text }) {
   if (!text) return null
   let cleaned = text
@@ -2106,8 +2123,11 @@ useEffect(() => {
                   {backBtn(t('settingsTitle'))}
                   <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>{t('account').toUpperCase()}</div>
                   <div style={{ background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, padding: '14px 16px', marginBottom: 20 }}>
-                    <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.08em', marginBottom: 6 }}>{t('signedInAs')}</div>
-                    <div style={{ fontSize: 14, color: TEXT, wordBreak: 'break-all' }}>{user.email}</div>
+                    <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.08em', marginBottom: 10 }}>{t('signedInAs')}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <UserAvatar user={user} size={36} />
+                      <div style={{ fontSize: 14, color: TEXT, wordBreak: 'break-all' }}>{user.email}</div>
+                    </div>
                   </div>
                   <button onClick={() => setShowSignOutModal(true)}
                     style={{ width: '100%', padding: '12px', borderRadius: 10, background: 'none', border: `1px solid ${BORDER}`, color: MUTED, fontSize: 13, cursor: 'pointer' }}>
@@ -2435,9 +2455,7 @@ useEffect(() => {
           {/* User avatar → settings */}
           <button onClick={() => { setShowSettings(true); setSettingsView('menu') }} title={t('settings')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
-            <div style={{ width: 28, height: 28, borderRadius: '50%', background: CARD, border: `1px solid ${BORDER2}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: MUTED, fontFamily: 'monospace' }}>
-              {(user?.user_metadata?.full_name?.[0] || user?.email?.[0] || '?').toUpperCase()}
-            </div>
+            <UserAvatar user={user} size={28} />
           </button>
         </div>
         )}
