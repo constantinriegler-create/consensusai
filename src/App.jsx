@@ -1879,7 +1879,7 @@ useEffect(() => {
       {/* Ambient orb layer — fixed, full viewport, hidden via CSS in light mode */}
       <div className="ambient-orbs" style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', zIndex: 2, pointerEvents: 'none', overflow: 'visible' }}>
         {(() => {
-          const orbColor = mode === 'premium' ? 'rgba(167,139,250,0.30)' : mode === 'lite' ? 'rgba(14,165,233,0.15)' : 'rgba(232,232,232,0.18)'
+          const orbColor = mode === 'premium' ? 'rgba(167,139,250,0.30)' : mode === 'lite' ? 'rgba(14,165,233,0.32)' : 'rgba(232,232,232,0.18)'
           const orbStyle = (top, left, anim) => ({ position: 'absolute', width: 500, height: 500, background: `radial-gradient(circle, ${orbColor} 0%, transparent 70%)`, top, left, filter: 'blur(80px)', borderRadius: '50%', animation: `${anim} ease-in-out infinite`, willChange: 'transform', transition: 'background 1s ease' })
           return (<>
             <div style={orbStyle('10%', '10%', 'orb1 15s')} />
