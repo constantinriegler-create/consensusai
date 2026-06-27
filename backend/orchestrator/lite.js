@@ -77,29 +77,42 @@ export async function liteRouter(prompt, attachment, onChunk, useWebSearch = fal
 
   // Step 1: route via DeepSeek
   onChunk('Routing to best model...')
-  const routingRaw = await callDeepSeekRouting(prompt).catch(() => ({
-    text: '{"model":"gpt","reason":"general knowledge"}',
-    usage: { input: 0, output: 0 },
-  }))
+  console.log('[lite] Step 1: calling DeepSeek routing...')
+  const routingRaw = await callDeepSeekRouting(prompt).catch((e) => {
+    console.error('[lite] Routing fetch failed:', e.message)
+    return { text: '{"model":"gpt","reason":"general knowledge"}', usage: { input: 0, output: 0 } }
+  })
+  console.log('[lite] Routing raw response:', JSON.stringify(routingRaw.text).slice(0, 200))
 
   let chosen = 'gpt'
   let reason = 'general knowledge'
   try {
-    const parsed = JSON.parse(routingRaw.text.trim())
-    if (parsed.model && CALLERS[parsed.model]) {
-      chosen = parsed.model
+    // Strip markdown code fences if DeepSeek wraps JSON in ```json...```
+    const cleaned = routingRaw.text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
+    const parsed = JSON.parse(cleaned)
+    const modelKey = (parsed.model || '').toLowerCase()
+    if (modelKey && CALLERS[modelKey]) {
+      chosen = modelKey
       reason = parsed.reason || reason
+      console.log(`[lite] Routing decision: ${chosen} — ${reason}`)
+    } else {
+      console.warn(`[lite] Unknown model key "${parsed.model}" from routing — falling back to gpt`)
     }
-  } catch {
-    // default to gpt
+  } catch (e) {
+    console.warn('[lite] JSON parse failed for routing response, falling back to gpt:', e.message)
   }
 
   const modelLabel = MODEL_LABELS[chosen]
   onChunk(`Answering with ${modelLabel}...`)
+  console.log(`[lite] Step 2: calling ${modelLabel} for answer...`)
 
   // Step 2: answer from chosen model
   const answerRaw = await CALLERS[chosen](augmentedPrompt, attachment, history)
-    .catch(e => ({ text: `${modelLabel} error: ${e.message}`, usage: { input: 0, output: 0 } }))
+    .catch(e => {
+      console.error(`[lite] ${modelLabel} answer call failed:`, e.message)
+      return { text: `${modelLabel} error: ${e.message}`, usage: { input: 0, output: 0 } }
+    })
+  console.log(`[lite] ${modelLabel} answered (${answerRaw.usage?.output ?? '?'} output tokens)`)
 
   const costEntries = [
     {

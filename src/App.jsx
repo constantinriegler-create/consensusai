@@ -1684,9 +1684,16 @@ useEffect(() => {
             setLoading(false)
           }
           if (parsed.type === 'error') {
+            const errMsg = parsed.message || 'Something went wrong. Please try again.'
+            const errorMessage = {
+              role: 'assistant', isPremium, isLite,
+              content: { summary: `⚠️ ${errMsg}`, routedTo: null },
+              individual: null, sources: [],
+            }
+            setMessages([...newMessages, errorMessage])
             setLoading(false); setStreamingText(''); setStatusText(''); setLiveRounds(null)
           }
-        } catch(e) {}
+        } catch(e) { console.error('[SSE parse error]', e) }
       }
     }
   }

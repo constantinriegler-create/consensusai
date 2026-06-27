@@ -341,6 +341,7 @@ app.post('/api/query/lite', requireAuth, async (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream')
     res.setHeader('Cache-Control', 'no-cache')
     res.setHeader('Connection', 'keep-alive')
+    res.flushHeaders()
 
     const debug = req.query.debug === '1'
     const result = await liteRouter(prompt, attachment, (event) => {
@@ -351,7 +352,7 @@ app.post('/api/query/lite', requireAuth, async (req, res) => {
     if (!finalChatId) {
       finalChatId = await saveChat(req.user.id, prompt.slice(0, 40), 'lite')
     }
-    saveMessages(finalChatId, prompt, result, 'lite').catch(e => console.error('Save error:', e))
+    saveMessages(finalChatId, prompt, result, 'lite').catch(e => console.error('[lite] Save messages error:', e))
 
     const donePayload = { type: 'done', chatId: finalChatId, answer: result.synthesis, individual: null, sources: result.sources || [] }
     if (debug && result.debug_cost) donePayload.debug_cost = result.debug_cost
