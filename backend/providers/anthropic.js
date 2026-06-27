@@ -38,5 +38,11 @@ export async function callAnthropic(prompt, attachment, history = []) {
   const data = await response.json()
   console.log('[anthropic] Response status:', response.status)
   console.log('[anthropic] Response body:', JSON.stringify(data).slice(0, 300))
-  return data.content[0].text
+  return {
+    text:  data.content[0].text,
+    usage: {
+      input:  data.usage?.input_tokens  ?? 0,
+      output: data.usage?.output_tokens ?? 0,
+    },
+  }
 }

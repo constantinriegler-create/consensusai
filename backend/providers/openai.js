@@ -34,6 +34,11 @@ export async function callOpenAI(prompt, attachment, history = []) {
   const data = await response.json()
   console.log('[openai] Response status:', response.status)
   console.log('[openai] Response body:', JSON.stringify(data).slice(0, 300))
-  return data.choices[0].message.content
- 
+  return {
+    text:  data.choices[0].message.content,
+    usage: {
+      input:  data.usage?.prompt_tokens     ?? 0,
+      output: data.usage?.completion_tokens ?? 0,
+    },
+  }
 }

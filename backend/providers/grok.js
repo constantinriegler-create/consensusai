@@ -30,5 +30,11 @@ export async function callGrok(prompt, attachment, history = []) {
     })
   })
   const data = await response.json()
-  return data.choices[0].message.content
+  return {
+    text:  data.choices[0].message.content,
+    usage: {
+      input:  data.usage?.prompt_tokens     ?? 0,
+      output: data.usage?.completion_tokens ?? 0,
+    },
+  }
 }

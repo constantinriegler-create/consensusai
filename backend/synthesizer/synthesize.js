@@ -51,6 +51,8 @@ Now synthesize these into one best answer.
   let streamingDone = false
   const reader = response.body.getReader()
   const decoder = new TextDecoder()
+  // Capture token usage from Anthropic SSE events
+  let synthUsage = { input: 0, output: 0 }
 
   while (!streamingDone) {
     const { done, value } = await reader.read()
@@ -72,6 +74,14 @@ Now synthesize these into one best answer.
               onChunk(text)
             }
           }
+          // message_start carries input_tokens
+          if (parsed.type === 'message_start' && parsed.message?.usage) {
+            synthUsage.input = parsed.message.usage.input_tokens ?? 0
+          }
+          // message_delta carries output_tokens
+          if (parsed.type === 'message_delta' && parsed.usage) {
+            synthUsage.output = parsed.usage.output_tokens ?? 0
+          }
           if (parsed.type === 'message_stop') { streamingDone = true; break }
         } catch(e) {}
       }
@@ -85,6 +95,7 @@ Now synthesize these into one best answer.
     const clean = jsonPart.replace(/```json|```/g, '').trim()
     const parsed = JSON.parse(clean)
     parsed.summary = parts[0].trim()
+    parsed._synthUsage = synthUsage
     return parsed
   } catch(e) {
     console.log('Parse failed, raw:', fullText)
@@ -93,7 +104,8 @@ Now synthesize these into one best answer.
       partial: [],
       conflicted: [],
       summary: fullText,
-      confidence: 'Low'
+      confidence: 'Low',
+      _synthUsage: synthUsage,
     }
   }
 }

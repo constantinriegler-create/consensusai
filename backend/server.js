@@ -309,9 +309,10 @@ app.post('/api/query', requireAuth, async (req, res) => {
     res.setHeader('Connection', 'keep-alive')
     res.write(`data: ${JSON.stringify({ type: 'status', message: 'Asking GPT-4o, Claude, DeepSeek, and Grok simultaneously...' })}\n\n`)
 
-   const result = await router(prompt, attachment, (chunk) => {
-  res.write(`data: ${JSON.stringify({ type: 'chunk', text: chunk })}\n\n`)
-}, useWebSearch, history)
+    const debug = req.query.debug === '1'
+    const result = await router(prompt, attachment, (chunk) => {
+      res.write(`data: ${JSON.stringify({ type: 'chunk', text: chunk })}\n\n`)
+    }, useWebSearch, history, debug)
 
     // Create new chat row only on first message; follow-ups reuse existing chatId
     let finalChatId = chatId
@@ -320,7 +321,9 @@ app.post('/api/query', requireAuth, async (req, res) => {
     }
     saveMessages(finalChatId, prompt, result, 'standard').catch(e => console.error('Save error:', e))
 
-    res.write(`data: ${JSON.stringify({ type: 'done', chatId: finalChatId, answer: result.synthesis, individual: result.individual, sources: result.sources || [] })}\n\n`)
+    const donePayload = { type: 'done', chatId: finalChatId, answer: result.synthesis, individual: result.individual, sources: result.sources || [] }
+    if (debug && result.debug_cost) donePayload.debug_cost = result.debug_cost
+    res.write(`data: ${JSON.stringify(donePayload)}\n\n`)
     res.end()
   } catch (err) {
     console.error('FULL ERROR:', err)
@@ -348,9 +351,10 @@ app.post('/api/query/premium', requireAuth, async (req, res) => {
     res.setHeader('Cache-Control', 'no-cache')
     res.setHeader('Connection', 'keep-alive')
 
+    const debug = req.query.debug === '1'
     const result = await premiumRouter(prompt, attachment, (event) => {
-  res.write(`data: ${JSON.stringify(event)}\n\n`)
-}, useWebSearch, history)
+      res.write(`data: ${JSON.stringify(event)}\n\n`)
+    }, useWebSearch, history, debug)
 
     // Create new chat row only on first message; follow-ups reuse existing chatId
     let finalChatId = chatId

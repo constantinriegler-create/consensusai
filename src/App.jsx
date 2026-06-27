@@ -124,6 +124,9 @@ function calcAgreementScore(content, resolution) {
 
 function ModelAgreementBar({ content, resolution, isPremium }) {
   const { t } = useTranslation()
+  const [showDetail, setShowDetail] = useState(false)
+  const isTouch = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+
   const score = calcAgreementScore(content, resolution)
   const isHigh = score >= 80
   const isMed = score >= 50
@@ -136,7 +139,11 @@ function ModelAgreementBar({ content, resolution, isPremium }) {
     : `${content?.agreed?.length || 0} consensus · ${content?.partial?.length || 0} partial · ${content?.conflicted?.length || 0} conflict`
 
   return (
-    <div title={tooltip} style={{ marginBottom: 16, padding: '12px 16px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, cursor: 'default' }}>
+    <div
+      title={!isTouch ? tooltip : undefined}
+      onClick={() => setShowDetail(s => !s)}
+      style={{ marginBottom: 16, padding: '12px 16px', background: CARD, border: `1px solid ${BORDER2}`, borderRadius: 10, cursor: 'pointer' }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.1em' }}>{t('modelAgreement')}</div>
         <div style={{ fontSize: 11, fontFamily: 'monospace', color, fontWeight: 600 }}>{score}% · {label}</div>
@@ -144,7 +151,17 @@ function ModelAgreementBar({ content, resolution, isPremium }) {
       <div style={{ height: 5, background: BORDER2, borderRadius: 3, overflow: 'hidden' }}>
         <div style={{ height: '100%', width: `${score}%`, background: `linear-gradient(90deg, ${color}99, ${color})`, borderRadius: 3, transition: 'width 0.8s cubic-bezier(0.4,0,0.2,1)' }} />
       </div>
-      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 6 }}>{t('basedOn4Models')}</div>
+      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 6 }}>
+        {t('basedOn4Models')} · {isTouch ? t('tapForDetails') : t('hoverForDetails')}
+      </div>
+      {showDetail && (
+        <div style={{ marginTop: 8, padding: '8px 10px', background: BORDER2, borderRadius: 6, fontSize: 11, fontFamily: 'monospace', color: MUTED }}>
+          {tooltip}
+        </div>
+      )}
+      <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, marginTop: 4, lineHeight: 1.5 }}>
+        {score}% {t('agreementLegend')} · <span style={{ color: GREEN }}>green</span>=high, <span style={{ color: YELLOW }}>yellow</span>=partial, <span style={{ color: RED }}>red</span>=conflict
+      </div>
     </div>
   )
 }
