@@ -2422,15 +2422,6 @@ useEffect(() => {
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
           </button>
-          {/* Search → opens sidebar */}
-          <button onClick={() => setSidebarOpen(true)} title={t('searchChats')}
-            onMouseEnter={e => { e.currentTarget.style.background = CARD; e.currentTarget.style.color = TEXT }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = MUTED }}
-            style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', color: MUTED, cursor: 'pointer', borderRadius: 8, marginBottom: 2, transition: 'background 0.15s, color 0.15s' }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-          </button>
           {/* History / expand */}
           <button onClick={() => setSidebarOpen(true)} title={t('sessions')}
             onMouseEnter={e => { e.currentTarget.style.background = CARD; e.currentTarget.style.color = TEXT }}
