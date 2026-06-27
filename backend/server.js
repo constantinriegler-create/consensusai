@@ -97,7 +97,7 @@ app.post('/api/promo', async (req, res) => {
   // Check if already applied
   const { data: existing } = await supabase
     .from('credits')
-    .select('standard_credits, premium_credits')
+    .select('standard_credits, premium_credits, lite_credits')
     .eq('user_id', userId)
     .single()
 
@@ -108,7 +108,7 @@ app.post('/api/promo', async (req, res) => {
   const { error } = await supabase
     .from('credits')
     .upsert(
-      { user_id: userId, standard_credits: 99999, premium_credits: 99999 },
+      { user_id: userId, standard_credits: 99999, premium_credits: 99999, lite_credits: 99 },
       { onConflict: 'user_id' }
     )
 

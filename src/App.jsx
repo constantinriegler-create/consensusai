@@ -706,27 +706,27 @@ function ModeToggle({ mode, setMode, disabled }) {
     return MUTED
   }
   return (
-    <div style={{ position: 'relative', display: 'inline-flex', border: `1px solid ${BORDER}`, borderRadius: 999, padding: 3, fontSize: 11, fontFamily: 'monospace' }}>
-      {/* Sliding pill */}
+    <div style={{ position: 'relative', display: 'inline-grid', gridTemplateColumns: 'repeat(3, minmax(max-content, 1fr))', border: `1px solid ${BORDER}`, borderRadius: 999, padding: 3, fontSize: 11, fontFamily: 'monospace' }}>
+      {/* Sliding pill — left-based so it tracks the grid column exactly */}
       <div style={{
-        position: 'absolute', top: 3, bottom: 3, left: 3,
+        position: 'absolute', top: 3, bottom: 3,
+        left: `calc(3px + ${pillIndex} * (100% - 6px) / 3)`,
         width: 'calc((100% - 6px) / 3)',
         borderRadius: 999,
         background: pillColor,
-        transform: `translateX(${pillIndex * 100}%)`,
-        transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+        transition: 'left 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
         pointerEvents: 'none',
       }} />
       <button onClick={() => !disabled && setMode('lite')} disabled={disabled}
-        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: textColor('lite'), cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
+        style={{ position: 'relative', zIndex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: textColor('lite'), cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999, textAlign: 'center' }}>
         {t('lite')}
       </button>
       <button onClick={() => !disabled && setMode('standard')} disabled={disabled}
-        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: textColor('standard'), cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
+        style={{ position: 'relative', zIndex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: textColor('standard'), cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999, textAlign: 'center' }}>
         {t('standard')}
       </button>
       <button onClick={() => !disabled && setMode('premium')} disabled={disabled}
-        style={{ position: 'relative', zIndex: 1, flex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: textColor('premium'), cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999 }}>
+        style={{ position: 'relative', zIndex: 1, padding: '5px 14px', border: 'none', background: 'transparent', color: textColor('premium'), cursor: disabled ? 'default' : 'pointer', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s ease', whiteSpace: 'nowrap', borderRadius: 999, textAlign: 'center' }}>
         {t('premium')}
       </button>
     </div>
