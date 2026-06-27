@@ -27,7 +27,7 @@ const TEXT = 'var(--c-text)'
 const MUTED = 'var(--c-muted)'
 const MUTED2 = 'var(--c-muted2)'
 const GREEN = '#22c55e'
-const YELLOW = '#888888'
+const YELLOW = '#eab308'
 const RED = '#ef4444'
 const PURPLE = '#a855f7'
 
