@@ -1195,244 +1195,321 @@ function LoginPage() {
     transition: 'border-color 0.15s',
   })
 
-  return (
-    <div style={{ background: BG, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
-      <style>{`@keyframes scrollBounce { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(8px) } }`}</style>
-
-      {/* ── First viewport: centered login ── */}
-      <div style={{
-        minHeight: '100dvh',
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-      }}>
-
-      {/* Globe language picker — top-right corner, dropdown list */}
-      <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 20 }}>
-        <button
-          onClick={() => setLangOpen(o => !o)}
-          style={{ background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 8, color: MUTED, padding: '7px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color 0.15s' }}
-          onMouseEnter={e => e.currentTarget.style.borderColor = MUTED}
-          onMouseLeave={e => e.currentTarget.style.borderColor = BORDER}
-        >
-          <Globe size={16} color={MUTED} />
-        </button>
-        {langOpen && (
-          <>
-            <div onClick={() => setLangOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 18 }} />
-            <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 19, background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 8, overflow: 'hidden', minWidth: 140, boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}>
-              {[
-                { value: 'en', label: 'English' },
-                { value: 'de', label: 'Deutsch' },
-                { value: 'ko', label: '한국어' },
-                { value: 'es', label: 'Español' },
-              ].map((opt, idx, arr) => (
-                <button key={opt.value} onClick={() => { changeLang(opt.value); setLangOpen(false) }}
-                  style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: lang === opt.value ? `${PURPLE}15` : 'transparent', border: 'none', borderBottom: idx < arr.length - 1 ? `1px solid ${BORDER}` : 'none', color: lang === opt.value ? PURPLE : TEXT, fontFamily: 'monospace', fontSize: 12, cursor: 'pointer', textAlign: 'left', transition: 'background 0.1s' }}
-                  onMouseEnter={e => { if (lang !== opt.value) e.currentTarget.style.background = CARD }}
-                  onMouseLeave={e => { if (lang !== opt.value) e.currentTarget.style.background = 'transparent' }}
-                >
-                  <span>{opt.label}</span>
-                  {lang === opt.value && <span style={{ fontSize: 10 }}>✓</span>}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-
-      <div style={{ width: '100%', maxWidth: 420, padding: isMobile ? '24px 20px 0' : '40px 20px 0', marginTop: 'auto', marginBottom: 'auto' }}>
-
-        {/* Hero header — outside the card */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 64, height: 64, borderRadius: 18, marginBottom: 16, boxShadow: `0 0 32px ${PURPLE}30` }} />
-          <div style={{ fontSize: 22, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.25em', marginBottom: 14, fontWeight: 700 }}>VELE AI</div>
-          {authMode === 'signup' && (
-            <h1 style={{ fontSize: isMobile ? 28 : 32, fontWeight: 800, color: TEXT, margin: 0, marginBottom: 12, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
-              {t('createAccount')}
-            </h1>
-          )}
-          <p style={{ color: 'var(--c-readable)', fontSize: 15, lineHeight: 1.65, margin: '0 auto', maxWidth: 340 }}>
-            {authMode === 'signup' ? t('signUpSubtitle') : t('signInSubtitle')}
-          </p>
-        </div>
-
-        {/* Model strip — sign-in only */}
-        {authMode === 'signin' && (
-          <>
-            <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 10 }}>
-              {MODEL_META.map(m => (
-                <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: CARD, border: `1px solid ${BORDER2}` }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
-                  <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.04em' }}>{m.label}</span>
-                </div>
-              ))}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: `${PURPLE}15`, border: `1px solid ${PURPLE}40` }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: PURPLE, flexShrink: 0 }} />
-                <span style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.04em' }}>One clear answer</span>
-              </div>
-            </div>
-            <p style={{ textAlign: 'center', fontSize: 11, color: MUTED2, fontFamily: 'monospace', letterSpacing: '0.04em', margin: '0 0 20px' }}>
-              Your question goes to all four at once.
-            </p>
-          </>
-        )}
-
-        {/* Form card */}
-        <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 20, padding: isMobile ? '28px 24px' : '36px 36px', borderTop: `2px solid ${PURPLE}` }}>
-
-          {error && (
-            <div style={{ background: 'var(--c-red-bg)', border: '1px solid var(--c-red-border)', borderRadius: 9, padding: '11px 14px', fontSize: 13, color: RED, marginBottom: 20 }}>
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleEmailSubmit}>
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.1em', marginBottom: 7 }}>{t('emailLabel')}</div>
-              <input
-                type="email" value={email} onChange={e => setEmail(e.target.value)}
-                onFocus={() => setFocused('email')} onBlur={() => setFocused(null)}
-                placeholder={t('emailPlaceholder')} autoComplete="email" disabled={!!loading}
-                style={inputStyle('email')}
-              />
-            </div>
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.1em', marginBottom: 7 }}>{t('passwordLabel')}</div>
-              <input
-                type="password" value={password} onChange={e => setPassword(e.target.value)}
-                onFocus={() => setFocused('password')} onBlur={() => setFocused(null)}
-                placeholder={authMode === 'signup' ? t('passwordPlaceholderSignup') : t('passwordPlaceholderSignin')}
-                autoComplete={authMode === 'signup' ? 'new-password' : 'current-password'}
-                disabled={!!loading}
-                style={inputStyle('password')}
-              />
-            </div>
-            <button type="submit" disabled={!!loading}
-              style={{ width: '100%', padding: '14px', borderRadius: 10, background: loading ? MUTED2 : PURPLE, border: 'none', color: '#fff', fontSize: 15, fontWeight: 600, cursor: loading ? 'default' : 'pointer', letterSpacing: '0.01em', transition: 'opacity 0.15s' }}
-              onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = '0.85' }}
-              onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-              {loading === 'email' ? (authMode === 'signup' ? t('creatingAccount') : t('signingIn')) : (authMode === 'signup' ? t('createAccountBtn') : t('signInBtn'))}
-            </button>
-          </form>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
-            <div style={{ flex: 1, height: 1, background: BORDER }} />
-            <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.15em' }}>{t('or')}</div>
-            <div style={{ flex: 1, height: 1, background: BORDER }} />
+  const LangPicker = () => (
+    <div style={{ position: isMobile ? 'fixed' : 'absolute', top: 16, right: 16, zIndex: 20 }}>
+      <button
+        onClick={() => setLangOpen(o => !o)}
+        style={{ background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 8, color: MUTED, padding: '7px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color 0.15s' }}
+        onMouseEnter={e => e.currentTarget.style.borderColor = MUTED}
+        onMouseLeave={e => e.currentTarget.style.borderColor = BORDER}
+      >
+        <Globe size={16} color={MUTED} />
+      </button>
+      {langOpen && (
+        <>
+          <div onClick={() => setLangOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 18 }} />
+          <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 19, background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 8, overflow: 'hidden', minWidth: 140, boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}>
+            {[
+              { value: 'en', label: 'English' },
+              { value: 'de', label: 'Deutsch' },
+              { value: 'ko', label: '한국어' },
+              { value: 'es', label: 'Español' },
+            ].map((opt, idx, arr) => (
+              <button key={opt.value} onClick={() => { changeLang(opt.value); setLangOpen(false) }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: lang === opt.value ? `${PURPLE}15` : 'transparent', border: 'none', borderBottom: idx < arr.length - 1 ? `1px solid ${BORDER}` : 'none', color: lang === opt.value ? PURPLE : TEXT, fontFamily: 'monospace', fontSize: 12, cursor: 'pointer', textAlign: 'left', transition: 'background 0.1s' }}
+                onMouseEnter={e => { if (lang !== opt.value) e.currentTarget.style.background = CARD }}
+                onMouseLeave={e => { if (lang !== opt.value) e.currentTarget.style.background = 'transparent' }}
+              >
+                <span>{opt.label}</span>
+                {lang === opt.value && <span style={{ fontSize: 10 }}>✓</span>}
+              </button>
+            ))}
           </div>
+        </>
+      )}
+    </div>
+  )
 
-          <button onClick={handleGoogleLogin} disabled={!!loading}
-            style={{ width: '100%', padding: '13px', borderRadius: 10, background: loading ? MUTED2 : '#fff', border: 'none', color: '#000', fontSize: 14, fontWeight: 600, cursor: loading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'opacity 0.15s' }}
+  const ModelPills = ({ align = 'center' }) => (
+    <>
+      <div style={{ display: 'flex', gap: 6, justifyContent: align, flexWrap: 'wrap', marginBottom: 8 }}>
+        {MODEL_META.map(m => (
+          <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: CARD, border: `1px solid ${BORDER2}` }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
+            <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.04em' }}>{m.label}</span>
+          </div>
+        ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: `${PURPLE}15`, border: `1px solid ${PURPLE}40` }}>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: PURPLE, flexShrink: 0 }} />
+          <span style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.04em' }}>One clear answer</span>
+        </div>
+      </div>
+      <p style={{ fontSize: 11, color: MUTED2, fontFamily: 'monospace', letterSpacing: '0.04em', margin: `0 0 ${isMobile ? '16px' : '28px'}`, textAlign: align === 'center' ? 'center' : 'left' }}>
+        Your question goes to all four at once.
+      </p>
+    </>
+  )
+
+  const LoginForm = () => (
+    <div style={{ width: '100%', maxWidth: 420 }}>
+      {authMode === 'signup' && (
+        <h1 style={{ fontSize: 28, fontWeight: 800, color: TEXT, margin: '0 0 24px', letterSpacing: '-0.02em', lineHeight: 1.1, textAlign: 'center' }}>
+          {t('createAccount')}
+        </h1>
+      )}
+      <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 20, padding: isMobile ? '28px 24px' : '36px 36px', borderTop: `2px solid ${PURPLE}` }}>
+        {error && (
+          <div style={{ background: 'var(--c-red-bg)', border: '1px solid var(--c-red-border)', borderRadius: 9, padding: '11px 14px', fontSize: 13, color: RED, marginBottom: 20 }}>
+            {error}
+          </div>
+        )}
+        <form onSubmit={handleEmailSubmit}>
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.1em', marginBottom: 7 }}>{t('emailLabel')}</div>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+              onFocus={() => setFocused('email')} onBlur={() => setFocused(null)}
+              placeholder={t('emailPlaceholder')} autoComplete="email" disabled={!!loading}
+              style={inputStyle('email')} />
+          </div>
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.1em', marginBottom: 7 }}>{t('passwordLabel')}</div>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+              onFocus={() => setFocused('password')} onBlur={() => setFocused(null)}
+              placeholder={authMode === 'signup' ? t('passwordPlaceholderSignup') : t('passwordPlaceholderSignin')}
+              autoComplete={authMode === 'signup' ? 'new-password' : 'current-password'}
+              disabled={!!loading} style={inputStyle('password')} />
+          </div>
+          <button type="submit" disabled={!!loading}
+            style={{ width: '100%', padding: '14px', borderRadius: 10, background: loading ? MUTED2 : PURPLE, border: 'none', color: '#fff', fontSize: 15, fontWeight: 600, cursor: loading ? 'default' : 'pointer', letterSpacing: '0.01em', transition: 'opacity 0.15s' }}
             onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = '0.85' }}
             onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-            <svg width="18" height="18" viewBox="0 0 48 48">
-              <path fill="#4285F4" d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.2 7.3-10.5 7.3-17.3z"/>
-              <path fill="#34A853" d="M24 48c6.6 0 12.2-2.2 16.2-5.9l-7.9-6c-2.2 1.5-5 2.3-8.3 2.3-6.4 0-11.8-4.3-13.7-10.1H2.1v6.2C6.1 42.6 14.5 48 24 48z"/>
-              <path fill="#FBBC05" d="M10.3 28.3c-.5-1.5-.8-3-.8-4.6s.3-3.2.8-4.6v-6.2H2.1C.8 15.9 0 19.9 0 24s.8 8.1 2.1 11.1l8.2-6.8z"/>
-              <path fill="#EA4335" d="M24 9.5c3.6 0 6.8 1.2 9.3 3.6l7-7C36.2 2.2 30.6 0 24 0 14.5 0 6.1 5.4 2.1 13.3l8.2 6.2C12.2 13.8 17.6 9.5 24 9.5z"/>
-            </svg>
-            {loading === 'google' ? t('redirecting') : t('continueWithGoogle')}
+            {loading === 'email' ? (authMode === 'signup' ? t('creatingAccount') : t('signingIn')) : (authMode === 'signup' ? t('createAccountBtn') : t('signInBtn'))}
           </button>
+        </form>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
+          <div style={{ flex: 1, height: 1, background: BORDER }} />
+          <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.15em' }}>{t('or')}</div>
+          <div style={{ flex: 1, height: 1, background: BORDER }} />
         </div>
-
-        {/* Sign up / sign in toggle — outside card */}
-        <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--c-readable)', marginTop: 20, lineHeight: 1.6 }}>
-          {authMode === 'signup' ? t('alreadyHaveAccount') : t('noAccount')}{' '}
-          <button
-            onClick={() => { setAuthMode(authMode === 'signup' ? 'signin' : 'signup'); setError(null) }}
-            style={{ background: 'none', border: 'none', color: PURPLE, cursor: 'pointer', padding: 0, fontSize: 13, fontWeight: 600, transition: 'opacity 0.15s' }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-            {authMode === 'signup' ? t('signInBtn') : t('signUpLink')}
-          </button>
-        </p>
-      </div>
-
-      {/* Scroll hint — sits at the bottom of the first viewport as a flex child */}
-      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 28, paddingTop: 16, cursor: 'pointer', userSelect: 'none', flexShrink: 0 }}
-        onClick={() => explainerRef.current?.scrollIntoView({ behavior: 'smooth' })}>
-        <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.18em', marginBottom: 8 }}>HOW IT WORKS</div>
-        <div style={{ display: 'flex', justifyContent: 'center', animation: 'scrollBounce 2s ease-in-out infinite' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={MUTED2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="6 9 12 15 18 9"/>
+        <button onClick={handleGoogleLogin} disabled={!!loading}
+          style={{ width: '100%', padding: '13px', borderRadius: 10, background: loading ? MUTED2 : '#fff', border: 'none', color: '#000', fontSize: 14, fontWeight: 600, cursor: loading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'opacity 0.15s' }}
+          onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = '0.85' }}
+          onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+          <svg width="18" height="18" viewBox="0 0 48 48">
+            <path fill="#4285F4" d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.2 7.3-10.5 7.3-17.3z"/>
+            <path fill="#34A853" d="M24 48c6.6 0 12.2-2.2 16.2-5.9l-7.9-6c-2.2 1.5-5 2.3-8.3 2.3-6.4 0-11.8-4.3-13.7-10.1H2.1v6.2C6.1 42.6 14.5 48 24 48z"/>
+            <path fill="#FBBC05" d="M10.3 28.3c-.5-1.5-.8-3-.8-4.6s.3-3.2.8-4.6v-6.2H2.1C.8 15.9 0 19.9 0 24s.8 8.1 2.1 11.1l8.2-6.8z"/>
+            <path fill="#EA4335" d="M24 9.5c3.6 0 6.8 1.2 9.3 3.6l7-7C36.2 2.2 30.6 0 24 0 14.5 0 6.1 5.4 2.1 13.3l8.2 6.2C12.2 13.8 17.6 9.5 24 9.5z"/>
           </svg>
+          {loading === 'google' ? t('redirecting') : t('continueWithGoogle')}
+        </button>
+      </div>
+      <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--c-readable)', marginTop: 20, lineHeight: 1.6 }}>
+        {authMode === 'signup' ? t('alreadyHaveAccount') : t('noAccount')}{' '}
+        <button
+          onClick={() => { setAuthMode(authMode === 'signup' ? 'signin' : 'signup'); setError(null) }}
+          style={{ background: 'none', border: 'none', color: PURPLE, cursor: 'pointer', padding: 0, fontSize: 13, fontWeight: 600, transition: 'opacity 0.15s' }}
+          onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+          onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+          {authMode === 'signup' ? t('signInBtn') : t('signUpLink')}
+        </button>
+      </p>
+    </div>
+  )
+
+  if (isMobile) {
+    return (
+      <div style={{ background: BG, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <style>{`@keyframes scrollBounce { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(8px) } }`}</style>
+        <LangPicker />
+
+        {/* Mobile hero */}
+        <div style={{ width: '100%', maxWidth: 420, padding: '48px 20px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'auto', marginBottom: 'auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+            <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 44, height: 44, borderRadius: 12, boxShadow: `0 0 20px ${PURPLE}30` }} />
+            <div style={{ fontSize: 16, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.25em', fontWeight: 700 }}>VELE AI</div>
+          </div>
+          <p style={{ color: 'var(--c-readable)', fontSize: 15, lineHeight: 1.65, margin: '0 auto 20px', maxWidth: 320, textAlign: 'center' }}>
+            {authMode === 'signup' ? t('signUpSubtitle') : t('signInSubtitle')}
+          </p>
+          {authMode === 'signin' && <ModelPills align="center" />}
+          <LoginForm />
+        </div>
+
+        {/* Scroll hint */}
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 28, paddingTop: 20, cursor: 'pointer', userSelect: 'none', flexShrink: 0 }}
+          onClick={() => explainerRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+          <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.18em', marginBottom: 6 }}>HOW IT WORKS</div>
+          <div style={{ display: 'flex', justifyContent: 'center', animation: 'scrollBounce 2s ease-in-out infinite' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={MUTED2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+        </div>
+
+        {/* Mobile scroll explainer */}
+        <div ref={explainerRef} style={{ padding: '72px 20px 80px', width: '100%' }}>
+          <div style={{ maxWidth: 560, margin: '0 auto' }}>
+            {[
+              {
+                ref: sec1Ref,
+                title: 'Ask once, get four expert opinions.',
+                body: 'Your question reaches GPT-5.4, Claude, DeepSeek, and Grok simultaneously — each answers independently before any synthesis begins.',
+                visual: (
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 16 }}>
+                    {MODEL_META.map(m => (
+                      <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: CARD, border: `1px solid ${BORDER2}` }}>
+                        <div style={{ width: 6, height: 6, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
+                        <span style={{ fontSize: 10, fontFamily: 'monospace', color: TEXT }}>{m.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                ),
+              },
+              {
+                ref: sec2Ref,
+                title: 'See where they agree — and where they don\'t.',
+                body: 'A color-coded confidence map shows exactly how much to trust the answer. Green = consensus, yellow = partial, red = conflict.',
+                visual: (
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ height: 8, borderRadius: 4, overflow: 'hidden', display: 'flex', marginBottom: 8 }}>
+                      <div style={{ flex: 3, background: GREEN }} />
+                      <div style={{ width: 2, background: BG }} />
+                      <div style={{ flex: 1, background: YELLOW }} />
+                      <div style={{ width: 2, background: BG }} />
+                      <div style={{ flex: 0.5, background: RED }} />
+                    </div>
+                    <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+                      <span style={{ fontSize: 10, fontFamily: 'monospace', color: GREEN }}>● agree</span>
+                      <span style={{ fontSize: 10, fontFamily: 'monospace', color: YELLOW }}>● partial</span>
+                      <span style={{ fontSize: 10, fontFamily: 'monospace', color: RED }}>● conflict</span>
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                ref: sec3Ref,
+                title: 'One honest, combined answer.',
+                body: 'Instead of trusting one AI that sounds confident even when it\'s wrong, you get the full picture — synthesized, sourced, and transparent.',
+                visual: (
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 14px', borderRadius: 20, background: `${PURPLE}15`, border: `1px solid ${PURPLE}40` }}>
+                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: PURPLE, flexShrink: 0 }} />
+                      <span style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE }}>Synthesis — all perspectives combined</span>
+                    </div>
+                  </div>
+                ),
+              },
+            ].map(({ ref, title, body, visual }, i) => (
+              <div key={i} ref={ref} style={{ marginBottom: i < 2 ? 48 : 0, opacity: secVisible[i] ? 1 : 0, transform: secVisible[i] ? 'translateY(0)' : 'translateY(28px)', transition: `opacity 0.6s ease ${i * 0.1}s, transform 0.6s ease ${i * 0.1}s` }}>
+                <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 14, padding: '20px 18px', borderLeft: `3px solid ${PURPLE}40` }}>
+                  {visual}
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: TEXT, margin: '0 0 8px', letterSpacing: '-0.01em', lineHeight: 1.25 }}>{title}</h3>
+                  <p style={{ fontSize: 14, color: MUTED, lineHeight: 1.65, margin: 0 }}>{body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+    )
+  }
 
-      </div>{/* end first viewport */}
+  // ── DESKTOP: two-column split layout ──────────────────────────────────────
+  return (
+    <div style={{ background: BG, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', display: 'grid', gridTemplateColumns: '55fr 45fr', minHeight: '100dvh' }}>
 
-      {/* ── Apple-style scroll explainer ── */}
-      <div ref={explainerRef} style={{ padding: isMobile ? '72px 20px 80px' : '100px 40px 120px' }}>
-        <div style={{ maxWidth: 560, margin: '0 auto' }}>
+      {/* LEFT COLUMN — pitch / landing content */}
+      <div style={{ height: '100dvh', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '60px 56px', borderRight: `1px solid ${BORDER}` }}>
+
+        {/* Logo + wordmark */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 36 }}>
+          <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 32, height: 32, borderRadius: 9, boxShadow: `0 0 20px ${PURPLE}30` }} />
+          <div style={{ fontSize: 13, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.25em', fontWeight: 700 }}>VELE AI</div>
+        </div>
+
+        {/* Headline */}
+        <h1 style={{ fontSize: 36, fontWeight: 800, color: TEXT, margin: '0 0 14px', letterSpacing: '-0.025em', lineHeight: 1.15, maxWidth: 460 }}>
+          4 AI models answer simultaneously.{' '}
+          <span style={{ color: PURPLE }}>One honest answer.</span>
+        </h1>
+        <p style={{ fontSize: 15, color: 'var(--c-readable)', lineHeight: 1.65, margin: '0 0 28px', maxWidth: 420 }}>
+          Stop trusting a single AI that sounds confident even when it's wrong.
+          Get four independent perspectives, then one synthesized answer.
+        </p>
+
+        {/* Model pills (sign-in mode) */}
+        {authMode === 'signin' && <ModelPills align="left" />}
+
+        {/* 3 explainer points */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {[
             {
-              ref: sec1Ref,
+              num: '01',
               title: 'Ask once, get four expert opinions.',
-              body: 'Your question reaches GPT-5.4, Claude, DeepSeek, and Grok simultaneously — each answers independently before any synthesis begins.',
+              body: 'GPT-5.4, Claude, DeepSeek, and Grok each answer independently before any synthesis begins.',
               visual: (
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 20 }}>
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
                   {MODEL_META.map(m => (
-                    <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 20, background: CARD, border: `1px solid ${BORDER2}` }}>
-                      <div style={{ width: 7, height: 7, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
-                      <span style={{ fontSize: 11, fontFamily: 'monospace', color: TEXT, letterSpacing: '0.03em' }}>{m.label}</span>
+                    <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, background: `${CARD}cc`, border: `1px solid ${BORDER2}` }}>
+                      <div style={{ width: 5, height: 5, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
+                      <span style={{ fontSize: 9, fontFamily: 'monospace', color: TEXT }}>{m.label}</span>
                     </div>
                   ))}
                 </div>
               ),
             },
             {
-              ref: sec2Ref,
+              num: '02',
               title: 'See where they agree — and where they don\'t.',
-              body: 'A color-coded confidence map shows exactly how much to trust the answer. Green = consensus, yellow = partial overlap, red = conflict.',
+              body: 'A confidence map shows consensus in green, partial overlap in yellow, conflict in red.',
               visual: (
-                <div style={{ marginBottom: 20 }}>
-                  <div style={{ height: 10, borderRadius: 5, overflow: 'hidden', display: 'flex', marginBottom: 10 }}>
+                <div style={{ marginBottom: 10 }}>
+                  <div style={{ height: 6, borderRadius: 3, overflow: 'hidden', display: 'flex', marginBottom: 6 }}>
                     <div style={{ flex: 3, background: GREEN }} />
-                    <div style={{ width: 3, background: BG }} />
+                    <div style={{ width: 2, background: BG }} />
                     <div style={{ flex: 1, background: YELLOW }} />
-                    <div style={{ width: 3, background: BG }} />
+                    <div style={{ width: 2, background: BG }} />
                     <div style={{ flex: 0.5, background: RED }} />
                   </div>
-                  <div style={{ display: 'flex', gap: 18, justifyContent: 'center' }}>
-                    <span style={{ fontSize: 10, fontFamily: 'monospace', color: GREEN }}>● high agreement</span>
-                    <span style={{ fontSize: 10, fontFamily: 'monospace', color: YELLOW }}>● partial</span>
-                    <span style={{ fontSize: 10, fontFamily: 'monospace', color: RED }}>● conflict</span>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <span style={{ fontSize: 9, fontFamily: 'monospace', color: GREEN }}>● agree</span>
+                    <span style={{ fontSize: 9, fontFamily: 'monospace', color: YELLOW }}>● partial</span>
+                    <span style={{ fontSize: 9, fontFamily: 'monospace', color: RED }}>● conflict</span>
                   </div>
                 </div>
               ),
             },
             {
-              ref: sec3Ref,
+              num: '03',
               title: 'One honest, combined answer.',
-              body: 'Instead of trusting one AI that sounds confident even when it\'s wrong, you get the full picture — synthesized, sourced, and transparent.',
+              body: 'All perspectives synthesized into one clear answer — sourced and transparent.',
               visual: (
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 18px', borderRadius: 20, background: `${PURPLE}15`, border: `1px solid ${PURPLE}40` }}>
-                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: PURPLE, flexShrink: 0 }} />
-                    <span style={{ fontSize: 11, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.04em' }}>Synthesis — all perspectives combined</span>
+                <div style={{ display: 'flex', marginBottom: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: `${PURPLE}15`, border: `1px solid ${PURPLE}40` }}>
+                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: PURPLE, flexShrink: 0 }} />
+                    <span style={{ fontSize: 9, fontFamily: 'monospace', color: PURPLE }}>Synthesis</span>
                   </div>
                 </div>
               ),
             },
-          ].map(({ ref, title, body, visual }, i) => (
-            <div key={i} ref={ref} style={{
-              marginBottom: i < 2 ? 64 : 0,
-              opacity: secVisible[i] ? 1 : 0,
-              transform: secVisible[i] ? 'translateY(0)' : 'translateY(30px)',
-              transition: `opacity 0.65s ease ${i * 0.1}s, transform 0.65s ease ${i * 0.1}s`,
-            }}>
-              <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? '24px 20px' : '28px 32px', borderLeft: `3px solid ${PURPLE}40` }}>
+          ].map(({ num, title, body, visual }) => (
+            <div key={num} style={{ display: 'flex', gap: 14, padding: '16px 18px', background: CARD, borderRadius: 12, border: `1px solid ${BORDER2}` }}>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.1em', marginTop: 1, flexShrink: 0 }}>{num}</div>
+              <div style={{ flex: 1 }}>
                 {visual}
-                <h3 style={{ fontSize: isMobile ? 19 : 22, fontWeight: 700, color: TEXT, margin: '0 0 10px', letterSpacing: '-0.01em', lineHeight: 1.25 }}>
-                  {title}
-                </h3>
-                <p style={{ fontSize: 14, color: MUTED, lineHeight: 1.7, margin: 0 }}>{body}</p>
+                <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, marginBottom: 3, lineHeight: 1.3 }}>{title}</div>
+                <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.55 }}>{body}</div>
               </div>
             </div>
           ))}
         </div>
+      </div>
+
+      {/* RIGHT COLUMN — login form */}
+      <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 48px', position: 'relative' }}>
+        <LangPicker />
+        <LoginForm />
       </div>
 
     </div>
