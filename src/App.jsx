@@ -1244,7 +1244,7 @@ function LoginPage() {
           <span style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.04em' }}>One clear answer</span>
         </div>
       </div>
-      <p style={{ fontSize: 11, color: MUTED2, fontFamily: 'monospace', letterSpacing: '0.04em', margin: `0 0 ${isMobile ? '16px' : '28px'}`, textAlign: align === 'center' ? 'center' : 'left' }}>
+      <p style={{ fontSize: 11, color: MUTED2, fontFamily: 'monospace', letterSpacing: '0.04em', margin: `0 0 ${isMobile ? '16px' : '40px'}`, textAlign: align === 'center' ? 'center' : 'left' }}>
         Your question goes to all four at once.
       </p>
     </>
@@ -1258,6 +1258,16 @@ function LoginPage() {
         </h1>
       )}
       <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 20, padding: isMobile ? '28px 24px' : '36px 36px', borderTop: `2px solid ${PURPLE}` }}>
+        {!isMobile && (
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ fontSize: 20, fontWeight: 700, color: TEXT, letterSpacing: '-0.01em', fontFamily: 'monospace', marginBottom: 4 }}>
+              {authMode === 'signup' ? 'Create account' : 'Sign in'}
+            </div>
+            <div style={{ fontSize: 12, color: MUTED }}>
+              {authMode === 'signup' ? 'Join for free' : 'Welcome back'}
+            </div>
+          </div>
+        )}
         {error && (
           <div style={{ background: 'var(--c-red-bg)', border: '1px solid var(--c-red-border)', borderRadius: 9, padding: '11px 14px', fontSize: 13, color: RED, marginBottom: 20 }}>
             {error}
@@ -1429,11 +1439,11 @@ function LoginPage() {
         </div>
 
         {/* Headline */}
-        <h1 style={{ fontSize: 36, fontWeight: 800, color: TEXT, margin: '0 0 14px', letterSpacing: '-0.025em', lineHeight: 1.15, maxWidth: 460 }}>
+        <h1 style={{ fontSize: 36, fontWeight: 800, color: TEXT, margin: '0 0 20px', letterSpacing: '-0.025em', lineHeight: 1.15, maxWidth: 460 }}>
           4 AI models answer simultaneously.{' '}
           <span style={{ color: PURPLE }}>One honest answer.</span>
         </h1>
-        <p style={{ fontSize: 15, color: 'var(--c-readable)', lineHeight: 1.65, margin: '0 0 28px', maxWidth: 420 }}>
+        <p style={{ fontSize: 15, color: 'var(--c-readable)', lineHeight: 1.65, margin: '0 0 40px', maxWidth: 420 }}>
           Stop trusting a single AI that sounds confident even when it's wrong.
           Get four independent perspectives, then one synthesized answer.
         </p>
@@ -1442,30 +1452,21 @@ function LoginPage() {
         {authMode === 'signin' && <ModelPills align="left" />}
 
         {/* 3 explainer points */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {[
             {
               num: '01',
               title: 'Ask once, get four expert opinions.',
               body: 'GPT-5.4, Claude, DeepSeek, and Grok each answer independently before any synthesis begins.',
-              visual: (
-                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
-                  {MODEL_META.map(m => (
-                    <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, background: `${CARD}cc`, border: `1px solid ${BORDER2}` }}>
-                      <div style={{ width: 5, height: 5, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
-                      <span style={{ fontSize: 9, fontFamily: 'monospace', color: TEXT }}>{m.label}</span>
-                    </div>
-                  ))}
-                </div>
-              ),
+              visual: null,
             },
             {
               num: '02',
               title: 'See where they agree — and where they don\'t.',
               body: 'A confidence map shows consensus in green, partial overlap in yellow, conflict in red.',
               visual: (
-                <div style={{ marginBottom: 10 }}>
-                  <div style={{ height: 6, borderRadius: 3, overflow: 'hidden', display: 'flex', marginBottom: 6 }}>
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ height: 6, borderRadius: 3, overflow: 'hidden', display: 'flex', marginBottom: 7 }}>
                     <div style={{ flex: 3, background: GREEN }} />
                     <div style={{ width: 2, background: BG }} />
                     <div style={{ flex: 1, background: YELLOW }} />
@@ -1485,7 +1486,7 @@ function LoginPage() {
               title: 'One honest, combined answer.',
               body: 'All perspectives synthesized into one clear answer — sourced and transparent.',
               visual: (
-                <div style={{ display: 'flex', marginBottom: 10 }}>
+                <div style={{ display: 'flex', marginBottom: 12 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: `${PURPLE}15`, border: `1px solid ${PURPLE}40` }}>
                     <div style={{ width: 5, height: 5, borderRadius: '50%', background: PURPLE, flexShrink: 0 }} />
                     <span style={{ fontSize: 9, fontFamily: 'monospace', color: PURPLE }}>Synthesis</span>
@@ -1494,12 +1495,12 @@ function LoginPage() {
               ),
             },
           ].map(({ num, title, body, visual }) => (
-            <div key={num} style={{ display: 'flex', gap: 14, padding: '16px 18px', background: CARD, borderRadius: 12, border: `1px solid ${BORDER2}` }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.1em', marginTop: 1, flexShrink: 0 }}>{num}</div>
+            <div key={num} style={{ display: 'flex', gap: 16, padding: '20px 22px', background: CARD, borderRadius: 12, border: `1px solid ${BORDER2}` }}>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.1em', marginTop: 2, flexShrink: 0 }}>{num}</div>
               <div style={{ flex: 1 }}>
                 {visual}
-                <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, marginBottom: 3, lineHeight: 1.3 }}>{title}</div>
-                <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.55 }}>{body}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, marginBottom: 5, lineHeight: 1.35 }}>{title}</div>
+                <div style={{ fontSize: 13, color: MUTED, lineHeight: 1.6 }}>{body}</div>
               </div>
             </div>
           ))}
