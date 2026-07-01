@@ -1119,11 +1119,15 @@ function LoginPage() {
   const [focused, setFocused] = useState(null)
   const [lang, setLang] = useState(i18n.language.startsWith('de') ? 'de' : 'en')
   const [langOpen, setLangOpen] = useState(false)
+  const [secVisible, setSecVisible] = useState([false, false, false])
   const isMobile = window.innerWidth <= 768
+  const explainerRef = useRef(null)
+  const sec1Ref = useRef(null)
+  const sec2Ref = useRef(null)
+  const sec3Ref = useRef(null)
 
-  // Unlock body/root scroll on mobile — index.css locks them for the main chat UI
+  // Unlock body/root scroll — index.css locks them for the main chat UI
   useEffect(() => {
-    if (!isMobile) return
     const root = document.getElementById('root')
     document.body.style.overflow = 'auto'
     document.body.style.height = 'auto'
@@ -1137,7 +1141,22 @@ function LoginPage() {
       document.documentElement.style.height = ''
       if (root) { root.style.overflow = ''; root.style.height = '' }
     }
-  }, [isMobile])
+  }, [])
+
+  useEffect(() => {
+    const refs = [sec1Ref, sec2Ref, sec3Ref]
+    const observers = refs.map((ref, i) => {
+      const obs = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) {
+          setSecVisible(prev => { const next = [...prev]; next[i] = true; return next })
+          obs.disconnect()
+        }
+      }, { threshold: 0.15 })
+      if (ref.current) obs.observe(ref.current)
+      return obs
+    })
+    return () => observers.forEach(o => o.disconnect())
+  }, [])
 
   function changeLang(l) {
     setLang(l)
@@ -1187,17 +1206,19 @@ function LoginPage() {
   })
 
   return (
-    <div style={{
-      minHeight: '100dvh',
-      position: 'relative',
-      display: 'flex',
-      flexDirection: isMobile ? 'column' : 'row',
-      alignItems: 'center',
-      justifyContent: isMobile ? 'flex-start' : 'center',
-      background: BG,
-      fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-      padding: isMobile ? '24px 20px 40px' : '20px 20px 40px',
-    }}>
+    <div style={{ background: BG, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
+      <style>{`@keyframes scrollBounce { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(8px) } }`}</style>
+
+      {/* ── First viewport: centered login ── */}
+      <div style={{
+        minHeight: '100dvh',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: isMobile ? 'flex-start' : 'center',
+        padding: isMobile ? '24px 20px 90px' : '20px 20px 90px',
+      }}>
 
       {/* Globe language picker — top-right corner, dropdown list */}
       <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 20 }}>
@@ -1251,18 +1272,23 @@ function LoginPage() {
 
         {/* Model strip — sign-in only */}
         {authMode === 'signin' && (
-          <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 28 }}>
-            {MODEL_META.map(m => (
-              <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: CARD, border: `1px solid ${BORDER2}` }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
-                <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.04em' }}>{m.label}</span>
+          <>
+            <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 10 }}>
+              {MODEL_META.map(m => (
+                <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: CARD, border: `1px solid ${BORDER2}` }}>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
+                  <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.04em' }}>{m.label}</span>
+                </div>
+              ))}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: `${PURPLE}15`, border: `1px solid ${PURPLE}40` }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: PURPLE, flexShrink: 0 }} />
+                <span style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.04em' }}>One clear answer</span>
               </div>
-            ))}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: `${PURPLE}15`, border: `1px solid ${PURPLE}40` }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: PURPLE, flexShrink: 0 }} />
-              <span style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.04em' }}>{t('synthesis_label')}</span>
             </div>
-          </div>
+            <p style={{ textAlign: 'center', fontSize: 11, color: MUTED2, fontFamily: 'monospace', letterSpacing: '0.04em', margin: '0 0 20px' }}>
+              Your question goes to all four at once.
+            </p>
+          </>
         )}
 
         {/* Form card */}
@@ -1335,6 +1361,92 @@ function LoginPage() {
           </button>
         </p>
       </div>
+
+      {/* Scroll hint — anchored to bottom of first viewport */}
+      <div style={{ position: 'absolute', bottom: 28, left: '50%', transform: 'translateX(-50%)', textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}
+        onClick={() => explainerRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+        <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.18em', marginBottom: 8 }}>HOW IT WORKS</div>
+        <div style={{ display: 'flex', justifyContent: 'center', animation: 'scrollBounce 2s ease-in-out infinite' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={MUTED2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+      </div>
+
+      </div>{/* end first viewport */}
+
+      {/* ── Apple-style scroll explainer ── */}
+      <div ref={explainerRef} style={{ padding: isMobile ? '72px 20px 80px' : '100px 40px 120px' }}>
+        <div style={{ maxWidth: 560, margin: '0 auto' }}>
+          {[
+            {
+              ref: sec1Ref,
+              title: 'Ask once, get four expert opinions.',
+              body: 'Your question reaches GPT-5.4, Claude, DeepSeek, and Grok simultaneously — each answers independently before any synthesis begins.',
+              visual: (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 20 }}>
+                  {MODEL_META.map(m => (
+                    <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 20, background: CARD, border: `1px solid ${BORDER2}` }}>
+                      <div style={{ width: 7, height: 7, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
+                      <span style={{ fontSize: 11, fontFamily: 'monospace', color: TEXT, letterSpacing: '0.03em' }}>{m.label}</span>
+                    </div>
+                  ))}
+                </div>
+              ),
+            },
+            {
+              ref: sec2Ref,
+              title: 'See where they agree — and where they don\'t.',
+              body: 'A color-coded confidence map shows exactly how much to trust the answer. Green = consensus, yellow = partial overlap, red = conflict.',
+              visual: (
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ height: 10, borderRadius: 5, overflow: 'hidden', display: 'flex', marginBottom: 10 }}>
+                    <div style={{ flex: 3, background: GREEN }} />
+                    <div style={{ width: 3, background: BG }} />
+                    <div style={{ flex: 1, background: YELLOW }} />
+                    <div style={{ width: 3, background: BG }} />
+                    <div style={{ flex: 0.5, background: RED }} />
+                  </div>
+                  <div style={{ display: 'flex', gap: 18, justifyContent: 'center' }}>
+                    <span style={{ fontSize: 10, fontFamily: 'monospace', color: GREEN }}>● high agreement</span>
+                    <span style={{ fontSize: 10, fontFamily: 'monospace', color: YELLOW }}>● partial</span>
+                    <span style={{ fontSize: 10, fontFamily: 'monospace', color: RED }}>● conflict</span>
+                  </div>
+                </div>
+              ),
+            },
+            {
+              ref: sec3Ref,
+              title: 'One honest, combined answer.',
+              body: 'Instead of trusting one AI that sounds confident even when it\'s wrong, you get the full picture — synthesized, sourced, and transparent.',
+              visual: (
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 18px', borderRadius: 20, background: `${PURPLE}15`, border: `1px solid ${PURPLE}40` }}>
+                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: PURPLE, flexShrink: 0 }} />
+                    <span style={{ fontSize: 11, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.04em' }}>Synthesis — all perspectives combined</span>
+                  </div>
+                </div>
+              ),
+            },
+          ].map(({ ref, title, body, visual }, i) => (
+            <div key={i} ref={ref} style={{
+              marginBottom: i < 2 ? 64 : 0,
+              opacity: secVisible[i] ? 1 : 0,
+              transform: secVisible[i] ? 'translateY(0)' : 'translateY(30px)',
+              transition: `opacity 0.65s ease ${i * 0.1}s, transform 0.65s ease ${i * 0.1}s`,
+            }}>
+              <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? '24px 20px' : '28px 32px', borderLeft: `3px solid ${PURPLE}40` }}>
+                {visual}
+                <h3 style={{ fontSize: isMobile ? 19 : 22, fontWeight: 700, color: TEXT, margin: '0 0 10px', letterSpacing: '-0.01em', lineHeight: 1.25 }}>
+                  {title}
+                </h3>
+                <p style={{ fontSize: 14, color: MUTED, lineHeight: 1.7, margin: 0 }}>{body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
     </div>
   )
 }
