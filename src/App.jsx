@@ -1126,21 +1126,11 @@ function LoginPage() {
   const sec2Ref = useRef(null)
   const sec3Ref = useRef(null)
 
-  // Unlock body/root scroll — index.css locks them for the main chat UI
+  // Unlock body/root scroll — index.css locks them for the main chat UI.
+  // Class addition is synchronous so CSS rules apply before first paint.
   useEffect(() => {
-    const root = document.getElementById('root')
-    document.body.style.overflow = 'auto'
-    document.body.style.height = 'auto'
-    document.documentElement.style.overflow = 'auto'
-    document.documentElement.style.height = 'auto'
-    if (root) { root.style.overflow = 'auto'; root.style.height = 'auto' }
-    return () => {
-      document.body.style.overflow = ''
-      document.body.style.height = ''
-      document.documentElement.style.overflow = ''
-      document.documentElement.style.height = ''
-      if (root) { root.style.overflow = ''; root.style.height = '' }
-    }
+    document.documentElement.classList.add('login-page')
+    return () => document.documentElement.classList.remove('login-page')
   }, [])
 
   useEffect(() => {
@@ -1216,8 +1206,6 @@ function LoginPage() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: isMobile ? 'flex-start' : 'center',
-        padding: isMobile ? '24px 20px 90px' : '20px 20px 90px',
       }}>
 
       {/* Globe language picker — top-right corner, dropdown list */}
@@ -1254,7 +1242,7 @@ function LoginPage() {
         )}
       </div>
 
-      <div style={{ width: '100%', maxWidth: 420 }}>
+      <div style={{ width: '100%', maxWidth: 420, padding: isMobile ? '24px 20px 0' : '40px 20px 0', marginTop: 'auto', marginBottom: 'auto' }}>
 
         {/* Hero header — outside the card */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
@@ -1362,12 +1350,12 @@ function LoginPage() {
         </p>
       </div>
 
-      {/* Scroll hint — anchored to bottom of first viewport */}
-      <div style={{ position: 'absolute', bottom: 28, left: '50%', transform: 'translateX(-50%)', textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}
+      {/* Scroll hint — sits at the bottom of the first viewport as a flex child */}
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 28, paddingTop: 16, cursor: 'pointer', userSelect: 'none', flexShrink: 0 }}
         onClick={() => explainerRef.current?.scrollIntoView({ behavior: 'smooth' })}>
         <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.18em', marginBottom: 8 }}>HOW IT WORKS</div>
         <div style={{ display: 'flex', justifyContent: 'center', animation: 'scrollBounce 2s ease-in-out infinite' }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={MUTED2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={MUTED2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </div>
