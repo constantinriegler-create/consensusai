@@ -1214,8 +1214,12 @@ function LoginPage() {
     setTimeout(() => setBarStarted(true), 30)
   }
 
-  // 3 large CSS gradient orbs — no filter:blur, transform-only animation
-  const Particles = () => (
+  // ── Inline JSX variables (NOT inner components) ─────────────────
+  // Inner component functions defined inside a parent re-create on every
+  // render, causing React to unmount+remount → CSS animations restart.
+  // Pre-evaluated JSX variables reconcile in-place → animations survive.
+
+  const particles = (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
       <div style={{ position: 'absolute', top: '-20%', left: '-15%', width: 700, height: 700, borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,197,94,0.1) 0%, transparent 60%)', willChange: 'transform', animation: reducedMotion ? 'none' : 'particleA 22s ease-in-out infinite' }} />
       <div style={{ position: 'absolute', top: '-25%', right: '-18%', width: 650, height: 650, borderRadius: '50%', background: 'radial-gradient(circle, rgba(249,115,22,0.09) 0%, transparent 60%)', willChange: 'transform', animation: reducedMotion ? 'none' : 'particleB 28s ease-in-out infinite 6s' }} />
@@ -1224,42 +1228,34 @@ function LoginPage() {
     </div>
   )
 
-  // Persistent model status strip — the "boot sequence idea" as ambient UI
-  const StatusDots = () => (
+  const statusDots = (
     <div style={{ display: 'flex', gap: 18, alignItems: 'center', marginBottom: 32 }}>
       {MODEL_META.map((m, i) => (
         <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <div style={{
-            width: 6, height: 6, borderRadius: '50%', background: m.color, flexShrink: 0,
-            animation: reducedMotion ? 'none' : `dotPulse 3.2s ease-in-out ${i * 0.8}s infinite`,
-          }} />
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: m.color, flexShrink: 0, animation: reducedMotion ? 'none' : `dotPulse 3.2s ease-in-out ${i * 0.8}s infinite` }} />
           <span style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.04em' }}>{m.label}</span>
         </div>
       ))}
     </div>
   )
 
-  // Confidence bar — scaleX animation + leading glow sweep, re-triggers on hover
-  const ConfidenceBar = ({ mobile = false }) => (
-    <div style={{ marginBottom: mobile ? 14 : 12 }}>
-      <div
-        style={{ position: 'relative', height: mobile ? 7 : 6, borderRadius: 4, overflow: 'hidden', background: BORDER2, cursor: 'default' }}
-        onMouseEnter={replayBar}
-      >
+  const confidenceBarDesktop = (
+    <div style={{ marginBottom: 12 }}>
+      <div style={{ position: 'relative', height: 6, borderRadius: 4, overflow: 'hidden', background: BORDER2, cursor: 'default' }} onMouseEnter={replayBar}>
         {barStarted && (
-          <div key={barKey} style={{ position: 'absolute', inset: 0 }}>
-            <div style={{ display: 'flex', width: '100%', height: '100%', transformOrigin: 'left', animation: `barFill 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards` }}>
+          <div style={{ position: 'absolute', inset: 0 }}>
+            <div style={{ display: 'flex', width: '100%', height: '100%', transformOrigin: 'left', animation: 'barFill 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards' }}>
               <div style={{ flex: 3, background: GREEN }} />
               <div style={{ width: 2, background: BG }} />
               <div style={{ flex: 1, background: YELLOW }} />
               <div style={{ width: 2, background: BG }} />
               <div style={{ flex: 0.5, background: RED }} />
             </div>
-            <div style={{ position: 'absolute', top: 0, bottom: 0, width: 28, left: 0, background: 'rgba(255,255,255,0.42)', borderRadius: 3, animation: `barGlow 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards`, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, bottom: 0, width: 28, left: 0, background: 'rgba(255,255,255,0.42)', borderRadius: 3, animation: 'barGlow 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards', pointerEvents: 'none' }} />
           </div>
         )}
       </div>
-      <div style={{ display: 'flex', gap: mobile ? 14 : 12, marginTop: 6, opacity: barStarted ? 1 : 0, transition: 'opacity 0.5s ease 0.7s', justifyContent: mobile ? 'center' : 'flex-start' }}>
+      <div style={{ display: 'flex', gap: 12, marginTop: 6, opacity: barStarted ? 1 : 0, transition: 'opacity 0.5s ease 0.7s' }}>
         <span style={{ fontSize: 9, fontFamily: 'monospace', color: GREEN }}>● agree</span>
         <span style={{ fontSize: 9, fontFamily: 'monospace', color: YELLOW }}>● partial</span>
         <span style={{ fontSize: 9, fontFamily: 'monospace', color: RED }}>● conflict</span>
@@ -1267,7 +1263,31 @@ function LoginPage() {
     </div>
   )
 
-  const LangPicker = () => (
+  const confidenceBarMobile = (
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ position: 'relative', height: 7, borderRadius: 4, overflow: 'hidden', background: BORDER2, cursor: 'default' }} onMouseEnter={replayBar}>
+        {barStarted && (
+          <div style={{ position: 'absolute', inset: 0 }}>
+            <div style={{ display: 'flex', width: '100%', height: '100%', transformOrigin: 'left', animation: 'barFill 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards' }}>
+              <div style={{ flex: 3, background: GREEN }} />
+              <div style={{ width: 2, background: BG }} />
+              <div style={{ flex: 1, background: YELLOW }} />
+              <div style={{ width: 2, background: BG }} />
+              <div style={{ flex: 0.5, background: RED }} />
+            </div>
+            <div style={{ position: 'absolute', top: 0, bottom: 0, width: 28, left: 0, background: 'rgba(255,255,255,0.42)', borderRadius: 3, animation: 'barGlow 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards', pointerEvents: 'none' }} />
+          </div>
+        )}
+      </div>
+      <div style={{ display: 'flex', gap: 14, marginTop: 6, opacity: barStarted ? 1 : 0, transition: 'opacity 0.5s ease 0.7s', justifyContent: 'center' }}>
+        <span style={{ fontSize: 9, fontFamily: 'monospace', color: GREEN }}>● agree</span>
+        <span style={{ fontSize: 9, fontFamily: 'monospace', color: YELLOW }}>● partial</span>
+        <span style={{ fontSize: 9, fontFamily: 'monospace', color: RED }}>● conflict</span>
+      </div>
+    </div>
+  )
+
+  const langPicker = (
     <div style={{ position: isMobile ? 'fixed' : 'absolute', top: 16, right: 16, zIndex: 30 }}>
       <button
         onClick={() => setLangOpen(o => !o)}
@@ -1302,7 +1322,7 @@ function LoginPage() {
     </div>
   )
 
-  const PitchContent = () => (
+  const pitchContent = (
     <div style={{ animation: reducedMotion ? 'none' : 'pitchReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) both' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
         <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 32, height: 32, borderRadius: 9 }} />
@@ -1316,17 +1336,14 @@ function LoginPage() {
         Stop trusting a single AI that sounds confident even when it's wrong.
         Get four independent perspectives, then one synthesized answer.
       </p>
-
-      {/* Model status strip — ambient indicator, always on */}
-      <StatusDots />
-
+      {statusDots}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
         {[
           { num: '01', title: 'Ask once, get four expert opinions.', body: 'GPT-5.4, Claude, DeepSeek, and Grok each answer independently before any synthesis begins.', visual: null },
           {
             num: '02', title: "See where they agree — and where they don't.",
             body: 'A confidence map shows consensus in green, partial overlap in yellow, conflict in red.',
-            visual: <ConfidenceBar />,
+            visual: confidenceBarDesktop,
           },
           {
             num: '03', title: 'One honest, combined answer.',
@@ -1356,7 +1373,7 @@ function LoginPage() {
     </div>
   )
 
-  const LoginForm = ({ withAnim = false }) => (
+  const loginFormInner = (withAnim) => (
     <div style={{ width: '100%', maxWidth: 420, ...(withAnim && !reducedMotion ? { animation: 'cardReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) both' } : {}) }}>
       {!isMobile && authMode === 'signup' && (
         <h1 style={{ fontSize: 24, fontWeight: 700, color: TEXT, margin: '0 0 20px', fontFamily: 'monospace', letterSpacing: '-0.01em' }}>
@@ -1364,7 +1381,6 @@ function LoginPage() {
         </h1>
       )}
       <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 18, padding: isMobile ? '28px 24px' : '34px 36px', borderTop: `2px solid ${PURPLE}`, transition: 'box-shadow 0.3s' }}>
-        {/* Terminal prompt header */}
         <div style={{ marginBottom: isMobile ? 18 : 26, display: 'flex', alignItems: 'center' }}>
           <span style={{ fontFamily: 'monospace', fontSize: isMobile ? 13 : 17, fontWeight: 700, color: PURPLE }}>
             &gt; {authMode === 'signin' ? 'sign_in' : 'create_account'}
@@ -1441,8 +1457,8 @@ function LoginPage() {
   if (isMobile) {
     return (
       <div style={{ background: BG, minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
-        <Particles />
-        <LangPicker />
+        {particles}
+        {langPicker}
         <div style={{ width: '100%', maxWidth: 420, padding: '44px 20px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 1, animation: reducedMotion ? 'none' : 'pitchReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) both' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, alignSelf: 'flex-start' }}>
             <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 32, height: 32, borderRadius: 9 }} />
@@ -1464,7 +1480,7 @@ function LoginPage() {
               </div>
             </div>
           )}
-          <LoginForm />
+          {loginFormInner(false)}
         </div>
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 28, paddingTop: 20, cursor: 'pointer', userSelect: 'none', flexShrink: 0, position: 'relative', zIndex: 1 }}
           onClick={() => explainerRef.current?.scrollIntoView({ behavior: 'smooth' })}>
@@ -1497,7 +1513,7 @@ function LoginPage() {
                 ref: sec2Ref,
                 title: "See where they agree — and where they don't.",
                 body: 'Green = consensus, yellow = partial, red = conflict.',
-                visual: <ConfidenceBar mobile />,
+                visual: confidenceBarMobile,
               },
               {
                 ref: sec3Ref,
@@ -1530,13 +1546,13 @@ function LoginPage() {
   // ── DESKTOP ──────────────────────────────────────────────────────
   return (
     <div style={{ background: BG, display: 'grid', gridTemplateColumns: '58fr 42fr', minHeight: '100dvh', position: 'relative' }}>
-      <Particles />
+      {particles}
       <div style={{ height: '100dvh', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '60px 56px', borderRight: `1px solid ${BORDER}`, position: 'relative', zIndex: 1 }}>
-        <PitchContent />
+        {pitchContent}
       </div>
       <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 48px', position: 'relative', zIndex: 1 }}>
-        <LangPicker />
-        <LoginForm withAnim />
+        {langPicker}
+        {loginFormInner(true)}
       </div>
     </div>
   )
