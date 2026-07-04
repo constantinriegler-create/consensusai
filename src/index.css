@@ -35,13 +35,13 @@ html.login-page #root {
   overscroll-behavior: auto !important;
 }
 
-/* ── Login page cinematic animations ── */
+/* ── Login page animations (transform/opacity only — compositor-safe) ── */
 @keyframes cursorBlink {
   0%, 100% { opacity: 1 }
   50%       { opacity: 0 }
 }
 @keyframes pitchReveal {
-  from { opacity: 0; transform: translateY(16px) }
+  from { opacity: 0; transform: translateY(14px) }
   to   { opacity: 1; transform: translateY(0) }
 }
 @keyframes cardReveal {
@@ -52,25 +52,34 @@ html.login-page #root {
   0%, 100% { transform: translateY(0) }
   50%      { transform: translateY(8px) }
 }
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.4; transform: scale(1) }
+  50%       { opacity: 1; transform: scale(1.65) }
+}
+@keyframes barFill {
+  from { transform: scaleX(0) }
+  to   { transform: scaleX(1) }
+}
+@keyframes barGlow {
+  0%   { transform: translateX(-30px); opacity: 0 }
+  15%  { opacity: 0.75 }
+  85%  { opacity: 0.4 }
+  100% { transform: translateX(600px); opacity: 0 }
+}
 @keyframes particleA {
   0%, 100% { transform: translate(0, 0) }
-  40%      { transform: translate(120px, 100px) }
-  70%      { transform: translate(50px, 160px) }
+  40%      { transform: translate(110px, 90px) }
+  70%      { transform: translate(45px, 150px) }
 }
 @keyframes particleB {
   0%, 100% { transform: translate(0, 0) }
-  35%      { transform: translate(-90px, 80px) }
-  70%      { transform: translate(-30px, 140px) }
+  35%      { transform: translate(-80px, 75px) }
+  70%      { transform: translate(-25px, 130px) }
 }
 @keyframes particleC {
   0%, 100% { transform: translate(0, 0) }
-  45%      { transform: translate(80px, -70px) }
-  75%      { transform: translate(20px, -130px) }
-}
-@keyframes particleD {
-  0%, 100% { transform: translate(0, 0) }
-  40%      { transform: translate(-70px, -80px) }
-  70%      { transform: translate(-10px, -140px) }
+  45%      { transform: translate(70px, -65px) }
+  75%      { transform: translate(18px, -120px) }
 }
 
 /* ── Theme variables ─────────────────────────────────────────── */

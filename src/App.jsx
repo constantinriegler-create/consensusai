@@ -1109,22 +1109,6 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
 }
     
 
-const BOOT_LINES = [
-  { text: '> VELE AI TERMINAL v1.0', dotColor: null },
-  { text: '> connecting models...', dotColor: null },
-  { text: '> GPT-5.4    ● online', dotColor: '#22c55e' },
-  { text: '> Claude     ● online', dotColor: '#f97316' },
-  { text: '> DeepSeek   ● online', dotColor: '#0ea5e9' },
-  { text: '> Grok       ● online', dotColor: '#e8e8e8' },
-  { text: '> synthesis engine ready_', dotColor: '#a855f7', fullColor: true },
-]
-
-const BOOT_LINES_MOBILE = [
-  { text: '> VELE AI v1.0', dotColor: null },
-  { text: '> 4 models online ●', dotColor: '#a855f7' },
-  { text: '> ready_', dotColor: '#a855f7', fullColor: true },
-]
-
 function LoginPage() {
   const { t, i18n } = useTranslation()
   const [authMode, setAuthMode] = useState('signin')
@@ -1138,6 +1122,7 @@ function LoginPage() {
   const [secVisible, setSecVisible] = useState([false, false, false])
   const [btnHover, setBtnHover] = useState(false)
   const [barStarted, setBarStarted] = useState(false)
+  const [barKey, setBarKey] = useState(0)
 
   const isMobile = window.innerWidth <= 768
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -1147,19 +1132,13 @@ function LoginPage() {
   const sec2Ref = useRef(null)
   const sec3Ref = useRef(null)
 
-  const [bootPhase, setBootPhase] = useState(() => {
-    if (reducedMotion) return 'done'
-    if (localStorage.getItem('vb_boot')) return 'quick'
-    return 'typing'
-  })
-  const [completedLines, setCompletedLines] = useState([])
-  const [typingText, setTypingText] = useState('')
-
+  // Unlock body/root scroll
   useEffect(() => {
     document.documentElement.classList.add('login-page')
     return () => document.documentElement.classList.remove('login-page')
   }, [])
 
+  // IntersectionObserver for mobile scroll cards
   useEffect(() => {
     const refs = [sec1Ref, sec2Ref, sec3Ref]
     const observers = refs.map((ref, i) => {
@@ -1175,71 +1154,10 @@ function LoginPage() {
     return () => observers.forEach(o => o.disconnect())
   }, [])
 
+  // Start confidence bar shortly after mount
   useEffect(() => {
-    if (bootPhase !== 'quick') return
-    const t = setTimeout(() => setBootPhase('done'), 350)
-    return () => clearTimeout(t)
-  }, [])
-
-  useEffect(() => {
-    if (bootPhase !== 'done') return
-    const t = setTimeout(() => setBarStarted(true), isMobile ? 100 : 380)
-    return () => clearTimeout(t)
-  }, [bootPhase])
-
-  useEffect(() => {
-    if (bootPhase !== 'typing') return
-    const lines = isMobile ? BOOT_LINES_MOBILE : BOOT_LINES
-    const cancelled = { current: false }
-    let timeoutId = null
-
-    const delay = (ms) => new Promise(resolve => {
-      timeoutId = setTimeout(() => { if (!cancelled.current) resolve() }, ms)
-    })
-
-    const charDelay = isMobile ? 14 : 20
-    const lineDelay = isMobile ? 90 : 140
-
-    async function runBoot() {
-      await delay(250)
-      for (let li = 0; li < lines.length; li++) {
-        if (cancelled.current) return
-        for (let ci = 1; ci <= lines[li].text.length; ci++) {
-          if (cancelled.current) return
-          await delay(charDelay)
-          if (!cancelled.current) setTypingText(lines[li].text.slice(0, ci))
-        }
-        if (cancelled.current) return
-        await delay(lineDelay)
-        if (!cancelled.current) { setCompletedLines(prev => [...prev, li]); setTypingText('') }
-      }
-      if (cancelled.current) return
-      await delay(480)
-      if (!cancelled.current) setBootPhase('fading')
-      await delay(660)
-      if (!cancelled.current) { setBootPhase('done'); localStorage.setItem('vb_boot', '1') }
-    }
-
-    const skipBoot = () => {
-      if (cancelled.current) return
-      cancelled.current = true
-      clearTimeout(timeoutId)
-      setBootPhase('done')
-      setCompletedLines(lines.map((_, i) => i))
-      setTypingText('')
-      localStorage.setItem('vb_boot', '1')
-    }
-
-    window.addEventListener('keydown', skipBoot, { once: true })
-    window.addEventListener('pointerdown', skipBoot, { once: true })
-    runBoot()
-
-    return () => {
-      cancelled.current = true
-      clearTimeout(timeoutId)
-      window.removeEventListener('keydown', skipBoot)
-      window.removeEventListener('pointerdown', skipBoot)
-    }
+    const timer = setTimeout(() => setBarStarted(true), 320)
+    return () => clearTimeout(timer)
   }, [])
 
   function changeLang(l) {
@@ -1286,33 +1204,74 @@ function LoginPage() {
     background: 'var(--c-input-bg)', color: TEXT, fontSize: 14,
     outline: 'none', boxSizing: 'border-box',
     fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-    transition: 'border-color 0.15s',
+    transition: 'border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1)',
   })
 
-  const lines = isMobile ? BOOT_LINES_MOBILE : BOOT_LINES
-  const bootVisible = bootPhase === 'typing' || bootPhase === 'fading'
-
-  function renderBootLine(line, text) {
-    const content = text !== undefined ? text : line.text
-    if (line.fullColor) return <span style={{ color: line.dotColor || PURPLE }}>{content}</span>
-    if (line.dotColor && text === undefined) {
-      const di = line.text.indexOf('●')
-      if (di >= 0) return (
-        <>
-          <span style={{ color: MUTED }}>{line.text.slice(0, di)}</span>
-          <span style={{ color: line.dotColor }}>●</span>
-          <span style={{ color: MUTED }}>{line.text.slice(di + 1)}</span>
-        </>
-      )
-    }
-    return <span style={{ color: MUTED }}>{content}</span>
+  // Replay bar animation on hover
+  const replayBar = () => {
+    if (!barStarted || reducedMotion) return
+    setBarStarted(false)
+    setTimeout(() => setBarStarted(true), 30)
   }
+
+  // 3 large CSS gradient orbs — no filter:blur, transform-only animation
+  const Particles = () => (
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+      <div style={{ position: 'absolute', top: '-20%', left: '-15%', width: 700, height: 700, borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,197,94,0.1) 0%, transparent 60%)', willChange: 'transform', animation: reducedMotion ? 'none' : 'particleA 22s ease-in-out infinite' }} />
+      <div style={{ position: 'absolute', top: '-25%', right: '-18%', width: 650, height: 650, borderRadius: '50%', background: 'radial-gradient(circle, rgba(249,115,22,0.09) 0%, transparent 60%)', willChange: 'transform', animation: reducedMotion ? 'none' : 'particleB 28s ease-in-out infinite 6s' }} />
+      <div style={{ position: 'absolute', bottom: '-22%', left: '-12%', width: 620, height: 620, borderRadius: '50%', background: 'radial-gradient(circle, rgba(14,165,233,0.08) 0%, transparent 60%)', willChange: 'transform', animation: reducedMotion ? 'none' : 'particleC 24s ease-in-out infinite 12s' }} />
+      <div style={{ position: 'absolute', top: '50%', left: isMobile ? '50%' : '30%', transform: 'translate(-50%, -50%)', width: 520, height: 520, borderRadius: '50%', background: 'radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 58%)' }} />
+    </div>
+  )
+
+  // Persistent model status strip — the "boot sequence idea" as ambient UI
+  const StatusDots = () => (
+    <div style={{ display: 'flex', gap: 18, alignItems: 'center', marginBottom: 32 }}>
+      {MODEL_META.map((m, i) => (
+        <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <div style={{
+            width: 6, height: 6, borderRadius: '50%', background: m.color, flexShrink: 0,
+            animation: reducedMotion ? 'none' : `dotPulse 3.2s ease-in-out ${i * 0.8}s infinite`,
+          }} />
+          <span style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED, letterSpacing: '0.04em' }}>{m.label}</span>
+        </div>
+      ))}
+    </div>
+  )
+
+  // Confidence bar — scaleX animation + leading glow sweep, re-triggers on hover
+  const ConfidenceBar = ({ mobile = false }) => (
+    <div style={{ marginBottom: mobile ? 14 : 12 }}>
+      <div
+        style={{ position: 'relative', height: mobile ? 7 : 6, borderRadius: 4, overflow: 'hidden', background: BORDER2, cursor: 'default' }}
+        onMouseEnter={replayBar}
+      >
+        {barStarted && (
+          <div key={barKey} style={{ position: 'absolute', inset: 0 }}>
+            <div style={{ display: 'flex', width: '100%', height: '100%', transformOrigin: 'left', animation: `barFill 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards` }}>
+              <div style={{ flex: 3, background: GREEN }} />
+              <div style={{ width: 2, background: BG }} />
+              <div style={{ flex: 1, background: YELLOW }} />
+              <div style={{ width: 2, background: BG }} />
+              <div style={{ flex: 0.5, background: RED }} />
+            </div>
+            <div style={{ position: 'absolute', top: 0, bottom: 0, width: 28, left: 0, background: 'rgba(255,255,255,0.42)', borderRadius: 3, animation: `barGlow 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards`, pointerEvents: 'none' }} />
+          </div>
+        )}
+      </div>
+      <div style={{ display: 'flex', gap: mobile ? 14 : 12, marginTop: 6, opacity: barStarted ? 1 : 0, transition: 'opacity 0.5s ease 0.7s', justifyContent: mobile ? 'center' : 'flex-start' }}>
+        <span style={{ fontSize: 9, fontFamily: 'monospace', color: GREEN }}>● agree</span>
+        <span style={{ fontSize: 9, fontFamily: 'monospace', color: YELLOW }}>● partial</span>
+        <span style={{ fontSize: 9, fontFamily: 'monospace', color: RED }}>● conflict</span>
+      </div>
+    </div>
+  )
 
   const LangPicker = () => (
     <div style={{ position: isMobile ? 'fixed' : 'absolute', top: 16, right: 16, zIndex: 30 }}>
       <button
         onClick={() => setLangOpen(o => !o)}
-        style={{ background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 8, color: MUTED, padding: '7px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color 0.15s' }}
+        style={{ background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 8, color: MUTED, padding: '7px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color 0.2s' }}
         onMouseEnter={e => e.currentTarget.style.borderColor = MUTED}
         onMouseLeave={e => e.currentTarget.style.borderColor = BORDER}
       >
@@ -1329,7 +1288,7 @@ function LoginPage() {
               { value: 'es', label: 'Español' },
             ].map((opt, idx, arr) => (
               <button key={opt.value} onClick={() => { changeLang(opt.value); setLangOpen(false) }}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: lang === opt.value ? `${PURPLE}15` : 'transparent', border: 'none', borderBottom: idx < arr.length - 1 ? `1px solid ${BORDER}` : 'none', color: lang === opt.value ? PURPLE : TEXT, fontFamily: 'monospace', fontSize: 12, cursor: 'pointer', textAlign: 'left', transition: 'background 0.1s' }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: lang === opt.value ? `${PURPLE}15` : 'transparent', border: 'none', borderBottom: idx < arr.length - 1 ? `1px solid ${BORDER}` : 'none', color: lang === opt.value ? PURPLE : TEXT, fontFamily: 'monospace', fontSize: 12, cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s' }}
                 onMouseEnter={e => { if (lang !== opt.value) e.currentTarget.style.background = CARD }}
                 onMouseLeave={e => { if (lang !== opt.value) e.currentTarget.style.background = 'transparent' }}
               >
@@ -1343,94 +1302,37 @@ function LoginPage() {
     </div>
   )
 
-  const Particles = () => (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-      <div style={{ position: 'absolute', top: '-15%', left: '-10%', width: 560, height: 560, borderRadius: '50%', background: 'radial-gradient(circle, #22c55e, transparent 65%)', filter: 'blur(50px)', opacity: 0.055, animation: reducedMotion ? 'none' : 'particleA 22s ease-in-out infinite' }} />
-      <div style={{ position: 'absolute', top: '-20%', right: '-12%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, #f97316, transparent 65%)', filter: 'blur(50px)', opacity: 0.05, animation: reducedMotion ? 'none' : 'particleB 28s ease-in-out infinite 4s' }} />
-      <div style={{ position: 'absolute', bottom: '-18%', left: '-8%', width: 520, height: 520, borderRadius: '50%', background: 'radial-gradient(circle, #0ea5e9, transparent 65%)', filter: 'blur(50px)', opacity: 0.05, animation: reducedMotion ? 'none' : 'particleC 25s ease-in-out infinite 9s' }} />
-      <div style={{ position: 'absolute', bottom: '-20%', right: '-10%', width: 460, height: 460, borderRadius: '50%', background: 'radial-gradient(circle, #aaaaaa, transparent 65%)', filter: 'blur(50px)', opacity: 0.03, animation: reducedMotion ? 'none' : 'particleD 30s ease-in-out infinite 14s' }} />
-      <div style={{ position: 'absolute', top: '50%', left: isMobile ? '50%' : '30%', transform: 'translate(-50%, -50%)', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, #a855f7, transparent 65%)', filter: 'blur(70px)', opacity: 0.05 }} />
-    </div>
-  )
-
-  const BootDisplay = () => (
-    <div style={{ opacity: bootPhase === 'fading' ? 0 : 1, transition: 'opacity 0.65s ease', fontFamily: 'monospace', fontSize: isMobile ? 13 : 14, lineHeight: 1.9 }}>
-      {completedLines.map(li => (
-        <div key={li}>{renderBootLine(lines[li])}</div>
-      ))}
-      {typingText && (
-        <div>
-          {renderBootLine(lines[completedLines.length], typingText)}
-          <span style={{ display: 'inline-block', width: 8, height: '0.9em', background: PURPLE, verticalAlign: 'text-bottom', marginLeft: 1, animation: reducedMotion ? 'none' : 'cursorBlink 0.85s step-end infinite' }} />
-        </div>
-      )}
-      {!typingText && bootPhase === 'typing' && completedLines.length < lines.length && (
-        <div>
-          <span style={{ display: 'inline-block', width: 8, height: '0.9em', background: PURPLE, verticalAlign: 'text-bottom', animation: reducedMotion ? 'none' : 'cursorBlink 0.85s step-end infinite' }} />
-        </div>
-      )}
-    </div>
-  )
-
   const PitchContent = () => (
-    <div style={{ animation: reducedMotion ? 'none' : 'pitchReveal 0.7s ease forwards' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 36 }}>
-        <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 32, height: 32, borderRadius: 9, boxShadow: `0 0 20px ${PURPLE}30` }} />
+    <div style={{ animation: reducedMotion ? 'none' : 'pitchReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) both' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
+        <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 32, height: 32, borderRadius: 9 }} />
         <div style={{ fontSize: 13, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.25em', fontWeight: 700 }}>VELE AI</div>
       </div>
-      <h1 style={{ fontSize: 36, fontWeight: 800, color: TEXT, margin: '0 0 20px', letterSpacing: '-0.025em', lineHeight: 1.15, maxWidth: 460, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
+      <h1 style={{ fontSize: 36, fontWeight: 800, color: TEXT, margin: '0 0 18px', letterSpacing: '-0.025em', lineHeight: 1.15, maxWidth: 460, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
         4 AI models answer simultaneously.{' '}
         <span style={{ color: PURPLE }}>One honest answer.</span>
       </h1>
-      <p style={{ fontSize: 15, color: 'var(--c-readable)', lineHeight: 1.65, margin: '0 0 36px', maxWidth: 420, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
+      <p style={{ fontSize: 15, color: 'var(--c-readable)', lineHeight: 1.65, margin: '0 0 32px', maxWidth: 420, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
         Stop trusting a single AI that sounds confident even when it's wrong.
         Get four independent perspectives, then one synthesized answer.
       </p>
-      {authMode === 'signin' && (
-        <>
-          <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-start', flexWrap: 'wrap', marginBottom: 8 }}>
-            {MODEL_META.map(m => (
-              <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: CARD, border: `1px solid ${BORDER2}` }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
-                <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--c-readable)', letterSpacing: '0.04em' }}>{m.label}</span>
-              </div>
-            ))}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 20, background: `${PURPLE}15`, border: `1px solid ${PURPLE}40` }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: PURPLE, flexShrink: 0 }} />
-              <span style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.04em' }}>One clear answer</span>
-            </div>
-          </div>
-          <p style={{ fontSize: 11, color: MUTED2, fontFamily: 'monospace', letterSpacing: '0.04em', margin: '0 0 36px' }}>Your question goes to all four at once.</p>
-        </>
-      )}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+      {/* Model status strip — ambient indicator, always on */}
+      <StatusDots />
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
         {[
           { num: '01', title: 'Ask once, get four expert opinions.', body: 'GPT-5.4, Claude, DeepSeek, and Grok each answer independently before any synthesis begins.', visual: null },
           {
             num: '02', title: "See where they agree — and where they don't.",
             body: 'A confidence map shows consensus in green, partial overlap in yellow, conflict in red.',
-            visual: (
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ height: 6, borderRadius: 3, overflow: 'hidden', display: 'flex', marginBottom: 7, width: barStarted ? '100%' : '0%', transition: 'width 1.4s ease' }}>
-                  <div style={{ flex: 3, background: GREEN }} />
-                  <div style={{ width: 2, background: BG }} />
-                  <div style={{ flex: 1, background: YELLOW }} />
-                  <div style={{ width: 2, background: BG }} />
-                  <div style={{ flex: 0.5, background: RED }} />
-                </div>
-                <div style={{ display: 'flex', gap: 12, opacity: barStarted ? 1 : 0, transition: 'opacity 0.5s ease 0.9s' }}>
-                  <span style={{ fontSize: 9, fontFamily: 'monospace', color: GREEN }}>● agree</span>
-                  <span style={{ fontSize: 9, fontFamily: 'monospace', color: YELLOW }}>● partial</span>
-                  <span style={{ fontSize: 9, fontFamily: 'monospace', color: RED }}>● conflict</span>
-                </div>
-              </div>
-            ),
+            visual: <ConfidenceBar />,
           },
           {
             num: '03', title: 'One honest, combined answer.',
             body: 'All perspectives synthesized into one clear answer — sourced and transparent.',
             visual: (
-              <div style={{ display: 'flex', marginBottom: 12 }}>
+              <div style={{ display: 'flex', marginBottom: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: `${PURPLE}15`, border: `1px solid ${PURPLE}40` }}>
                   <div style={{ width: 5, height: 5, borderRadius: '50%', background: PURPLE, flexShrink: 0 }} />
                   <span style={{ fontSize: 9, fontFamily: 'monospace', color: PURPLE }}>Synthesis</span>
@@ -1439,7 +1341,9 @@ function LoginPage() {
             ),
           },
         ].map(({ num, title, body, visual }) => (
-          <div key={num} style={{ display: 'flex', gap: 16, padding: '18px 20px', background: CARD, borderRadius: 12, border: `1px solid ${BORDER2}` }}>
+          <div key={num} style={{ display: 'flex', gap: 16, padding: '17px 20px', background: CARD, borderRadius: 12, border: `1px solid ${BORDER2}`, transition: 'border-color 0.25s' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = `${PURPLE}30`}
+            onMouseLeave={e => e.currentTarget.style.borderColor = BORDER2}>
             <div style={{ fontSize: 10, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.1em', marginTop: 2, flexShrink: 0 }}>{num}</div>
             <div style={{ flex: 1 }}>
               {visual}
@@ -1453,13 +1357,14 @@ function LoginPage() {
   )
 
   const LoginForm = ({ withAnim = false }) => (
-    <div style={{ width: '100%', maxWidth: 420, ...(withAnim && !reducedMotion ? { animation: 'cardReveal 0.65s ease 0.15s both' } : {}) }}>
+    <div style={{ width: '100%', maxWidth: 420, ...(withAnim && !reducedMotion ? { animation: 'cardReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) both' } : {}) }}>
       {!isMobile && authMode === 'signup' && (
         <h1 style={{ fontSize: 24, fontWeight: 700, color: TEXT, margin: '0 0 20px', fontFamily: 'monospace', letterSpacing: '-0.01em' }}>
           {t('createAccount')}
         </h1>
       )}
-      <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 18, padding: isMobile ? '28px 24px' : '34px 36px', borderTop: `2px solid ${PURPLE}`, boxShadow: withAnim ? `0 0 60px ${PURPLE}06` : 'none' }}>
+      <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 18, padding: isMobile ? '28px 24px' : '34px 36px', borderTop: `2px solid ${PURPLE}`, transition: 'box-shadow 0.3s' }}>
+        {/* Terminal prompt header */}
         <div style={{ marginBottom: isMobile ? 18 : 26, display: 'flex', alignItems: 'center' }}>
           <span style={{ fontFamily: 'monospace', fontSize: isMobile ? 13 : 17, fontWeight: 700, color: PURPLE }}>
             &gt; {authMode === 'signin' ? 'sign_in' : 'create_account'}
@@ -1488,9 +1393,11 @@ function LoginPage() {
               disabled={!!loading} style={inputStyle('password')} />
           </div>
           <button type="submit" disabled={!!loading}
-            style={{ width: '100%', padding: '13px', borderRadius: 10, background: loading ? MUTED2 : PURPLE, border: 'none', color: '#fff', fontSize: 14, fontWeight: 600, cursor: loading ? 'default' : 'pointer', letterSpacing: '0.04em', transition: 'opacity 0.15s', fontFamily: 'monospace' }}
-            onMouseEnter={e => { if (!loading) { setBtnHover(true); e.currentTarget.style.opacity = '0.88' } }}
-            onMouseLeave={e => { setBtnHover(false); e.currentTarget.style.opacity = '1' }}>
+            style={{ width: '100%', padding: '13px', borderRadius: 10, background: loading ? MUTED2 : PURPLE, border: 'none', color: '#fff', fontSize: 14, fontWeight: 600, cursor: loading ? 'default' : 'pointer', letterSpacing: '0.04em', transition: 'opacity 0.2s, transform 0.15s', fontFamily: 'monospace' }}
+            onMouseEnter={e => { if (!loading) { setBtnHover(true); e.currentTarget.style.opacity = '0.88'; e.currentTarget.style.transform = 'translateY(-1px)' } }}
+            onMouseLeave={e => { setBtnHover(false); e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)' }}
+            onMouseDown={e => { e.currentTarget.style.transform = 'translateY(1px)' }}
+            onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-1px)' }}>
             {loading === 'email'
               ? (authMode === 'signup' ? t('creatingAccount') : t('signingIn'))
               : (btnHover && authMode === 'signin' ? '> authenticate_' : (authMode === 'signup' ? t('createAccountBtn') : t('signInBtn')))
@@ -1503,9 +1410,11 @@ function LoginPage() {
           <div style={{ flex: 1, height: 1, background: BORDER }} />
         </div>
         <button onClick={handleGoogleLogin} disabled={!!loading}
-          style={{ width: '100%', padding: '12px', borderRadius: 10, background: loading ? MUTED2 : '#fff', border: 'none', color: '#000', fontSize: 14, fontWeight: 600, cursor: loading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'opacity 0.15s' }}
-          onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = '0.85' }}
-          onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+          style={{ width: '100%', padding: '12px', borderRadius: 10, background: loading ? MUTED2 : '#fff', border: 'none', color: '#000', fontSize: 14, fontWeight: 600, cursor: loading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'opacity 0.2s, transform 0.15s' }}
+          onMouseEnter={e => { if (!loading) { e.currentTarget.style.opacity = '0.88'; e.currentTarget.style.transform = 'translateY(-1px)' } }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)' }}
+          onMouseDown={e => { e.currentTarget.style.transform = 'translateY(1px)' }}
+          onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-1px)' }}>
           <svg width="18" height="18" viewBox="0 0 48 48">
             <path fill="#4285F4" d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.2 7.3-10.5 7.3-17.3z"/>
             <path fill="#34A853" d="M24 48c6.6 0 12.2-2.2 16.2-5.9l-7.9-6c-2.2 1.5-5 2.3-8.3 2.3-6.4 0-11.8-4.3-13.7-10.1H2.1v6.2C6.1 42.6 14.5 48 24 48z"/>
@@ -1519,7 +1428,7 @@ function LoginPage() {
         {authMode === 'signup' ? t('alreadyHaveAccount') : t('noAccount')}{' '}
         <button
           onClick={() => { setAuthMode(authMode === 'signup' ? 'signin' : 'signup'); setError(null) }}
-          style={{ background: 'none', border: 'none', color: PURPLE, cursor: 'pointer', padding: 0, fontSize: 13, fontWeight: 600, transition: 'opacity 0.15s', fontFamily: 'monospace' }}
+          style={{ background: 'none', border: 'none', color: PURPLE, cursor: 'pointer', padding: 0, fontSize: 13, fontWeight: 600, transition: 'opacity 0.2s', fontFamily: 'monospace' }}
           onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
           onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
           {authMode === 'signup' ? t('signInBtn') : t('signUpLink')} →
@@ -1534,29 +1443,17 @@ function LoginPage() {
       <div style={{ background: BG, minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
         <Particles />
         <LangPicker />
-        <div style={{ width: '100%', maxWidth: 420, padding: '44px 20px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-          <div style={{ width: '100%', marginBottom: 24, minHeight: 96 }}>
-            {bootVisible
-              ? <BootDisplay />
-              : (
-                <div style={{ animation: reducedMotion ? 'none' : 'pitchReveal 0.5s ease forwards' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                    <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 36, height: 36, borderRadius: 10, boxShadow: `0 0 16px ${PURPLE}30` }} />
-                    <div style={{ fontSize: 13, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.25em', fontWeight: 700 }}>VELE AI</div>
-                  </div>
-                  <p style={{ color: 'var(--c-readable)', fontSize: 14, lineHeight: 1.6, margin: 0, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
-                    {authMode === 'signup' ? t('signUpSubtitle') : t('signInSubtitle')}
-                  </p>
-                </div>
-              )
-            }
+        <div style={{ width: '100%', maxWidth: 420, padding: '44px 20px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 1, animation: reducedMotion ? 'none' : 'pitchReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) both' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, alignSelf: 'flex-start' }}>
+            <img src="/android-chrome-192x192.png" alt="VELE AI" style={{ width: 32, height: 32, borderRadius: 9 }} />
+            <div style={{ fontSize: 13, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.25em', fontWeight: 700 }}>VELE AI</div>
           </div>
-          {!bootVisible && authMode === 'signin' && (
-            <div style={{ width: '100%', marginBottom: 20, animation: reducedMotion ? 'none' : 'pitchReveal 0.5s ease 0.1s both' }}>
-              <div style={{ display: 'flex', gap: 5, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 6 }}>
-                {MODEL_META.map(m => (
+          {authMode === 'signin' && (
+            <div style={{ width: '100%', marginBottom: 18 }}>
+              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 5 }}>
+                {MODEL_META.map((m, i) => (
                   <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 9px', borderRadius: 20, background: CARD, border: `1px solid ${BORDER2}` }}>
-                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
+                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: m.color, flexShrink: 0, animation: reducedMotion ? 'none' : `dotPulse 3.2s ease-in-out ${i * 0.8}s infinite` }} />
                     <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--c-readable)' }}>{m.label}</span>
                   </div>
                 ))}
@@ -1569,17 +1466,15 @@ function LoginPage() {
           )}
           <LoginForm />
         </div>
-        {!bootVisible && (
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 28, paddingTop: 20, cursor: 'pointer', userSelect: 'none', flexShrink: 0, position: 'relative', zIndex: 1 }}
-            onClick={() => explainerRef.current?.scrollIntoView({ behavior: 'smooth' })}>
-            <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.18em', marginBottom: 6 }}>HOW IT WORKS</div>
-            <div style={{ display: 'flex', justifyContent: 'center', animation: reducedMotion ? 'none' : 'scrollBounce 2s ease-in-out infinite' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={MUTED2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9"/>
-              </svg>
-            </div>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 28, paddingTop: 20, cursor: 'pointer', userSelect: 'none', flexShrink: 0, position: 'relative', zIndex: 1 }}
+          onClick={() => explainerRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+          <div style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED2, letterSpacing: '0.18em', marginBottom: 6 }}>HOW IT WORKS</div>
+          <div style={{ display: 'flex', justifyContent: 'center', animation: reducedMotion ? 'none' : 'scrollBounce 2s ease-in-out infinite' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={MUTED2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
           </div>
-        )}
+        </div>
         <div ref={explainerRef} style={{ padding: '60px 20px 80px', width: '100%', position: 'relative', zIndex: 1 }}>
           <div style={{ maxWidth: 420, margin: '0 auto' }}>
             {[
@@ -1588,7 +1483,7 @@ function LoginPage() {
                 title: 'Ask once, get four expert opinions.',
                 body: 'Your question reaches GPT-5.4, Claude, DeepSeek, and Grok simultaneously — each answers independently.',
                 visual: (
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 14 }}>
+                  <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 14 }}>
                     {MODEL_META.map(m => (
                       <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: CARD, border: `1px solid ${BORDER2}` }}>
                         <div style={{ width: 5, height: 5, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
@@ -1602,22 +1497,7 @@ function LoginPage() {
                 ref: sec2Ref,
                 title: "See where they agree — and where they don't.",
                 body: 'Green = consensus, yellow = partial, red = conflict.',
-                visual: (
-                  <div style={{ marginBottom: 14 }}>
-                    <div style={{ height: 7, borderRadius: 4, overflow: 'hidden', display: 'flex', marginBottom: 7, width: secVisible[1] ? '100%' : '0%', transition: 'width 1.4s ease 0.2s' }}>
-                      <div style={{ flex: 3, background: GREEN }} />
-                      <div style={{ width: 2, background: BG }} />
-                      <div style={{ flex: 1, background: YELLOW }} />
-                      <div style={{ width: 2, background: BG }} />
-                      <div style={{ flex: 0.5, background: RED }} />
-                    </div>
-                    <div style={{ display: 'flex', gap: 14, justifyContent: 'center', opacity: secVisible[1] ? 1 : 0, transition: 'opacity 0.5s ease 0.9s' }}>
-                      <span style={{ fontSize: 9, fontFamily: 'monospace', color: GREEN }}>● agree</span>
-                      <span style={{ fontSize: 9, fontFamily: 'monospace', color: YELLOW }}>● partial</span>
-                      <span style={{ fontSize: 9, fontFamily: 'monospace', color: RED }}>● conflict</span>
-                    </div>
-                  </div>
-                ),
+                visual: <ConfidenceBar mobile />,
               },
               {
                 ref: sec3Ref,
@@ -1633,7 +1513,7 @@ function LoginPage() {
                 ),
               },
             ].map(({ ref, title, body, visual }, i) => (
-              <div key={i} ref={ref} style={{ marginBottom: i < 2 ? 40 : 0, opacity: secVisible[i] ? 1 : 0, transform: secVisible[i] ? 'translateY(0)' : 'translateY(24px)', transition: `opacity 0.6s ease ${i * 0.1}s, transform 0.6s ease ${i * 0.1}s` }}>
+              <div key={i} ref={ref} style={{ marginBottom: i < 2 ? 40 : 0, opacity: secVisible[i] ? 1 : 0, transform: secVisible[i] ? 'translateY(0)' : 'translateY(22px)', transition: `opacity 0.55s ease ${i * 0.08}s, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) ${i * 0.08}s` }}>
                 <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 12, padding: '18px 16px', borderLeft: `3px solid ${PURPLE}40` }}>
                   {visual}
                   <h3 style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: '0 0 6px', lineHeight: 1.3, fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>{title}</h3>
@@ -1652,7 +1532,7 @@ function LoginPage() {
     <div style={{ background: BG, display: 'grid', gridTemplateColumns: '58fr 42fr', minHeight: '100dvh', position: 'relative' }}>
       <Particles />
       <div style={{ height: '100dvh', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '60px 56px', borderRight: `1px solid ${BORDER}`, position: 'relative', zIndex: 1 }}>
-        {bootVisible ? <BootDisplay /> : <PitchContent />}
+        <PitchContent />
       </div>
       <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 48px', position: 'relative', zIndex: 1 }}>
         <LangPicker />
