@@ -35,6 +35,44 @@ html.login-page #root {
   overscroll-behavior: auto !important;
 }
 
+/* ── Login page cinematic animations ── */
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1 }
+  50%       { opacity: 0 }
+}
+@keyframes pitchReveal {
+  from { opacity: 0; transform: translateY(16px) }
+  to   { opacity: 1; transform: translateY(0) }
+}
+@keyframes cardReveal {
+  from { opacity: 0; transform: translateY(10px) }
+  to   { opacity: 1; transform: translateY(0) }
+}
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0) }
+  50%      { transform: translateY(8px) }
+}
+@keyframes particleA {
+  0%, 100% { transform: translate(0, 0) }
+  40%      { transform: translate(120px, 100px) }
+  70%      { transform: translate(50px, 160px) }
+}
+@keyframes particleB {
+  0%, 100% { transform: translate(0, 0) }
+  35%      { transform: translate(-90px, 80px) }
+  70%      { transform: translate(-30px, 140px) }
+}
+@keyframes particleC {
+  0%, 100% { transform: translate(0, 0) }
+  45%      { transform: translate(80px, -70px) }
+  75%      { transform: translate(20px, -130px) }
+}
+@keyframes particleD {
+  0%, 100% { transform: translate(0, 0) }
+  40%      { transform: translate(-70px, -80px) }
+  70%      { transform: translate(-10px, -140px) }
+}
+
 /* ── Theme variables ─────────────────────────────────────────── */
 :root {
   --c-bg: #080808; --c-surface: #0f0f0f; --c-surface-deep: #0a0a0a;
