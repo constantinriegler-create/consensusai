@@ -31,6 +31,11 @@ const YELLOW = '#eab308'
 const RED = '#ef4444'
 const PURPLE = '#a855f7'
 const LITE = '#0ea5e9'
+const LIME = '#a3e635'
+
+// Alpha-blends a color (hex literal or var() reference) toward transparent — needed because
+// CSS vars like `var(--c-amber)` can't take a hex alpha suffix the way `${PURPLE}30` can.
+const tint = (color, pct) => `color-mix(in srgb, ${color} ${pct}%, transparent)`
 
 const MODEL_META = [
   { key: 'openai', label: 'GPT-5.4', color: '#10a37f' },
@@ -346,11 +351,24 @@ function DebateHistory({ rounds }) {
 function FeatureCard({ feature, isMobile }) {
   const [open, setOpen] = useState(false)
   const [hovered, setHovered] = useState(false)
+  const c = feature.color || AMBER
+  const active = open || hovered
   return (
     <div onClick={() => setOpen(!open)} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      style={{ background: open ? CARD : hovered ? CARD : SURFACE, border: `1px solid ${open ? BORDER : BORDER2}`, borderRadius: 10, padding: isMobile ? '10px 11px' : '14px 16px', borderLeft: `2px solid ${open ? AMBER : 'var(--c-amber-a30)'}`, cursor: 'pointer', transition: 'all 0.15s', gridColumn: open ? 'span 2' : 'span 1' }}>
+      style={{
+        background: 'var(--glass-bg)',
+        border: `1px solid ${active ? tint(c, 35) : 'var(--glass-border)'}`,
+        borderRadius: 10,
+        padding: isMobile ? '10px 11px' : '14px 16px',
+        borderLeft: `2px solid ${active ? c : tint(c, 45)}`,
+        cursor: 'pointer',
+        transition: 'transform 0.2s cubic-bezier(0.4,0,0.2,1), border-color 0.2s ease, box-shadow 0.2s ease',
+        transform: active && !isMobile ? 'translateY(-2px)' : 'translateY(0)',
+        boxShadow: active ? `0 10px 28px ${tint(c, 20)}` : 'none',
+        gridColumn: open ? 'span 2' : 'span 1',
+      }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: open ? 8 : 4 }}>
-        <div style={{ fontSize: isMobile ? 9 : 11, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.06em', lineHeight: 1.3 }}>{feature.label.toUpperCase()}</div>
+        <div style={{ fontSize: isMobile ? 9 : 11, fontFamily: 'monospace', color: c, letterSpacing: '0.06em', lineHeight: 1.3 }}>{feature.label.toUpperCase()}</div>
         <div style={{ fontSize: 9, color: MUTED2, fontFamily: 'monospace', flexShrink: 0, marginLeft: 4 }}>{open ? '▲' : '▼'}</div>
       </div>
       <div style={{ fontSize: isMobile ? 11 : 12, color: MUTED, lineHeight: 1.45, marginBottom: open ? 10 : 0, overflow: open ? 'visible' : 'hidden', display: open ? 'block' : '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{feature.desc}</div>
@@ -1632,10 +1650,10 @@ export default function App() {
   const { t, i18n } = useTranslation()
 
   const FEATURE_DETAILS = [
-    { label: t('multiModel'), desc: t('multiModelDesc'), detail: t('multiModelDetail') },
-    { label: t('consensusFeature'), desc: t('consensusDesc'), detail: t('consensusDetail') },
-    { label: t('debate'), desc: t('debateDesc'), detail: t('debateDetail') },
-    { label: t('transparency'), desc: t('transparencyDesc'), detail: t('transparencyDetail') },
+    { label: t('multiModel'), desc: t('multiModelDesc'), detail: t('multiModelDetail'), color: GREEN },
+    { label: t('consensusFeature'), desc: t('consensusDesc'), detail: t('consensusDetail'), color: LIME },
+    { label: t('debate'), desc: t('debateDesc'), detail: t('debateDetail'), color: PURPLE },
+    { label: t('transparency'), desc: t('transparencyDesc'), detail: t('transparencyDetail'), color: AMBER },
   ]
 
   const [user, setUser] = useState(null)
@@ -2121,6 +2139,7 @@ useEffect(() => {
             <div style={orbStyle('10%', '10%', 'orb1 15s')} />
             <div style={orbStyle('40%', '60%', 'orb2 18s')} />
             <div style={orbStyle('70%', '20%', 'orb3 12s')} />
+            <div style={orbStyle('5%', '75%', 'orb4 24s')} />
           </>)
         })()}
       </div>
@@ -2701,19 +2720,45 @@ useEffect(() => {
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '48px 0', position: 'relative' }}>
           {messages.length === 0 && !loading && (
-            <div style={{ maxWidth: 600, margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px', position: 'relative', zIndex: 1 }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 16 }}>{t('terminal')}</div>
-              <div style={{ fontSize: isMobile ? 26 : 36, fontWeight: 700, color: TEXT, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 12 }}>
+            <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ maxWidth: 600, margin: '0 auto', width: '100%', padding: isMobile ? '0 16px' : '0 32px', position: 'relative', zIndex: 1, boxSizing: 'border-box' }}>
+              <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 14 }}>{t('terminal')}</div>
+              <div style={{
+                fontSize: isMobile ? 26 : 36, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 12,
+                backgroundImage: 'linear-gradient(100deg, var(--c-text) 35%, #c9aaff 50%, var(--c-text) 65%)',
+                backgroundSize: '250% auto', backgroundPosition: '0% 50%',
+                color: 'transparent', WebkitBackgroundClip: 'text', backgroundClip: 'text',
+                animation: 'nameShimmer 6s ease-in-out infinite',
+              }}>
                 {getGreeting(t)}{name ? `, ${name}` : ''}.
               </div>
-              <div style={{ fontSize: 15, color: MUTED, marginBottom: mode === 'premium' ? 16 : 48, lineHeight: 1.7 }}>
-                <div>{mode === 'premium' ? t('subtitlePremium') : mode === 'lite' ? t('subtitleLite') : t('subtitleStandard')}</div>
-                {credits.lite_credits > 0 && <div style={{ color: LITE }}>{t('liteQueriesRemaining', { count: credits.lite_credits, unit: credits.lite_credits === 1 ? t('query') : t('queries') })}</div>}
-                {credits.standard_credits > 0 && <div style={{ color: GREEN }}>{t('standardQueriesRemaining', { count: credits.standard_credits, unit: credits.standard_credits === 1 ? t('query') : t('queries') })}</div>}
-                {credits.premium_credits > 0 && <div style={{ color: PURPLE }}>{t('premiumQueriesRemaining', { count: credits.premium_credits, unit: credits.premium_credits === 1 ? t('query') : t('queries') })}</div>}
+              <div style={{ fontSize: 15, color: MUTED, marginBottom: 14, lineHeight: 1.7 }}>
+                {mode === 'premium' ? t('subtitlePremium') : mode === 'lite' ? t('subtitleLite') : t('subtitleStandard')}
               </div>
+              {(credits.lite_credits > 0 || credits.standard_credits > 0 || credits.premium_credits > 0) && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: mode === 'premium' ? 14 : 28 }}>
+                  {credits.lite_credits > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 12px', borderRadius: 999, background: 'var(--glass-bg)', border: `1px solid ${LITE}45`, boxShadow: `0 0 18px ${LITE}28`, fontSize: 11, fontFamily: 'monospace', color: LITE }}>
+                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: LITE, boxShadow: `0 0 6px ${LITE}`, flexShrink: 0 }} />
+                      {t('liteQueriesRemaining', { count: credits.lite_credits, unit: credits.lite_credits === 1 ? t('query') : t('queries') })}
+                    </div>
+                  )}
+                  {credits.standard_credits > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 12px', borderRadius: 999, background: 'var(--glass-bg)', border: `1px solid ${GREEN}45`, boxShadow: `0 0 18px ${GREEN}28`, fontSize: 11, fontFamily: 'monospace', color: GREEN }}>
+                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: GREEN, boxShadow: `0 0 6px ${GREEN}`, flexShrink: 0 }} />
+                      {t('standardQueriesRemaining', { count: credits.standard_credits, unit: credits.standard_credits === 1 ? t('query') : t('queries') })}
+                    </div>
+                  )}
+                  {credits.premium_credits > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 12px', borderRadius: 999, background: 'var(--glass-bg)', border: `1px solid ${PURPLE}45`, boxShadow: `0 0 18px ${PURPLE}28`, fontSize: 11, fontFamily: 'monospace', color: PURPLE }}>
+                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: PURPLE, boxShadow: `0 0 6px ${PURPLE}`, flexShrink: 0 }} />
+                      {t('premiumQueriesRemaining', { count: credits.premium_credits, unit: credits.premium_credits === 1 ? t('query') : t('queries') })}
+                    </div>
+                  )}
+                </div>
+              )}
               {mode === 'premium' && (
-                <div style={{ fontSize: 12, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.08em', marginBottom: 48, display: 'flex', alignItems: 'center', gap: 8, opacity: 0.85 }}>
+                <div style={{ fontSize: 12, fontFamily: 'monospace', color: PURPLE, letterSpacing: '0.08em', marginBottom: 28, display: 'flex', alignItems: 'center', gap: 8, opacity: 0.85 }}>
                   <span>◆</span>
                   <span>{t('premiumModeBanner')}</span>
                 </div>
@@ -2725,7 +2770,7 @@ useEffect(() => {
               {!isMobile && (
                 <>
                   <div style={{ fontSize: 11, color: MUTED2, fontFamily: 'monospace', marginBottom: 16, letterSpacing: '0.06em' }}>{t('createdBy')}</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 0', fontFamily: 'monospace', fontSize: 10, color: MUTED2, letterSpacing: '0.06em', marginBottom: 32 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 0', fontFamily: 'monospace', fontSize: 10, color: MUTED2, letterSpacing: '0.06em' }}>
                     {[
                       ['Privacy Policy', '/privacy-policy'],
                       ['Terms',          '/terms'],
@@ -2743,6 +2788,7 @@ useEffect(() => {
                   </div>
                 </>
               )}
+            </div>
             </div>
           )}
 

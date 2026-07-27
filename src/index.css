@@ -96,6 +96,14 @@ html.login-page #root {
   --c-amber-a20: #e8e8e820; --c-amber-a30: #e8e8e830; --c-amber-a40: #e8e8e840;
   --c-red-a99: #ef444499; --c-red-bg: #1a0a0a; --c-red-border: #3a1a1a;
   --c-danger-sep: #1a0a0a; --c-input-bg: #0a0a0a; --c-placeholder: #555;
+
+  /* ── Glass surfaces & gradient accents ─────────────────────── */
+  --glass-bg: rgba(255,255,255,0.05);
+  --glass-bg-strong: rgba(255,255,255,0.07);
+  --glass-border: rgba(255,255,255,0.10);
+  --glass-border-strong: rgba(255,255,255,0.16);
+  --glass-shadow: 0 8px 32px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.06);
+  --grad-purple: linear-gradient(135deg, #7C3AED, #9F67FF);
 }
 
 /* ── Ambient orb animations ──────────────────────────────────── */
@@ -120,6 +128,18 @@ html.login-page #root {
   75%  { transform: translate(100px, -200px); }
   100% { transform: translate(0px, 0px); }
 }
+@keyframes orb4 {
+  0%   { transform: translate(0px, 0px); }
+  30%  { transform: translate(-160px, -220px); }
+  60%  { transform: translate(220px, -90px); }
+  100% { transform: translate(0px, 0px); }
+}
+
+/* ── Greeting name shimmer ────────────────────────────────────── */
+@keyframes nameShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
 
 /* ── Ambient orbs: hidden in light mode, visible in dark ─────── */
 .ambient-orbs { display: none; }
@@ -142,4 +162,21 @@ html[data-theme="light"] {
   --c-amber-a20: #1a1a1a20; --c-amber-a30: #1a1a1a30; --c-amber-a40: #1a1a1a40;
   --c-red-a99: #ef444499; --c-red-bg: #fff0f0; --c-red-border: #ffd0d0;
   --c-danger-sep: #ffd0d0; --c-input-bg: #f5f5f5; --c-placeholder: #c0c0c0;
+
+  /* ── Glass surfaces: lighter tint, darker border, softer shadow ── */
+  --glass-bg: rgba(255,255,255,0.55);
+  --glass-bg-strong: rgba(255,255,255,0.72);
+  --glass-border: rgba(17,17,17,0.08);
+  --glass-border-strong: rgba(17,17,17,0.14);
+  --glass-shadow: 0 8px 32px rgba(20,20,30,0.10), inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+/* ── Respect OS-level reduced-motion preference for every animation/transition site-wide ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
