@@ -31,7 +31,6 @@ const YELLOW = '#eab308'
 const RED = '#ef4444'
 const PURPLE = '#a855f7'
 const LITE = '#0ea5e9'
-const LIME = '#a3e635'
 
 // Alpha-blends a color (hex literal or var() reference) toward transparent — needed because
 // CSS vars like `var(--c-amber)` can't take a hex alpha suffix the way `${PURPLE}30` can.
@@ -348,23 +347,23 @@ function DebateHistory({ rounds }) {
   )
 }
 
-function FeatureCard({ feature, isMobile }) {
+function FeatureCard({ feature, isMobile, accentColor }) {
   const [open, setOpen] = useState(false)
   const [hovered, setHovered] = useState(false)
-  const c = feature.color || AMBER
   const active = open || hovered
+  const c = active ? accentColor : AMBER
   return (
     <div onClick={() => setOpen(!open)} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       style={{
         background: 'var(--glass-bg)',
-        border: `1px solid ${active ? tint(c, 35) : 'var(--glass-border)'}`,
+        border: `1px solid ${active ? tint(accentColor, 35) : 'var(--glass-border)'}`,
         borderRadius: 10,
         padding: isMobile ? '10px 11px' : '14px 16px',
-        borderLeft: `2px solid ${active ? c : tint(c, 45)}`,
+        borderLeft: `2px solid ${active ? accentColor : tint(AMBER, 30)}`,
         cursor: 'pointer',
         transition: 'transform 0.2s cubic-bezier(0.4,0,0.2,1), border-color 0.2s ease, box-shadow 0.2s ease',
         transform: active && !isMobile ? 'translateY(-2px)' : 'translateY(0)',
-        boxShadow: active ? `0 10px 28px ${tint(c, 20)}` : 'none',
+        boxShadow: active ? `0 10px 28px ${tint(accentColor, 20)}` : 'none',
         gridColumn: open ? 'span 2' : 'span 1',
       }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: open ? 8 : 4 }}>
@@ -947,6 +946,9 @@ function UpdateAnnouncementModal({ onDismiss }) {
 }
 
 const PACKS = {
+  lite: {
+    50: { price: 1.99 },
+  },
   standard: {
     10:  { price: 1.99,   save: null },
     50:  { price: 9.99,   save: null },
@@ -974,7 +976,7 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
 
   async function handleBuy(packType) {
     setLoading(packType)
-    const packId = `${packType}_${qty}`
+    const packId = packType === 'lite' ? 'lite_50' : `${packType}_${qty}`
     try {
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
@@ -1024,7 +1026,7 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? 20 : 36, width: isMobile ? 'calc(100vw - 32px)' : 480, borderTop: `2px solid ${AMBER}`, maxHeight: '90vh', overflowY: 'auto' }}>
+      <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: isMobile ? 20 : 36, width: isMobile ? 'calc(100vw - 32px)' : 660, borderTop: `2px solid ${AMBER}`, maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ fontSize: 10, fontFamily: 'monospace', color: AMBER, letterSpacing: '0.15em', marginBottom: 12 }}>{t('buyCredits')}</div>
         <h3 style={{ fontSize: isMobile ? 17 : 20, fontWeight: 600, marginBottom: 6, color: TEXT }}>{t('getMoreQueries')}</h3>
         <p style={{ color: MUTED, fontSize: 13, marginBottom: isMobile ? 12 : 20, lineHeight: 1.6 }}>{t('creditsNeverExpire')}</p>
@@ -1051,7 +1053,26 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12, marginBottom: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: 12, marginBottom: 24 }}>
+          {/* Lite card — fixed pack, not qty-scaled */}
+          {(() => {
+            const pack = PACKS.lite[50]
+            return (
+              <div style={{ background: `${LITE}10`, border: `1px solid ${LITE}40`, borderRadius: 12, padding: 20 }}>
+                <div style={{ fontSize: 10, fontFamily: 'monospace', color: LITE, letterSpacing: '0.1em', marginBottom: 8 }}>⚡ LITE</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: TEXT }}>${pack.price}</div>
+                </div>
+                <div style={{ fontSize: 12, color: MUTED, marginBottom: 16 }}>50 queries</div>
+                <div style={{ fontSize: 11, color: 'var(--c-secondary)', marginBottom: 16, lineHeight: 1.6 }}>Quick tasks — one smart model picks the best AI for the job. Great for emails, rewrites, fast questions.</div>
+                <button onClick={() => handleBuy('lite')} disabled={!!loading}
+                  style={{ width: '100%', padding: '10px', borderRadius: 8, background: LITE, border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading && loading !== 'lite' ? 0.5 : 1 }}>
+                  {loading === 'lite' ? t('loadingDots') : t('buyLite')}
+                </button>
+              </div>
+            )
+          })()}
+
           {/* Standard card */}
           {(() => {
             const pack = PACKS.standard[qty]
@@ -1062,10 +1083,13 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
                   <div style={{ fontSize: 28, fontWeight: 700, color: TEXT }}>${pack.price}</div>
                   {pack.save && <span style={{ fontSize: 11, color: '#22c55e', background: '#22c55e18', borderRadius: 8, padding: '2px 8px', fontWeight: 600 }}>save ${pack.save}</span>}
                 </div>
-                <div style={{ fontSize: 12, color: MUTED, marginBottom: 16 }}>{qty} {qty === 1 ? 'query' : 'queries'}</div>
-                <div style={{ fontSize: 11, color: 'var(--c-secondary)', marginBottom: 16, lineHeight: 1.6 }}>4 AI models answer simultaneously. Claude synthesizes the result.</div>
+                <div style={{ fontSize: 12, color: MUTED, marginBottom: 10 }}>{qty} {qty === 1 ? 'query' : 'queries'}</div>
+                <div style={{ fontSize: 11, color: 'var(--c-secondary)', marginBottom: 10, lineHeight: 1.6 }}>4 AI models answer simultaneously. Claude synthesizes the result.</div>
+                <div style={{ fontSize: 11, color: LITE, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span style={{ fontSize: 10 }}>⚡</span> + {qty} lite queries included
+                </div>
                 <button onClick={() => handleBuy('standard')} disabled={!!loading}
-                  style={{ width: '100%', padding: '10px', borderRadius: 8, background: AMBER, border: 'none', color: BG, fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading === 'premium' ? 0.5 : 1 }}>
+                  style={{ width: '100%', padding: '10px', borderRadius: 8, background: AMBER, border: 'none', color: BG, fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading && loading !== 'standard' ? 0.5 : 1 }}>
                   {loading === 'standard' ? t('loadingDots') : t('buyStandard')}
                 </button>
               </div>
@@ -1082,10 +1106,13 @@ function BuyCreditsModal({ onClose, user, onPurchase }) {
                   <div style={{ fontSize: 28, fontWeight: 700, color: TEXT }}>${pack.price}</div>
                   {pack.save && <span style={{ fontSize: 11, color: '#22c55e', background: '#22c55e18', borderRadius: 8, padding: '2px 8px', fontWeight: 600 }}>save ${pack.save}</span>}
                 </div>
-                <div style={{ fontSize: 12, color: MUTED, marginBottom: 16 }}>{qty} {qty === 1 ? 'query' : 'queries'}</div>
-                <div style={{ fontSize: 11, color: 'var(--c-secondary)', marginBottom: 16, lineHeight: 1.6 }}>4 models debate in 2 rounds, vote blindly on the best answer.</div>
+                <div style={{ fontSize: 12, color: MUTED, marginBottom: 10 }}>{qty} {qty === 1 ? 'query' : 'queries'}</div>
+                <div style={{ fontSize: 11, color: 'var(--c-secondary)', marginBottom: 10, lineHeight: 1.6 }}>4 models debate in 2 rounds, vote blindly on the best answer.</div>
+                <div style={{ fontSize: 11, color: LITE, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span style={{ fontSize: 10 }}>⚡</span> + {qty * 2} lite queries included
+                </div>
                 <button onClick={() => handleBuy('premium')} disabled={!!loading}
-                  style={{ width: '100%', padding: '10px', borderRadius: 8, background: PURPLE, border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading === 'standard' ? 0.5 : 1 }}>
+                  style={{ width: '100%', padding: '10px', borderRadius: 8, background: PURPLE, border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading && loading !== 'premium' ? 0.5 : 1 }}>
                   {loading === 'premium' ? t('loadingDots') : t('buyPremium')}
                 </button>
               </div>
@@ -1650,10 +1677,10 @@ export default function App() {
   const { t, i18n } = useTranslation()
 
   const FEATURE_DETAILS = [
-    { label: t('multiModel'), desc: t('multiModelDesc'), detail: t('multiModelDetail'), color: GREEN },
-    { label: t('consensusFeature'), desc: t('consensusDesc'), detail: t('consensusDetail'), color: LIME },
-    { label: t('debate'), desc: t('debateDesc'), detail: t('debateDetail'), color: PURPLE },
-    { label: t('transparency'), desc: t('transparencyDesc'), detail: t('transparencyDetail'), color: AMBER },
+    { label: t('multiModel'), desc: t('multiModelDesc'), detail: t('multiModelDetail') },
+    { label: t('consensusFeature'), desc: t('consensusDesc'), detail: t('consensusDetail') },
+    { label: t('debate'), desc: t('debateDesc'), detail: t('debateDetail') },
+    { label: t('transparency'), desc: t('transparencyDesc'), detail: t('transparencyDetail') },
   ]
 
   const [user, setUser] = useState(null)
@@ -2744,8 +2771,8 @@ useEffect(() => {
                     </div>
                   )}
                   {credits.standard_credits > 0 && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 12px', borderRadius: 999, background: 'var(--glass-bg)', border: `1px solid ${GREEN}45`, boxShadow: `0 0 18px ${GREEN}28`, fontSize: 11, fontFamily: 'monospace', color: GREEN }}>
-                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: GREEN, boxShadow: `0 0 6px ${GREEN}`, flexShrink: 0 }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 12px', borderRadius: 999, background: 'var(--glass-bg)', border: `1px solid ${tint(AMBER, 45)}`, boxShadow: `0 0 18px ${tint(AMBER, 22)}`, fontSize: 11, fontFamily: 'monospace', color: AMBER }}>
+                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: AMBER, boxShadow: `0 0 6px ${tint(AMBER, 70)}`, flexShrink: 0 }} />
                       {t('standardQueriesRemaining', { count: credits.standard_credits, unit: credits.standard_credits === 1 ? t('query') : t('queries') })}
                     </div>
                   )}
@@ -2764,7 +2791,7 @@ useEffect(() => {
                 </div>
               )}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? 8 : 10, marginBottom: 24 }}>
-                {FEATURE_DETAILS.map((f, i) => <FeatureCard key={i} feature={f} isMobile={isMobile} />)}
+                {FEATURE_DETAILS.map((f, i) => <FeatureCard key={i} feature={f} isMobile={isMobile} accentColor={mode === 'lite' ? LITE : mode === 'premium' ? PURPLE : AMBER} />)}
               </div>
 
               {!isMobile && (
@@ -2957,7 +2984,7 @@ useEffect(() => {
                       style={{ background: useWebSearch ? (mode === 'premium' ? `${PURPLE}20` : mode === 'lite' ? `${LITE}20` : 'var(--c-amber-a20)') : CARD, border: `1px solid ${useWebSearch ? (mode === 'premium' ? PURPLE : mode === 'lite' ? LITE : AMBER) : BORDER}`, borderRadius: 7, height: 32, padding: '0 10px', cursor: 'pointer', color: useWebSearch ? (mode === 'premium' ? PURPLE : mode === 'lite' ? LITE : AMBER) : MUTED, fontSize: 10, fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.08em', display: 'inline-flex', alignItems: 'center', transition: 'all 0.15s', flexShrink: 0 }}>{t('web')}</button>
                   )}
                 </div>
-                <div style={{ fontSize: 10, fontFamily: 'monospace', color: MUTED2, textAlign: 'right' }}>
+                <div style={{ fontSize: 10, fontFamily: 'monospace', color: mode === 'premium' ? PURPLE : mode === 'lite' ? LITE : AMBER, textAlign: 'right' }}>
                   {mode === 'lite'
                     ? t('liteQueriesLeft', { count: credits.lite_credits, unit: credits.lite_credits === 1 ? t('query') : t('queries') })
                     : mode === 'standard'
